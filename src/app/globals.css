@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #FAF8F5;
+  --bg-secondary: #F5F2EB;
+  --bg-blush: #F9EBEA;
+  --text-primary: #2A2523;
+  --text-secondary: #5C5551;
+  --accent-gold: #C5A880;
+  --accent-gold-dark: #A8885E;
+  --border-subtle: #EBE4DA;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-sans), sans-serif;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Luxury Headings */
+h1, h2, h3, .font-serif {
+  font-family: var(--font-serif), Georgia, serif;
+}
+
+/* Subtle custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F5F2EB;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D3C2AD;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #BFA88F;
+}
+
+/* Aesthetic Glow & Glass */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(235, 228, 218, 0.8);
+}
+
+.glass-panel-dark {
+  background: rgba(42, 37, 35, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(197, 168, 128, 0.3);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #A8885E 0%, #C5A880 50%, #8B6C43 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.hero-gradient {
+  background: radial-gradient(circle at 80% 20%, rgba(249, 235, 234, 0.6) 0%, rgba(245, 242, 235, 0.4) 50%, rgba(250, 248, 245, 1) 100%);
+}

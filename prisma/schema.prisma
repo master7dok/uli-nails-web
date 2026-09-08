@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Service {
+  id            String   @id @default(cuid())
+  category      String   @default("manicure") // manicure, gel, extension, additional
+  titlePl       String
+  titleUa       String
+  descriptionPl String?
+  descriptionUa String?
+  pricePln      Float
+  durationMin   Int?     @default(90)
+  isPopular     Boolean  @default(false)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Course {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  titlePl       String
+  titleUa       String
+  subtitlePl    String?
+  subtitleUa    String?
+  descriptionPl String
+  descriptionUa String
+  durationPl    String   @default("2 dni")
+  durationUa    String   @default("2 дні")
+  levelPl       String   @default("Dla każdego")
+  levelUa       String   @default("Для всіх")
+  pricePln      Float
+  badgePl       String?
+  badgeUa       String?
+  bonusPl       String?
+  bonusUa       String?
+  featuresPl    String   // JSON string array
+  featuresUa    String   // JSON string array
+  syllabusPl    String?  // JSON string array of days
+  syllabusUa    String?  // JSON string array of days
+  formUrl       String?
+  sortOrder     Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model PortfolioItem {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  titlePl   String?
+  titleUa   String?
+  category  String   @default("gel") // gel, manicure, french, correction
+  featured  Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  rolePl    String
+  roleUa    String
+  textPl    String
+  textUa    String
+  rating    Int      @default(5)
+  avatarUrl String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
