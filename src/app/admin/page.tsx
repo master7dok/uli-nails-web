@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import AdminLogin from "@/components/admin/AdminLogin";
 import PortfolioTab from "@/components/admin/PortfolioTab";
@@ -15,42 +15,79 @@ import {
   Settings,
   LogOut,
   ExternalLink,
-  Sparkles,
-  ShieldCheck,
   MessageSquareQuote,
 } from "lucide-react";
 
 type ActiveTab = "portfolio" | "prices" | "courses" | "testimonials" | "settings";
 
+function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [activeTab, setActiveTab] = useState<ActiveTab>("prices");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("settings");
 
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
+      let token = typeof window !== "undefined" ? localStorage.getItem("uli_admin_token") : null;
+
+      // Якщо в localStorage немає, пробуємо витягти з кукі
+      if (!token) {
+        token = getCookie("uli_admin_token");
+        if (token && typeof window !== "undefined") {
+          localStorage.setItem("uli_admin_token", token);
+        }
+      }
+
       const headers: Record<string, string> = {};
-      const token = typeof window !== "undefined" ? localStorage.getItem("uli_admin_token") : null;
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
         headers["x-admin-token"] = token;
       }
-      const res = await fetch("/api/auth/check", { headers });
-      const data = await res.json();
-      setIsAuthenticated(data.authenticated === true);
+
+      const res = await fetch("/api/auth/check", {
+        headers,
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setIsAuthenticated(data.authenticated === true);
+      } else {
+        setIsAuthenticated(false);
+      }
     } catch {
       setIsAuthenticated(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [checkAuth]);
+
+  const handleLoginSuccess = () => {
+    const token = getCookie("uli_admin_token");
+    if (token && typeof window !== "undefined") {
+      localStorage.setItem("uli_admin_token", token);
+    }
+    setIsAuthenticated(true);
+  };
 
   const handleLogout = async () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("uli_admin_token");
     }
-    await fetch("/api/auth/logout", { method: "POST" });
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch {
+      // Ігноруємо помилку мережі при виході
+    }
     setIsAuthenticated(false);
   };
 
@@ -63,7 +100,7 @@ export default function AdminPage() {
   }
 
   if (!isAuthenticated) {
-    return <AdminLogin onSuccess={() => setIsAuthenticated(true)} />;
+    return <AdminLogin onSuccess={handleLoginSuccess} />;
   }
 
   const navItems = [
@@ -102,7 +139,7 @@ export default function AdminPage() {
 
             <button
               onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-700 hover:bg-red-50 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-700 hover:bg-red-50 transition-colors cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Вийти</span>
@@ -123,7 +160,7 @@ export default function AdminPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-200 whitespace-nowrap ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-200 whitespace-nowrap cursor-pointer ${
                   isActive
                     ? "bg-charcoal-900 text-white shadow-soft"
                     : "bg-white text-charcoal-600 hover:bg-nude-100 border border-nude-200"
