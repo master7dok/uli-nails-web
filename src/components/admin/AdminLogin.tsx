@@ -28,6 +28,9 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
       if (!res.ok) {
         setError(data.error || "Невірний пароль");
       } else {
+        if (data.token) {
+          localStorage.setItem("uli_admin_token", data.token);
+        }
         onSuccess();
       }
     } catch (err) {

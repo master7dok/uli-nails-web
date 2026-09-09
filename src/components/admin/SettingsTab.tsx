@@ -16,6 +16,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import InstagramIcon from "@/components/icons/InstagramIcon";
+import { getAdminHeaders } from "@/lib/adminClient";
 
 export default function SettingsTab() {
   const [settings, setSettings] = useState<Record<string, string>>({
@@ -57,6 +58,7 @@ export default function SettingsTab() {
       // 1. Upload file
       const res = await fetch("/api/upload", {
         method: "POST",
+        headers: getAdminHeaders(),
         body: formData,
       });
 
@@ -72,7 +74,7 @@ export default function SettingsTab() {
       // 3. Immediately auto-save to database
       await fetch("/api/settings", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAdminHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(newSettings),
       });
 
@@ -90,7 +92,7 @@ export default function SettingsTab() {
     try {
       const res = await fetch("/api/settings", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAdminHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(settings),
       });
 

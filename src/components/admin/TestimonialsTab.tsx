@@ -14,6 +14,7 @@ import {
   ArrowDown,
   CheckCircle2,
 } from "lucide-react";
+import { getAdminHeaders } from "@/lib/adminClient";
 
 interface TestimonialItem {
   id: string;
@@ -90,7 +91,7 @@ export default function TestimonialsTab() {
     try {
       const res = await fetch("/api/testimonials/reorder", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAdminHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({
           items: reorderedPayload.map((item) => ({
             id: item.id,
@@ -116,7 +117,7 @@ export default function TestimonialsTab() {
     try {
       const res = await fetch("/api/testimonials", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAdminHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({
           ...newForm,
           sortOrder: testimonials.length + 1,
@@ -150,7 +151,7 @@ export default function TestimonialsTab() {
     try {
       const res = await fetch(`/api/testimonials/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAdminHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(editForm),
       });
 
@@ -166,7 +167,10 @@ export default function TestimonialsTab() {
   const handleDelete = async (id: string) => {
     if (!confirm("Видалити цей відгук?")) return;
     try {
-      const res = await fetch(`/api/testimonials/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/testimonials/${id}`, {
+        method: "DELETE",
+        headers: getAdminHeaders(),
+      });
       if (res.ok) {
         setTestimonials(testimonials.filter((t) => t.id !== id));
       }

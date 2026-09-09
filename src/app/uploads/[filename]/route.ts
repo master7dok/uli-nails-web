@@ -10,7 +10,15 @@ export async function GET(
     const { filename } = await params;
     // Security check to prevent directory traversal
     const cleanFilename = path.basename(filename);
-    const filePath = path.join(process.cwd(), "public", "uploads", cleanFilename);
+    const customDir = process.env.UPLOAD_DIR;
+    let filePath = path.join(process.cwd(), "public", "uploads", cleanFilename);
+
+    if (customDir && !fs.existsSync(filePath)) {
+      const customFilePath = path.join(customDir, cleanFilename);
+      if (fs.existsSync(customFilePath)) {
+        filePath = customFilePath;
+      }
+    }
 
     if (!fs.existsSync(filePath)) {
       return new NextResponse("File not found", { status: 404 });

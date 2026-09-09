@@ -28,7 +28,13 @@ export default function AdminPage() {
 
   const checkAuth = async () => {
     try {
-      const res = await fetch("/api/auth/check");
+      const headers: Record<string, string> = {};
+      const token = typeof window !== "undefined" ? localStorage.getItem("uli_admin_token") : null;
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+        headers["x-admin-token"] = token;
+      }
+      const res = await fetch("/api/auth/check", { headers });
       const data = await res.json();
       setIsAuthenticated(data.authenticated === true);
     } catch {
@@ -41,6 +47,9 @@ export default function AdminPage() {
   }, []);
 
   const handleLogout = async () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("uli_admin_token");
+    }
     await fetch("/api/auth/logout", { method: "POST" });
     setIsAuthenticated(false);
   };

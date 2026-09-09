@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2, Edit2, Check, X, Clock, Flame, RefreshCw } from "lucide-react";
+import { getAdminHeaders } from "@/lib/adminClient";
 
 interface ServiceItem {
   id: string;
@@ -58,7 +59,7 @@ export default function PricesTab() {
     try {
       const res = await fetch("/api/services", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAdminHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(newForm),
       });
 
@@ -90,7 +91,7 @@ export default function PricesTab() {
     try {
       const res = await fetch(`/api/services/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAdminHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(editForm),
       });
 
@@ -106,7 +107,10 @@ export default function PricesTab() {
   const handleDelete = async (id: string) => {
     if (!confirm("Видалити цю послугу з прайсу?")) return;
     try {
-      const res = await fetch(`/api/services/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/services/${id}`, {
+        method: "DELETE",
+        headers: getAdminHeaders(),
+      });
       if (res.ok) {
         setServices(services.filter((s) => s.id !== id));
       }

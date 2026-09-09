@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Plus, Trash2, Upload, Link as LinkIcon, RefreshCw, Image as ImageIcon, CheckCircle2 } from "lucide-react";
+import { getAdminHeaders } from "@/lib/adminClient";
 
 interface PortfolioItem {
   id: string;
@@ -65,6 +66,7 @@ export default function PortfolioTab() {
         formData.append("file", file);
         const upRes = await fetch("/api/upload", {
           method: "POST",
+          headers: getAdminHeaders(),
           body: formData,
         });
         const upData = await upRes.json();
@@ -81,7 +83,7 @@ export default function PortfolioTab() {
       // 2. Save to portfolio
       const res = await fetch("/api/portfolio", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAdminHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({
           imageUrl: finalUrl,
           titlePl,
@@ -112,7 +114,10 @@ export default function PortfolioTab() {
     if (!confirm("Видалити це фото з галереї?")) return;
 
     try {
-      const res = await fetch(`/api/portfolio/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/portfolio/${id}`, {
+        method: "DELETE",
+        headers: getAdminHeaders(),
+      });
       if (res.ok) {
         setItems(items.filter((item) => item.id !== id));
       }

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2, Edit2, Check, X, Clock, GraduationCap, Link2 } from "lucide-react";
+import { getAdminHeaders } from "@/lib/adminClient";
 
 interface CourseItem {
   id: string;
@@ -59,7 +60,7 @@ export default function CoursesTab() {
     try {
       const res = await fetch(`/api/courses/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAdminHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(editForm),
       });
 
