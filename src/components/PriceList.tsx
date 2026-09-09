@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Clock, Send, Flame } from "lucide-react";
+import { Sparkles, Clock, Send, Flame, ChevronRight, Gem } from "lucide-react";
 import InstagramIcon from "@/components/icons/InstagramIcon";
 
 interface ServiceItem {
@@ -31,6 +31,7 @@ export default function PriceList({ services }: PriceListProps) {
     { id: "all", label: t.prices.categoryAll },
     { id: "manicure", label: t.prices.categoryManicure },
     { id: "gel", label: t.prices.categoryGel },
+    { id: "pedicure", label: t.prices.categoryPedicure },
     { id: "extension", label: t.prices.categoryExtension },
     { id: "care", label: t.prices.categoryCare },
   ];
@@ -46,10 +47,20 @@ export default function PriceList({ services }: PriceListProps) {
 
   return (
     <section id="prices" className="py-24 bg-[#F5F2EB]/50 relative overflow-hidden">
+      {/* Decorative ambient blurred spots for depth */}
+      <div className="absolute top-1/4 left-[-10%] w-96 h-96 rounded-full bg-blush-100/40 blur-3xl pointer-events-none -z-10" />
+      <div className="absolute bottom-10 right-[-10%] w-[420px] h-[420px] rounded-full bg-nude-200/40 blur-3xl pointer-events-none -z-10" />
+
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blush-100 border border-blush-200 mb-4">
+        {/* Section Header with scroll reveal */}
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="text-center max-w-2xl mx-auto mb-12"
+        >
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blush-100 border border-blush-200 mb-4 shadow-xs">
             <Sparkles className="w-3.5 h-3.5 text-gold-700" />
             <span className="text-xs font-semibold tracking-wider uppercase text-charcoal-700">
               {t.prices.badge}
@@ -61,29 +72,52 @@ export default function PriceList({ services }: PriceListProps) {
           <p className="text-base text-charcoal-600 leading-relaxed">
             {t.prices.subtitle}
           </p>
-        </div>
+        </motion.div>
 
-        {/* Category Tabs */}
-        <div className="flex items-center justify-start sm:justify-center overflow-x-auto pb-4 mb-10 gap-2 scrollbar-none">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveTab(cat.id)}
-              className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
-                activeTab === cat.id
-                  ? "bg-charcoal-900 text-white shadow-soft"
-                  : "bg-white/80 hover:bg-white text-charcoal-600 border border-nude-200"
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
+        {/* Category Tabs with Animated Pill indicator */}
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.12 }}
+          className="flex items-center justify-start sm:justify-center overflow-x-auto pb-4 mb-10 gap-2 scrollbar-none"
+        >
+          {categories.map((cat) => {
+            const isActive = activeTab === cat.id;
 
-        {/* Instagram Price List Card */}
-        <div className="rounded-3xl bg-white p-6 sm:p-10 shadow-card border border-nude-200/90 relative">
-          {/* Subtle top Instagram-like header label */}
-          <div className="flex items-center justify-between pb-6 mb-6 border-b border-nude-200 text-xs font-semibold uppercase tracking-widest text-charcoal-500">
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setActiveTab(cat.id)}
+                className={`relative px-5 py-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-200 ${
+                  isActive
+                    ? "text-white"
+                    : "text-charcoal-600 hover:text-charcoal-900 bg-white/80 hover:bg-white border border-nude-200/90 shadow-xs"
+                }`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activePriceCategoryPill"
+                    className="absolute inset-0 bg-charcoal-900 rounded-full shadow-soft"
+                    transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                  />
+                )}
+                <span className="relative z-10">{cat.label}</span>
+              </button>
+            );
+          })}
+        </motion.div>
+
+        {/* Main Price List Card with interactive scroll reveal */}
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.1 }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          className="rounded-3xl bg-white/95 backdrop-blur-sm p-5 sm:p-9 shadow-card border border-nude-200/90 relative"
+        >
+          {/* Top header labels */}
+          <div className="flex items-center justify-between pb-5 mb-3 border-b border-nude-200 text-[11px] font-semibold uppercase tracking-widest text-charcoal-400 px-2 sm:px-4">
             <span>Usługa / Послуга</span>
             <div className="flex items-center gap-8">
               <span className="hidden sm:inline">Czas / Час</span>
@@ -91,9 +125,9 @@ export default function PriceList({ services }: PriceListProps) {
             </div>
           </div>
 
-          <div className="divide-y divide-nude-100">
+          <div className="space-y-1">
             <AnimatePresence mode="popLayout">
-              {filteredServices.map((service) => {
+              {filteredServices.map((service, index) => {
                 const title = getLocalized(service, "title");
                 const description = getLocalized(service, "description");
 
@@ -101,27 +135,29 @@ export default function PriceList({ services }: PriceListProps) {
                   <motion.div
                     key={service.id}
                     layout
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.25 }}
-                    className="py-5 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                    initial={{ opacity: 0, y: 12 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.3, delay: index * 0.035 }}
+                    className="py-3.5 px-3 sm:px-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 group transition-all duration-200 hover:bg-[#FAF7F2] border border-transparent hover:border-gold-300/40 hover:shadow-xs"
                   >
                     {/* Title & Description */}
                     <div className="flex-1 pr-4">
                       <div className="flex items-center gap-2">
-                        <h4 className="font-serif text-lg sm:text-xl font-normal text-charcoal-900 group-hover:text-gold-700 transition-colors">
+                        <Sparkles className="w-3.5 h-3.5 text-gold-600 opacity-0 group-hover:opacity-100 transition-all duration-200 -translate-x-1 group-hover:translate-x-0 shrink-0 hidden sm:block" />
+                        <h4 className="font-serif text-base sm:text-lg font-normal text-charcoal-900 group-hover:text-gold-800 transition-colors">
                           {title}
                         </h4>
                         {service.isPopular && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-blush-100 text-gold-700 border border-blush-200">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-blush-100 text-gold-800 border border-blush-200 shrink-0">
                             <Flame className="w-3 h-3 text-pink-600" />
-                            {t.prices.popularBadge}
+                            <span>{t.prices.popularBadge}</span>
                           </span>
                         )}
                       </div>
                       {description && (
-                        <p className="text-xs sm:text-[13px] text-charcoal-500 mt-1 leading-relaxed max-w-xl">
+                        <p className="text-xs sm:text-[13px] text-charcoal-500 mt-1 leading-relaxed max-w-xl sm:pl-5.5">
                           {description}
                         </p>
                       )}
@@ -130,8 +166,8 @@ export default function PriceList({ services }: PriceListProps) {
                     {/* Duration & Price */}
                     <div className="flex items-center justify-between sm:justify-end gap-6 sm:gap-10 shrink-0">
                       {service.durationMin && (
-                        <div className="flex items-center gap-1.5 text-xs text-charcoal-400 font-medium">
-                          <Clock className="w-3.5 h-3.5" />
+                        <div className="flex items-center gap-1.5 text-xs text-charcoal-400 group-hover:text-charcoal-600 font-medium transition-colors">
+                          <Clock className="w-3.5 h-3.5 text-gold-600" />
                           <span>
                             {service.durationMin} {t.prices.minutes}
                           </span>
@@ -139,7 +175,7 @@ export default function PriceList({ services }: PriceListProps) {
                       )}
 
                       <div className="text-right">
-                        <span className="font-serif text-2xl font-bold text-charcoal-900 group-hover:text-gold-700 transition-colors">
+                        <span className="font-serif text-xl sm:text-2xl font-bold text-charcoal-900 group-hover:text-gold-700 transition-colors">
                           {service.pricePln}
                         </span>{" "}
                         <span className="text-xs font-semibold text-charcoal-500 uppercase">
@@ -153,15 +189,24 @@ export default function PriceList({ services }: PriceListProps) {
             </AnimatePresence>
           </div>
 
-          {/* Quick Booking Bar */}
-          <div className="mt-10 pt-6 border-t border-nude-200/90 flex flex-col sm:flex-row items-center justify-between gap-4 bg-nude-50/70 p-5 rounded-2xl">
+          {/* Quick Booking Interactive Bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mt-8 pt-6 border-t border-nude-200/90 flex flex-col sm:flex-row items-center justify-between gap-4 bg-nude-50/80 p-5 rounded-2xl"
+          >
             <div className="text-center sm:text-left">
-              <p className="text-sm font-semibold text-charcoal-800">
-                {language === "pl"
-                  ? "Chcesz zarezerwować termin na stylizację?"
-                  : "Бажаєте записатися на послугу?"}
+              <p className="text-sm font-semibold text-charcoal-900 flex items-center justify-center sm:justify-start gap-1.5">
+                <Gem className="w-4 h-4 text-gold-600" />
+                <span>
+                  {language === "pl"
+                    ? "Chcesz zarezerwować termin na stylizację?"
+                    : "Бажаєте записатися на послугу?"}
+                </span>
               </p>
-              <p className="text-xs text-charcoal-500">
+              <p className="text-xs text-charcoal-500 mt-0.5">
                 {language === "pl"
                   ? "Napisz bezpośrednio na Telegram lub Instagram"
                   : "Напишіть напряму в Telegram або Instagram Direct"}
@@ -169,28 +214,32 @@ export default function PriceList({ services }: PriceListProps) {
             </div>
 
             <div className="flex items-center gap-3">
-              <a
+              <motion.a
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 href="https://t.me/uliana_p_u"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 transition-colors shadow-xs"
+                className="inline-flex items-center gap-1.5 px-4.5 py-2.5 rounded-full text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 transition-colors shadow-xs"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>{t.prices.bookViaTelegram}</span>
-              </a>
+              </motion.a>
 
-              <a
+              <motion.a
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 href="https://instagram.com/uli.nails.krk"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold text-charcoal-800 bg-white hover:bg-nude-100 border border-nude-300 transition-colors shadow-xs"
+                className="inline-flex items-center gap-1.5 px-4.5 py-2.5 rounded-full text-xs font-semibold text-charcoal-800 bg-white hover:bg-nude-100 border border-nude-300 transition-colors shadow-xs"
               >
                 <InstagramIcon className="w-3.5 h-3.5 text-pink-600" />
                 <span>{t.prices.bookViaInstagram}</span>
-              </a>
+              </motion.a>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );

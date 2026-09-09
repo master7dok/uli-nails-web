@@ -2,18 +2,20 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
+import { defaultTestimonials } from "@/lib/defaultData";
+
 export async function GET() {
   try {
     const testimonials = await prisma.testimonial.findMany({
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     });
-    return NextResponse.json(testimonials);
+    if (testimonials.length > 0) {
+      return NextResponse.json(testimonials);
+    }
+    return NextResponse.json(defaultTestimonials);
   } catch (error) {
-    console.error("Error fetching testimonials:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch testimonials" },
-      { status: 500 }
-    );
+    console.warn("Database unavailable for testimonials, returning defaults:", error);
+    return NextResponse.json(defaultTestimonials);
   }
 }
 

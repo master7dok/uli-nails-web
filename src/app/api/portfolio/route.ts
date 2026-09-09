@@ -2,15 +2,20 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
+import { defaultPortfolio } from "@/lib/defaultData";
+
 export async function GET() {
   try {
     const items = await prisma.portfolioItem.findMany({
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
     });
-    return NextResponse.json(items);
+    if (items.length > 0) {
+      return NextResponse.json(items);
+    }
+    return NextResponse.json(defaultPortfolio);
   } catch (error) {
-    console.error("Error fetching portfolio:", error);
-    return NextResponse.json({ error: "Failed to fetch portfolio" }, { status: 500 });
+    console.warn("Database unavailable for portfolio, returning defaults:", error);
+    return NextResponse.json(defaultPortfolio);
   }
 }
 

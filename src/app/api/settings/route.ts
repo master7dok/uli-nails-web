@@ -2,17 +2,19 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
+import { defaultSettings } from "@/lib/defaultData";
+
 export async function GET() {
   try {
     const settings = await prisma.setting.findMany();
-    const map: Record<string, string> = {};
+    const map: Record<string, string> = { ...defaultSettings };
     settings.forEach((s) => {
       map[s.key] = s.value;
     });
     return NextResponse.json(map);
   } catch (error) {
-    console.error("Error fetching settings:", error);
-    return NextResponse.json({ error: "Failed to fetch settings" }, { status: 500 });
+    console.warn("Database unavailable for settings, returning defaults:", error);
+    return NextResponse.json(defaultSettings);
   }
 }
 

@@ -42,8 +42,14 @@ export default function Portfolio({ items }: PortfolioProps) {
     <section id="portfolio" className="py-24 bg-[#FAF8F5] relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-nude-100 border border-nude-300 mb-4">
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="text-center max-w-2xl mx-auto mb-12"
+        >
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-nude-100 border border-nude-300 mb-4 shadow-xs">
             <Camera className="w-3.5 h-3.5 text-gold-700" />
             <span className="text-xs font-semibold tracking-wider uppercase text-charcoal-700">
               {t.portfolio.badge}
@@ -55,24 +61,41 @@ export default function Portfolio({ items }: PortfolioProps) {
           <p className="text-base text-charcoal-600 leading-relaxed">
             {t.portfolio.subtitle}
           </p>
-        </div>
+        </motion.div>
 
-        {/* Filter Tabs */}
-        <div className="flex items-center justify-start sm:justify-center overflow-x-auto pb-4 mb-10 gap-2 scrollbar-none">
-          {filterTabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveCategory(tab.id)}
-              className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
-                activeCategory === tab.id
-                  ? "bg-charcoal-900 text-white shadow-soft"
-                  : "bg-white/90 hover:bg-white text-charcoal-600 border border-nude-200"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        {/* Filter Tabs with animated pill */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.12 }}
+          className="flex items-center justify-start sm:justify-center overflow-x-auto pb-4 mb-10 gap-2 scrollbar-none"
+        >
+          {filterTabs.map((tab) => {
+            const isActive = activeCategory === tab.id;
+
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveCategory(tab.id)}
+                className={`relative px-5 py-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-200 ${
+                  isActive
+                    ? "text-white"
+                    : "text-charcoal-600 hover:text-charcoal-900 bg-white/80 hover:bg-white border border-nude-200/90 shadow-xs"
+                }`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activePortfolioCategoryPill"
+                    className="absolute inset-0 bg-charcoal-900 rounded-full shadow-soft"
+                    transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                  />
+                )}
+                <span className="relative z-10">{tab.label}</span>
+              </button>
+            );
+          })}
+        </motion.div>
 
         {/* Image Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">

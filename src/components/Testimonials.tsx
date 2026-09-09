@@ -26,8 +26,14 @@ export default function Testimonials({ items }: TestimonialsProps) {
     <section id="reviews" className="py-24 bg-[#F5F2EB]/60 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blush-100 border border-blush-200 mb-4">
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="text-center max-w-2xl mx-auto mb-16"
+        >
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blush-100 border border-blush-200 mb-4 shadow-xs">
             <MessageSquareQuote className="w-3.5 h-3.5 text-gold-700" />
             <span className="text-xs font-semibold tracking-wider uppercase text-charcoal-700">
               {t.testimonials.badge}
@@ -39,7 +45,7 @@ export default function Testimonials({ items }: TestimonialsProps) {
           <p className="text-base text-charcoal-600 leading-relaxed">
             {t.testimonials.subtitle}
           </p>
-        </div>
+        </motion.div>
 
         {/* Reviews Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -50,9 +56,10 @@ export default function Testimonials({ items }: TestimonialsProps) {
             return (
               <motion.div
                 key={item.id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                viewport={{ once: true, amount: 0.15 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="flex flex-col justify-between rounded-3xl p-8 bg-white border border-nude-200/90 shadow-soft hover:shadow-card transition-all"
               >

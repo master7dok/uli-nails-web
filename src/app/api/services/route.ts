@@ -2,15 +2,20 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
+import { defaultServices } from "@/lib/defaultData";
+
 export async function GET() {
   try {
     const services = await prisma.service.findMany({
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     });
-    return NextResponse.json(services);
+    if (services.length > 0) {
+      return NextResponse.json(services);
+    }
+    return NextResponse.json(defaultServices);
   } catch (error) {
-    console.error("Error fetching services:", error);
-    return NextResponse.json({ error: "Failed to fetch services" }, { status: 500 });
+    console.warn("Database unavailable for services, returning defaults:", error);
+    return NextResponse.json(defaultServices);
   }
 }
 

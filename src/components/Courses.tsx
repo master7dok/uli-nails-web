@@ -96,7 +96,13 @@ export default function Courses({ courses }: CoursesProps) {
     <section id="courses" className="py-24 bg-[#FAF8F5] relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14">
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="text-center max-w-3xl mx-auto mb-14"
+        >
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-nude-100 border border-nude-300 mb-4 shadow-xs">
             <GraduationCap className="w-3.5 h-3.5 text-gold-700" />
             <span className="text-xs font-semibold tracking-wider uppercase text-charcoal-700">
@@ -109,7 +115,7 @@ export default function Courses({ courses }: CoursesProps) {
           <p className="text-base sm:text-lg text-charcoal-600 leading-relaxed">
             {t.courses.subtitle}
           </p>
-        </div>
+        </motion.div>
 
         {/* 1. PROMO BANNER (Bring a Friend / Приходь з подругою!) */}
         <motion.div
@@ -146,7 +152,13 @@ export default function Courses({ courses }: CoursesProps) {
         </motion.div>
 
         {/* 2. Personalized Curriculum Note */}
-        <div className="mb-14 max-w-4xl mx-auto p-4 sm:p-5 rounded-2xl bg-nude-100/80 border border-gold-400/40 shadow-xs flex items-center gap-3.5">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="mb-14 max-w-4xl mx-auto p-4 sm:p-5 rounded-2xl bg-nude-100/80 border border-gold-400/40 shadow-xs flex items-center gap-3.5"
+        >
           <div className="w-8 h-8 rounded-full bg-gold-500/20 flex items-center justify-center text-gold-800 shrink-0">
             <Info className="w-4 h-4" />
           </div>
@@ -156,7 +168,7 @@ export default function Courses({ courses }: CoursesProps) {
             </span>
             {t.courses.personalizedNotice}
           </div>
-        </div>
+        </motion.div>
 
         {/* 3. COURSES CARDS GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 mb-16">
@@ -181,10 +193,11 @@ export default function Courses({ courses }: CoursesProps) {
             return (
               <motion.div
                 key={course.id || course.slug}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 25 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.08 }}
+                whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.55, delay: index * 0.08 }}
                 className={`relative flex flex-col rounded-3xl p-6 sm:p-8 transition-all duration-300 ${
                   isFeatured
                     ? "bg-white border-2 border-gold-500/80 shadow-glow"

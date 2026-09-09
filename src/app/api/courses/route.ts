@@ -2,16 +2,21 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
+import { defaultCourses } from "@/lib/defaultData";
+
 export async function GET() {
   try {
     const courses = await prisma.course.findMany({
       where: { isActive: true },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     });
-    return NextResponse.json(courses);
+    if (courses.length > 0) {
+      return NextResponse.json(courses);
+    }
+    return NextResponse.json(defaultCourses);
   } catch (error) {
-    console.error("Error fetching courses:", error);
-    return NextResponse.json({ error: "Failed to fetch courses" }, { status: 500 });
+    console.warn("Database unavailable for courses, returning defaults:", error);
+    return NextResponse.json(defaultCourses);
   }
 }
 

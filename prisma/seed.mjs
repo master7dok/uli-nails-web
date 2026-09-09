@@ -48,6 +48,28 @@ async function main() {
       sortOrder: 3,
     },
     {
+      category: "pedicure",
+      titlePl: "Pedicure estetyczny hybrydowy (bez podologii)",
+      titleUa: "Естетичний гібридний педикюр (без подології)",
+      descriptionPl: "Czyste i bezpieczne opracowanie skórek, ultracienkie elastyczne malowanie kolorem pod skórki.",
+      descriptionUa: "Безпечне оброблення кутикули та пальчиків, ультратонке еластичне покриття під кутикулу.",
+      pricePln: 160,
+      durationMin: 75,
+      isPopular: true,
+      sortOrder: 4,
+    },
+    {
+      category: "pedicure",
+      titlePl: "Pedicure pełny SPA + Pododysk (opracowanie stóp)",
+      titleUa: "Повний SPA-педикюр з пододиском (обробка стоп)",
+      descriptionPl: "Aparatowe wygładzenie stóp pododyskiem, peeling, odżywczy krem oraz idealna stylizacja paznokci.",
+      descriptionUa: "Апаратне шліфування стоп пододиском, пілінг, зволожувальний догляд та бездоганний колір.",
+      pricePln: 190,
+      durationMin: 90,
+      isPopular: false,
+      sortOrder: 5,
+    },
+    {
       category: "extension",
       titlePl: "Przedłużanie paznokci (długość 1-2)",
       titleUa: "Нарощування нігтів (довжина 1-2)",
@@ -56,7 +78,7 @@ async function main() {
       pricePln: 200,
       durationMin: 135,
       isPopular: true,
-      sortOrder: 4,
+      sortOrder: 6,
     },
     {
       category: "extension",
@@ -67,7 +89,7 @@ async function main() {
       pricePln: 230,
       durationMin: 150,
       isPopular: false,
-      sortOrder: 5,
+      sortOrder: 7,
     },
     {
       category: "gel",
@@ -78,7 +100,7 @@ async function main() {
       pricePln: 160,
       durationMin: 105,
       isPopular: false,
-      sortOrder: 6,
+      sortOrder: 8,
     },
     {
       category: "care",
@@ -89,7 +111,7 @@ async function main() {
       pricePln: 100,
       durationMin: 45,
       isPopular: false,
-      sortOrder: 7,
+      sortOrder: 9,
     },
     {
       category: "additional",
@@ -100,7 +122,7 @@ async function main() {
       pricePln: 30,
       durationMin: 20,
       isPopular: false,
-      sortOrder: 8,
+      sortOrder: 10,
     },
     {
       category: "additional",
@@ -111,7 +133,7 @@ async function main() {
       pricePln: 20,
       durationMin: 15,
       isPopular: false,
-      sortOrder: 9,
+      sortOrder: 11,
     },
   ];
 
@@ -555,15 +577,15 @@ async function main() {
     },
     {
       key: "hero_photo_url",
-      value: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1000&auto=format&fit=crop",
+      value: "/uploads/img-2269-------1788893828203.jpg",
     },
     {
       key: "about_main_photo_url",
-      value: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=1000&auto=format&fit=crop",
+      value: "/uploads/img-2558-------1788893832635.jpg",
     },
     {
       key: "about_secondary_photo_url",
-      value: "https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=600&auto=format&fit=crop",
+      value: "/uploads/img-2550-1788893834425.jpg",
     },
   ];
 
