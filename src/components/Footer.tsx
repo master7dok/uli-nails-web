@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { Send, MapPin, Phone, Lock, Heart } from "lucide-react";
 import InstagramIcon from "@/components/icons/InstagramIcon";
-import { getSettingText } from "@/lib/settingsHelper";
+import { getSettingText, getInstagramLink } from "@/lib/settingsHelper";
 
 interface FooterProps {
   settings?: Record<string, string>;
@@ -13,6 +13,7 @@ interface FooterProps {
 
 export default function Footer({ settings }: FooterProps) {
   const { language, t } = useLanguage();
+  const instagram = getInstagramLink(language, settings);
 
   return (
     <footer id="contacts" className="bg-[#1F1C1B] text-[#E8DFD8] pt-16 pb-12">
@@ -33,21 +34,11 @@ export default function Footer({ settings }: FooterProps) {
             {/* Social Badges */}
             <div className="flex items-center gap-3">
               <a
-                href="https://instagram.com/uli.nails.krk"
+                href={instagram.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-[#2E2826] hover:bg-pink-900/60 border border-[#443D3A] flex items-center justify-center text-[#E8DFD8] hover:text-white transition-colors"
-                title="Instagram @uli.nails.krk"
-              >
-                <InstagramIcon className="w-4 h-4" />
-              </a>
-
-              <a
-                href="https://instagram.com/uli.nail.krk"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-[#2E2826] hover:bg-pink-900/60 border border-[#443D3A] flex items-center justify-center text-[#E8DFD8] hover:text-white transition-colors"
-                title="Instagram @uli.nail.krk"
+                title={`Instagram ${instagram.handle}`}
               >
                 <InstagramIcon className="w-4 h-4" />
               </a>
@@ -108,14 +99,26 @@ export default function Footer({ settings }: FooterProps) {
                 <MapPin className="w-4 h-4 text-gold-500 shrink-0" />
                 <span>{t.footer.location}</span>
               </div>
-              <div className="flex items-center gap-2.5">
-                <InstagramIcon className="w-4 h-4 text-gold-500 shrink-0" />
-                <span>@uli.nails.krk / @uli.nail.krk</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Send className="w-4 h-4 text-gold-500 shrink-0" />
+              <a
+                href={instagram.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2.5 hover:text-white transition-colors group"
+                title={`Instagram ${instagram.handle}`}
+              >
+                <InstagramIcon className="w-4 h-4 text-gold-500 shrink-0 group-hover:text-pink-400 transition-colors" />
+                <span>Instagram: {instagram.handle}</span>
+              </a>
+              <a
+                href="https://t.me/uliana_p_u"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2.5 hover:text-white transition-colors group"
+                title="Telegram @uliana_p_u"
+              >
+                <Send className="w-4 h-4 text-gold-500 shrink-0 group-hover:text-sky-400 transition-colors" />
                 <span>Telegram: @uliana_p_u</span>
-              </div>
+              </a>
             </div>
           </div>
         </div>

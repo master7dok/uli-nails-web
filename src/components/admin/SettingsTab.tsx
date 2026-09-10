@@ -275,7 +275,7 @@ export default function SettingsTab() {
         <div>
           <label className="block text-xs font-semibold text-charcoal-700 mb-1.5 flex items-center gap-1.5">
             <InstagramIcon className="w-3.5 h-3.5 text-pink-600" />
-            <span>Основний Instagram профіль</span>
+            <span>Польський профіль Instagram (PL версія сайту)</span>
           </label>
           <input
             type="text"
@@ -286,13 +286,16 @@ export default function SettingsTab() {
             placeholder="@uli.nails.krk"
             className="w-full px-4 py-2.5 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none"
           />
+          <span className="text-[11px] text-charcoal-400 mt-1 block">
+            Використовується для посилань, коли відвідувач переглядає сайт польською мовою (PL).
+          </span>
         </div>
 
         {/* Instagram Secondary */}
         <div>
           <label className="block text-xs font-semibold text-charcoal-700 mb-1.5 flex items-center gap-1.5">
             <InstagramIcon className="w-3.5 h-3.5 text-pink-600" />
-            <span>Другий Instagram профіль</span>
+            <span>Український профіль Instagram (UA версія сайту)</span>
           </label>
           <input
             type="text"
@@ -303,6 +306,9 @@ export default function SettingsTab() {
             placeholder="@uli.nail.krk"
             className="w-full px-4 py-2.5 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none"
           />
+          <span className="text-[11px] text-charcoal-400 mt-1 block">
+            Використовується для посилань, коли відвідувач переглядає сайт українською мовою (UA).
+          </span>
         </div>
 
         {/* Telegram */}

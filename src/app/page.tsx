@@ -68,7 +68,7 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen flex flex-col">
-      <Header />
+      <Header settings={settings} />
       <Hero settings={settings} />
       <About settings={settings} />
       <Courses courses={courses} settings={settings} />

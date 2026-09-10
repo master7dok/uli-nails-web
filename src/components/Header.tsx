@@ -5,11 +5,18 @@ import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { Send, Menu, X, Sparkles, Globe } from "lucide-react";
 import InstagramIcon from "@/components/icons/InstagramIcon";
+import { getInstagramLink } from "@/lib/settingsHelper";
 
-export default function Header() {
+interface HeaderProps {
+  settings?: Record<string, string>;
+}
+
+export default function Header({ settings }: HeaderProps = {}) {
   const { language, setLanguage, t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  const instagram = getInstagramLink(language, settings);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -88,10 +95,10 @@ export default function Header() {
 
           {/* Social Icons */}
           <a
-            href="https://instagram.com/uli.nails.krk"
+            href={instagram.url}
             target="_blank"
             rel="noopener noreferrer"
-            title="Instagram @uli.nails.krk"
+            title={`Instagram ${instagram.handle}`}
             className="hidden sm:flex items-center justify-center w-9 h-9 rounded-full bg-[#EFE9DF]/60 text-charcoal-700 hover:text-pink-600 hover:bg-blush-100 transition-colors"
           >
             <InstagramIcon className="w-4 h-4" />
@@ -143,13 +150,13 @@ export default function Header() {
             ))}
             <div className="pt-3 flex items-center space-x-4">
               <a
-                href="https://instagram.com/uli.nails.krk"
+                href={instagram.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-sm text-charcoal-700 hover:text-pink-600"
               >
                 <InstagramIcon className="w-4 h-4" />
-                <span>@uli.nails.krk</span>
+                <span>{instagram.handle}</span>
               </a>
               <a
                 href="https://t.me/uliana_p_u"

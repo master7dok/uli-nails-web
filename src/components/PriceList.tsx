@@ -5,7 +5,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Clock, Send, Flame, ChevronRight, Gem } from "lucide-react";
 import InstagramIcon from "@/components/icons/InstagramIcon";
-import { getSettingText } from "@/lib/settingsHelper";
+import { getSettingText, getInstagramLink } from "@/lib/settingsHelper";
 
 interface ServiceItem {
   id: string;
@@ -28,6 +28,7 @@ interface PriceListProps {
 export default function PriceList({ services, settings }: PriceListProps) {
   const { language, t, getLocalized } = useLanguage();
   const [activeTab, setActiveTab] = useState<string>("all");
+  const instagram = getInstagramLink(language, settings);
 
   const categories = [
     { id: "all", label: t.prices.categoryAll },
@@ -240,9 +241,10 @@ export default function PriceList({ services, settings }: PriceListProps) {
               <motion.a
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                href="https://instagram.com/uli.nails.krk"
+                href={instagram.url}
                 target="_blank"
                 rel="noopener noreferrer"
+                title={`Instagram ${instagram.handle}`}
                 className="inline-flex items-center gap-1.5 px-4.5 py-2.5 rounded-full text-xs font-semibold text-charcoal-800 bg-white hover:bg-nude-100 border border-nude-300 transition-colors shadow-xs"
               >
                 <InstagramIcon className="w-3.5 h-3.5 text-pink-600" />
