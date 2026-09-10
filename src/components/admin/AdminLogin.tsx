@@ -94,12 +94,6 @@ export default function AdminLogin({ onSuccess }: AdminLoginProps) {
             )}
           </button>
         </form>
-
-        <div className="mt-8 pt-6 border-t border-nude-100 text-center">
-          <span className="text-[11px] text-charcoal-400">
-            За замовчуванням: <code className="text-gold-700 font-mono">uliana_admin_secret</code>
-          </span>
-        </div>
       </div>
     </div>
   );
