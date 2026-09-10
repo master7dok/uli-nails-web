@@ -31,9 +31,9 @@ Ekskluzywna platforma internetowa (Landing Page + Panel Administracyjny) dla mis
 npm install
 ```
 
-### 2. Baza Danych (Prisma + SQLite):
+### 2. Baza Danych (Prisma + PostgreSQL):
 ```bash
-# Wygenerowanie klienta i synchronizacja bazy dev.db
+# Wygenerowanie klienta i synchronizacja bazy PostgreSQL
 npx prisma db push
 
 # Wypełnienie bazy początkowymi danymi (cennik, kursy, opinie)
@@ -57,8 +57,13 @@ npm start
 ## 🔐 Dostęp do Panelu Administratora
 
 - **Adres URL:** [http://localhost:3000/admin](http://localhost:3000/admin)
-- **Domyślne hasło dostępu:** `uliana_admin_secret`
-*(Hasło można zmienić w pliku `.env` pod zmienną `ADMIN_PASSWORD`)*
+- **Hasło dostępu:** zmienna środowiskowa `ADMIN_PASSWORD` (domyślnie: `uliana_admin_secret`).
+
+---
+
+## 📖 Pełny Przewodnik Techniczny / База Знань
+Szczegółowy opis architektury, struktury plików, zmiennych środowiskowych, Coolify i instrukcji rozwiązywania problemów znajduje się w dedykowanym dokumencie:
+👉 **[PROJECT_KNOWLEDGE_BASE.md](./PROJECT_KNOWLEDGE_BASE.md)**
 
 ---
 
