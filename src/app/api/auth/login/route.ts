@@ -1,22 +1,31 @@
 import { NextResponse } from "next/server";
-import { createAuthToken, getExpectedPassword, ADMIN_COOKIE_NAME } from "@/lib/auth";
+import {
+  createSessionToken,
+  verifyPassword,
+  verifyCsrf,
+  ADMIN_COOKIE_NAME,
+} from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
-    const { password } = await request.json();
-    const expected = getExpectedPassword();
+    if (!verifyCsrf(request)) {
+      return NextResponse.json(
+        { error: "CSRF validation failed" },
+        { status: 403 }
+      );
+    }
 
-    // Support trimmed input
+    const { password } = await request.json();
     const cleanPassword = typeof password === "string" ? password.trim() : "";
 
-    if (!cleanPassword || cleanPassword !== expected) {
+    if (!cleanPassword || !verifyPassword(cleanPassword)) {
       return NextResponse.json(
         { error: "Невірний пароль / Nieprawidłowe hasło" },
         { status: 401 }
       );
     }
 
-    const token = createAuthToken(expected);
+    const token = createSessionToken();
     const response = NextResponse.json({ success: true, token });
 
     // Determine if connection is HTTPS (respects reverse proxies like Traefik in Coolify)

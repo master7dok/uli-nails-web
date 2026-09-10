@@ -125,9 +125,21 @@ export default function Footer({ settings }: FooterProps) {
 
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#877E78]">
-          <p>© {new Date().getFullYear()} Uliana Nails. {t.footer.rights}</p>
+          <div>
+            <p>© {new Date().getFullYear()} Uliana Nails. {t.footer.rights}</p>
+            <p className="text-[11px] text-[#6E6661] mt-0.5">
+              Uliana Nails • Usługi kosmetyczne &amp; szkolenia stacjonarne • Kraków, Polska
+            </p>
+          </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
+            <Link
+              href="/privacy"
+              className="hover:text-gold-400 transition-colors underline-offset-4 hover:underline"
+            >
+              {language === "pl" ? "Polityka Prywatności" : "Політика конфіденційності"}
+            </Link>
+
             <Link
               href="/admin"
               className="inline-flex items-center gap-1.5 text-[#877E78] hover:text-gold-400 transition-colors"

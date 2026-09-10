@@ -103,6 +103,7 @@ export default function About({ settings }: AboutProps) {
                   alt="Gel architecture close-up"
                   fill
                   className="object-cover"
+                  sizes="176px"
                 />
               </div>
 

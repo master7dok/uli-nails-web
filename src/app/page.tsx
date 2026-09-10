@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { prisma, isDatabaseAvailable } from "@/lib/prisma";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
@@ -25,22 +25,25 @@ export default async function HomePage() {
   let settingsList: any[] = [];
 
   try {
-    [courses, services, portfolio, testimonials, settingsList] = await Promise.all([
-      prisma.course.findMany({
-        where: { isActive: true },
-        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-      }),
-      prisma.service.findMany({
-        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-      }),
-      prisma.portfolioItem.findMany({
-        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-      }),
-      prisma.testimonial.findMany({
-        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-      }),
-      prisma.setting.findMany(),
-    ]);
+    const dbOnline = await isDatabaseAvailable();
+    if (dbOnline) {
+      [courses, services, portfolio, testimonials, settingsList] = await Promise.all([
+        prisma.course.findMany({
+          where: { isActive: true },
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+        }),
+        prisma.service.findMany({
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+        }),
+        prisma.portfolioItem.findMany({
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+        }),
+        prisma.testimonial.findMany({
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+        }),
+        prisma.setting.findMany(),
+      ]);
+    }
   } catch (error) {
     console.warn("Could not query database directly, utilizing fallback data:", error);
   }

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Montserrat } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
+import CookieConsent from "@/components/CookieConsent";
 
 const playfair = Playfair_Display({
   subsets: ["latin", "latin-ext", "cyrillic"],
@@ -43,6 +44,26 @@ export const metadata: Metadata = {
     locale: "pl_PL",
     type: "website",
   },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://ulinails.pl"),
+  alternates: {
+    canonical: "https://ulinails.pl",
+    languages: {
+      "pl-PL": "https://ulinails.pl",
+      "uk-UA": "https://ulinails.pl",
+      "x-default": "https://ulinails.pl",
+    },
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },
@@ -62,7 +83,10 @@ export default function RootLayout({
   return (
     <html lang="pl" className={`${playfair.variable} ${montserrat.variable}`}>
       <body className="antialiased min-h-screen flex flex-col bg-[#FAF8F5] text-[#2A2523]">
-        <LanguageProvider>{children}</LanguageProvider>
+        <LanguageProvider>
+          {children}
+          <CookieConsent />
+        </LanguageProvider>
       </body>
     </html>
   );

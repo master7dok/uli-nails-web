@@ -1,5 +1,33 @@
 import { execSync } from "child_process";
 import { PrismaClient } from "@prisma/client";
+import net from "net";
+
+async function isPortOpen(dbUrl) {
+  try {
+    const url = new URL(
+      dbUrl.replace(/^postgresql:\/\//, "http://").replace(/^postgres:\/\//, "http://")
+    );
+    const host = url.hostname || "localhost";
+    const port = parseInt(url.port || "5432", 10);
+    return await new Promise((resolve) => {
+      const socket = new net.Socket();
+      let settled = false;
+      const finish = (open) => {
+        if (settled) return;
+        settled = true;
+        socket.destroy();
+        resolve(open);
+      };
+      socket.setTimeout(500);
+      socket.once("connect", () => finish(true));
+      socket.once("timeout", () => finish(false));
+      socket.once("error", () => finish(false));
+      socket.connect(port, host);
+    });
+  } catch {
+    return false;
+  }
+}
 
 async function autoInit() {
   const dbUrl = process.env.DATABASE_URL || "";
@@ -7,6 +35,12 @@ async function autoInit() {
 
   if (!dbUrl || (!dbUrl.startsWith("postgres://") && !dbUrl.startsWith("postgresql://"))) {
     console.log("[auto-init] DATABASE_URL is not configured for PostgreSQL, skipping auto-init.");
+    return;
+  }
+
+  const online = await isPortOpen(dbUrl);
+  if (!online) {
+    console.log("[auto-init] Database host is currently offline. Starting server immediately with fallback data.");
     return;
   }
 

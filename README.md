@@ -57,7 +57,7 @@ npm start
 ## 🔐 Dostęp do Panelu Administratora
 
 - **Adres URL:** [http://localhost:3000/admin](http://localhost:3000/admin)
-- **Hasło dostępu:** zmienna środowiskowa `ADMIN_PASSWORD` (domyślnie: `uliana_admin_secret`).
+- **Hasło dostępu:** konfigurowane przez zmienną środowiskową `ADMIN_PASSWORD` w pliku `.env`.
 
 ---
 

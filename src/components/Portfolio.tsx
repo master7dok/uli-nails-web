@@ -120,7 +120,9 @@ export default function Portfolio({ items, settings }: PortfolioProps) {
                     src={item.imageUrl}
                     alt={title || "Uliana Nails portfolio artwork"}
                     fill
-                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 400px"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 380px"
+                    priority={index < 2}
+                    loading={index < 4 ? "eager" : "lazy"}
                     className="object-cover object-center transition-transform duration-500 group-hover:scale-108"
                   />
 

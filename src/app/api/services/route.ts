@@ -1,20 +1,21 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, isDatabaseAvailable } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
 import { defaultServices } from "@/lib/defaultData";
 
 export async function GET() {
   try {
-    const services = await prisma.service.findMany({
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    });
-    if (services.length > 0) {
-      return NextResponse.json(services);
+    if (await isDatabaseAvailable()) {
+      const services = await prisma.service.findMany({
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      });
+      if (services.length > 0) {
+        return NextResponse.json(services);
+      }
     }
     return NextResponse.json(defaultServices);
   } catch (error) {
-    console.warn("Database unavailable for services, returning defaults:", error);
     return NextResponse.json(defaultServices);
   }
 }
@@ -23,6 +24,13 @@ export async function POST(request: Request) {
   try {
     if (!(await isAuthenticated(request))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!(await isDatabaseAvailable())) {
+      return NextResponse.json(
+        { error: "База даних тимчасово недоступна. Будь ласка, перевірте PostgreSQL / Baza danych jest niedostępna." },
+        { status: 503 }
+      );
     }
 
     const data = await request.json();
