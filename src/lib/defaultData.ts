@@ -65,6 +65,7 @@ export interface DefaultTestimonial {
 
 export const defaultServices: DefaultService[] = [
   {
+    id: "service-1",
     category: "manicure",
     titlePl: "Manicure hybrydowy",
     titleUa: "Манікюр гібридний (гель-лак)",
@@ -76,7 +77,8 @@ export const defaultServices: DefaultService[] = [
     sortOrder: 1,
   },
   {
-    category: "gel",
+    id: "service-2",
+    category: "manicure",
     titlePl: "Paznokcie żelowe (uzupełnienie / utwardzenie)",
     titleUa: "Гелеві нігті (укріплення / корекція)",
     descriptionPl: "Wzmocnienie naturalnej płytki twardym żelem, architektoniczna budowa apeksu, odporność na złamania.",
@@ -87,6 +89,7 @@ export const defaultServices: DefaultService[] = [
     sortOrder: 2,
   },
   {
+    id: "service-3",
     category: "manicure",
     titlePl: "Zdjęcie hybrydy + manicure higieniczny",
     titleUa: "Зняття покриття + гігієнічний манікюр",
@@ -98,6 +101,7 @@ export const defaultServices: DefaultService[] = [
     sortOrder: 3,
   },
   {
+    id: "service-4",
     category: "pedicure",
     titlePl: "Pedicure estetyczny hybrydowy (bez podologii)",
     titleUa: "Естетичний гібридний педикюр (без подології)",
@@ -109,6 +113,7 @@ export const defaultServices: DefaultService[] = [
     sortOrder: 4,
   },
   {
+    id: "service-5",
     category: "pedicure",
     titlePl: "Pedicure pełny SPA + Pododysk (opracowanie stóp)",
     titleUa: "Повний SPA-педикюр з пододиском (обробка стоп)",
@@ -120,7 +125,8 @@ export const defaultServices: DefaultService[] = [
     sortOrder: 5,
   },
   {
-    category: "extension",
+    id: "service-6",
+    category: "manicure",
     titlePl: "Przedłużanie paznokci od zera (długość S/M)",
     titleUa: "Нарощування нігтів з нуля (довжина S/M)",
     descriptionPl: "Modelowanie na szablonie lub formach górnych żelem/polyżelem, perfekcyjny tunel i smukły kształt.",
@@ -131,7 +137,8 @@ export const defaultServices: DefaultService[] = [
     sortOrder: 6,
   },
   {
-    category: "extension",
+    id: "service-7",
+    category: "manicure",
     titlePl: "Przedłużanie paznokci długie (długość L/XL)",
     titleUa: "Нарощування нігтів довгі (довжина L/XL)",
     descriptionPl: "Ekstremalna długość z zachowaniem prawidłowej architektury, nośności i odporności na pęknięcia.",
@@ -142,7 +149,8 @@ export const defaultServices: DefaultService[] = [
     sortOrder: 7,
   },
   {
-    category: "care",
+    id: "service-8",
+    category: "additional",
     titlePl: "Zabieg regeneracyjny SPA + masaż dłoni",
     titleUa: "SPA-догляд з масажем та відновленням",
     descriptionPl: "Peeling enzymatyczny, maska odżywcza z witaminami, ciepła parafina i relaksujący masaż dłoni.",
@@ -153,7 +161,8 @@ export const defaultServices: DefaultService[] = [
     sortOrder: 8,
   },
   {
-    category: "care",
+    id: "service-9",
+    category: "additional",
     titlePl: "Zabieg IBX System (terapia zniszczonej płytki)",
     titleUa: "Лікування та зміцнення IBX System",
     descriptionPl: "Głęboko penetrujący system naprawczy do kruchych, rozdwajających się i osłabionych paznokci.",
@@ -164,6 +173,7 @@ export const defaultServices: DefaultService[] = [
     sortOrder: 9,
   },
   {
+    id: "service-10",
     category: "additional",
     titlePl: "Zdobienia (French / Babyboomer / Ombre)",
     titleUa: "Дизайн (Френч / Бебібумер / Омбре)",
@@ -175,6 +185,7 @@ export const defaultServices: DefaultService[] = [
     sortOrder: 10,
   },
   {
+    id: "service-11",
     category: "additional",
     titlePl: "Naprawa / rekonstrukcja 1 paznokcia",
     titleUa: "Ремонт / донарощування 1 нігтя",
@@ -620,4 +631,125 @@ export const defaultSettings: Record<string, string> = {
   hero_photo_url: "/uploads/img-2269-------1788893828203.jpg",
   about_main_photo_url: "/uploads/img-2558-------1788893832635.jpg",
   about_secondary_photo_url: "/uploads/img-2550-1788893834425.jpg",
+
+  // --- 1. Hero Section ---
+  text_hero_titleLine1_ua: "Архітектура гелю,",
+  text_hero_titleLine1_pl: "Architektura żelu,",
+  text_hero_titleLine2_ua: "чистий манікюр",
+  text_hero_titleLine2_pl: "czysty manicure",
+  text_hero_titleLine3_ua: "та професійне",
+  text_hero_titleLine3_pl: "i profesjonalne",
+  text_hero_titleLine4_ua: "наставництво",
+  text_hero_titleLine4_pl: "szkolenia",
+  text_hero_subtitle_ua:
+    "Авторські офлайн-курси з нуля та підвищення кваліфікації. Навчаю майстрів та команди салонів робити естетичне тонке моделювання без відшарувань за 1:15.",
+  text_hero_subtitle_pl:
+    "Autorskie szkolenia stacjonarne od podstaw oraz Level Up. Uczę stylistki i zespoły salonów wykonywać estetyczne, smukłe stylizacje bez zapowietrzeń w 1:15.",
+  text_hero_stat1_value: "120+",
+  text_hero_stat1_label_ua: "учениць",
+  text_hero_stat1_label_pl: "absolwentek",
+  text_hero_stat2_value: "6+",
+  text_hero_stat2_label_ua: "років досвіду",
+  text_hero_stat2_label_pl: "lat doświadczenia",
+  text_hero_stat3_value: "75",
+  text_hero_stat3_unit_ua: "хв",
+  text_hero_stat3_unit_pl: "min",
+  text_hero_stat3_label_ua: "середня швидкість",
+  text_hero_stat3_label_pl: "średni czas",
+
+  // --- 2. About Section ---
+  text_about_title_ua: "Привіт, я Уляна",
+  text_about_title_pl: "Cześć, tu Uliana",
+  text_about_p1_ua:
+    "Професійний Nail Master та Gel Expert. Мій підхід — це баланс анатомічної безпеки, ультра-чистого манікюру та філігранної тонкості нігтів, що носяться без відшарувань більше 4 тижнів.",
+  text_about_p1_pl:
+    "Profesjonalna stylistka paznokci i ekspertka pracy z żelem. Moje podejście to równowaga anatomicznego bezpieczeństwa, nieskazitelnie czystego manicure oraz filigranowej lekkości paznokci, które noszą się bez zapowietrzeń ponad 4 tygodnie.",
+  text_about_p2_ua:
+    "Я спеціалізуюся на роботі зі складними нігтями: виправлення форми трапецій, клюючих та скручених нігтів без пилу та товщини. Окрема гордість моєї методики — це швидкість без компромісів: якісна повноцінна процедура за 75-80 хвилин.",
+  text_about_p2_pl:
+    "Specjalizuję się w trudnych przypadkach: korekta paznokci trapezowych, rosnących w dół i skręconych bez nadmiaru grubości i zbędnego piłowania. Moim znakiem rozpoznawczym jest także wysoka ergonomia i szybkość: precyzyjny zabieg w 75-80 minut.",
+  text_about_p3_ua:
+    "Крім прийому клієнтів, я проводжу офлайн-курси в Кракові та допомагаю власникам салонів навчати персонал, щоб клієнти поверталися знову і знову.",
+  text_about_p3_pl:
+    "Oprócz pracy przy biurku prowadzę intensywne szkolenia stacjonarne w Krakowie oraz pomagam właścicielom salonów podnosić kwalifikacje zespołów.",
+  text_about_feature1_ua: "Твердий гель без візуального потовщення нігтьової пластини",
+  text_about_feature1_pl: "Twardy żel bez wizualnego pogrubiania płytki",
+  text_about_feature2_ua: "Ліквідація відшарувань біля кутикули та на вільному краї",
+  text_about_feature2_pl: "Koniec z zapowietrzeniami w strefie skórek i na wolnym brzegu",
+  text_about_feature3_ua: "Швидкість роботи без метушні та перепилювання",
+  text_about_feature3_pl: "Szybka praca bez zbędnych ruchów i poprawek",
+  text_about_feature4_ua: "Сертифіковані методики та медична безпека інструментів",
+  text_about_feature4_pl: "Certyfikowane procedury i pełne bezpieczeństwo sanitarne",
+  text_about_stat1_value: "6+",
+  text_about_stat1_label_ua: "Років у nail-індустрії",
+  text_about_stat1_label_pl: "Lat w branży beauty",
+  text_about_stat2_value: "120+",
+  text_about_stat2_label_ua: "Випускниць та майстрів салонів",
+  text_about_stat2_label_pl: "Przeszkolonych stylistek",
+  text_about_stat3_value: "850+",
+  text_about_stat3_label_ua: "Задоволених постійних клієнтів",
+  text_about_stat3_label_pl: "Zadowolonych stałych klientek",
+  text_about_stat4_value: "28+",
+  text_about_stat4_label_ua: "Днів гарантії носіння",
+  text_about_stat4_label_pl: "Dni gwarancji noszenia",
+
+  // --- 3. Courses Section ---
+  text_courses_title_ua: "Програми навчання та менторингу",
+  text_courses_title_pl: "Programy szkoleń stacjonarnych",
+  text_courses_subtitle_ua:
+    "Від впевненого старту з нуля до філігранного володіння гелем і навчання команд б'юті-салонів.",
+  text_courses_subtitle_pl:
+    "Od pewnego startu od podstaw po mistrzowską architekturę żelu i mentoring zespołów salonów.",
+  text_courses_promo_title_ua: "Приходь з подругою! 🤍",
+  text_courses_promo_title_pl: "Przyjdź z przyjaciółką! 🤍",
+  text_courses_promo_badge_ua: "-250 zł",
+  text_courses_promo_badge_pl: "-250 zł",
+  text_courses_promo_text_ua:
+    "Навчатися вдвох ефективніше та веселіше. Запроси майстра, якому це також актуально, та отримай приємний бонус — знижку 250 zł на свій курс 🥰",
+  text_courses_promo_text_pl:
+    "Wspólna nauka jest bardziej efektywna i przyjemniejsza. Zaproś znajomą stylistkę i odbierz zniżkę 250 zł na swoje szkolenie 🥰",
+  text_courses_personalized_title_ua: "Індивідуальна адаптація програми:",
+  text_courses_personalized_title_pl: "Indywidualne dopasowanie programu:",
+  text_courses_personalized_text_ua:
+    "Кожна програма офлайн-навчання адаптується індивідуально під ваші цілі та поточні складнощі (чистота зрізу, швидкість, усунення відшарувань) на основі відповідей у короткій анкеті.",
+  text_courses_personalized_text_pl:
+    "Każdy program stacjonarny jest indywidualnie dopasowywany do Twoich potrzeb i obecnych trudności na podstawie krótkiej ankiety.",
+  text_courses_booking_title_ua: "Умови бронювання:",
+  text_courses_booking_title_pl: "Zasady rezerwacji:",
+  text_courses_booking_text_ua:
+    "Бронювання дат на курс здійснюється після внесення завдатку (150 zł). Реквізити надаються індивідуально після узгодження програми.",
+  text_courses_booking_text_pl:
+    "Rezerwacja terminu szkolenia następuje po wpłacie zadatku (150 zł). Dane do przelewu są przekazywane indywidualnie po ustaleniu programu.",
+
+  // --- 4. Price List Section ---
+  text_prices_title_ua: "Естетичні послуги",
+  text_prices_title_pl: "Oferta salonowa",
+  text_prices_subtitle_ua: "Преміальні матеріали, одноразові розхідники та повна безпека.",
+  text_prices_subtitle_pl: "Materiały najwyższej klasy, pakiety jednorazowe i pełna sterylność.",
+
+  // --- 5. Portfolio Section ---
+  text_portfolio_badge_ua: "Галерея робіт",
+  text_portfolio_badge_pl: "Galeria prac",
+  text_portfolio_title_ua: "Фірмова естетика",
+  text_portfolio_title_pl: "Estetyka i styl",
+  text_portfolio_subtitle_ua:
+    "Тонкі міцні торці, чистий зріз та бездоганний блік без перевантаження нігтів.",
+  text_portfolio_subtitle_pl:
+    "Cienkie krawędzie, idealna linia światła i elegancka harmonia dłoni.",
+
+  // --- 6. Testimonials Section ---
+  text_testimonials_badge_ua: "Відгуки та результати",
+  text_testimonials_badge_pl: "Opinie i efekty",
+  text_testimonials_title_ua: "Що кажуть учениці та клієнти",
+  text_testimonials_title_pl: "Co mówią absolwentki i klientki",
+  text_testimonials_subtitle_ua:
+    "Реальні історії майстрів, які змінили свій підхід до роботи.",
+  text_testimonials_subtitle_pl:
+    "Prawdziwe historie stylistek, które wzniosły swoją pracę na wyższy poziom.",
+
+  // --- 7. Footer Section ---
+  text_footer_about_brand_ua:
+    "Професійний простір краси нігтів та авторського наставництва від Уляни в Кракові. Бездоганний гель, швидкість та довіра.",
+  text_footer_about_brand_pl:
+    "Przestrzeń bezpiecznej estetyki paznokci oraz autorskiego mentoringu Uliany w Krakowie. Czystość, żel i pewność każdego ruchu.",
 };

@@ -5,6 +5,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Clock, Send, Flame, ChevronRight, Gem } from "lucide-react";
 import InstagramIcon from "@/components/icons/InstagramIcon";
+import { getSettingText } from "@/lib/settingsHelper";
 
 interface ServiceItem {
   id: string;
@@ -21,29 +22,35 @@ interface ServiceItem {
 
 interface PriceListProps {
   services: ServiceItem[];
+  settings?: Record<string, string>;
 }
 
-export default function PriceList({ services }: PriceListProps) {
+export default function PriceList({ services, settings }: PriceListProps) {
   const { language, t, getLocalized } = useLanguage();
   const [activeTab, setActiveTab] = useState<string>("all");
 
   const categories = [
     { id: "all", label: t.prices.categoryAll },
     { id: "manicure", label: t.prices.categoryManicure },
-    { id: "gel", label: t.prices.categoryGel },
     { id: "pedicure", label: t.prices.categoryPedicure },
-    { id: "extension", label: t.prices.categoryExtension },
-    { id: "care", label: t.prices.categoryCare },
+    { id: "additional", label: t.prices.categoryAdditional },
   ];
 
   const filteredServices =
     activeTab === "all"
       ? services
-      : services.filter(
-          (s) =>
-            s.category === activeTab ||
-            (activeTab === "care" && (s.category === "care" || s.category === "additional"))
-        );
+      : services.filter((s) => {
+          if (activeTab === "manicure") {
+            return s.category === "manicure" || s.category === "gel" || s.category === "extension";
+          }
+          if (activeTab === "pedicure") {
+            return s.category === "pedicure";
+          }
+          if (activeTab === "additional") {
+            return s.category === "additional" || s.category === "care";
+          }
+          return s.category === activeTab;
+        });
 
   return (
     <section id="prices" className="py-24 bg-[#F5F2EB]/50 relative overflow-hidden">
@@ -67,10 +74,10 @@ export default function PriceList({ services }: PriceListProps) {
             </span>
           </div>
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-normal text-charcoal-900 tracking-tight mb-4">
-            {t.prices.title}
+            {getSettingText(settings, "text_prices_title", language, t.prices.title)}
           </h2>
           <p className="text-base text-charcoal-600 leading-relaxed">
-            {t.prices.subtitle}
+            {getSettingText(settings, "text_prices_subtitle", language, t.prices.subtitle)}
           </p>
         </motion.div>
 
@@ -130,10 +137,14 @@ export default function PriceList({ services }: PriceListProps) {
               {filteredServices.map((service, index) => {
                 const title = getLocalized(service, "title");
                 const description = getLocalized(service, "description");
+                const uniqueKey =
+                  service.id && String(service.id).trim() !== ""
+                    ? String(service.id)
+                    : `service-${service.category || "item"}-${index}`;
 
                 return (
                   <motion.div
-                    key={service.id}
+                    key={uniqueKey}
                     layout
                     initial={{ opacity: 0, y: 12 }}
                     whileInView={{ opacity: 1, y: 0 }}

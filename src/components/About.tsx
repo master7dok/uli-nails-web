@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import { motion } from "framer-motion";
 import { ShieldCheck, Zap, Sparkles, Check, Gem, Award } from "lucide-react";
+import { getSettingText } from "@/lib/settingsHelper";
 
 interface AboutProps {
   settings?: Record<string, string>;
@@ -16,9 +17,60 @@ const DEFAULT_ABOUT_SECONDARY =
   "https://images.unsplash.com/photo-1632345031435-8727f6897d53?q=80&w=600&auto=format&fit=crop";
 
 export default function About({ settings }: AboutProps) {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const mainPhoto = settings?.about_main_photo_url || DEFAULT_ABOUT_MAIN;
   const secondaryPhoto = settings?.about_secondary_photo_url || DEFAULT_ABOUT_SECONDARY;
+
+  const title = getSettingText(settings, "text_about_title", language, t.about.title);
+  const p1 = getSettingText(settings, "text_about_p1", language, t.about.p1);
+  const p2 = getSettingText(settings, "text_about_p2", language, t.about.p2);
+  const p3 = getSettingText(settings, "text_about_p3", language, t.about.p3);
+
+  const features = [
+    getSettingText(settings, "text_about_feature1", language, t.about.features[0]),
+    getSettingText(settings, "text_about_feature2", language, t.about.features[1]),
+    getSettingText(settings, "text_about_feature3", language, t.about.features[2]),
+    getSettingText(settings, "text_about_feature4", language, t.about.features[3]),
+  ];
+
+  const stats = [
+    {
+      value: settings?.text_about_stat1_value || "6+",
+      label: getSettingText(
+        settings,
+        "text_about_stat1_label",
+        language,
+        t.about.stats[0]?.label || "Років у nail-індустрії"
+      ),
+    },
+    {
+      value: settings?.text_about_stat2_value || "120+",
+      label: getSettingText(
+        settings,
+        "text_about_stat2_label",
+        language,
+        t.about.stats[1]?.label || "Випускниць та майстрів салонів"
+      ),
+    },
+    {
+      value: settings?.text_about_stat3_value || "850+",
+      label: getSettingText(
+        settings,
+        "text_about_stat3_label",
+        language,
+        t.about.stats[2]?.label || "Задоволених постійних клієнтів"
+      ),
+    },
+    {
+      value: settings?.text_about_stat4_value || "28+",
+      label: getSettingText(
+        settings,
+        "text_about_stat4_label",
+        language,
+        t.about.stats[3]?.label || "Днів гарантії носіння"
+      ),
+    },
+  ];
 
   return (
     <section id="about" className="py-24 bg-[#F5F2EB]/60 relative overflow-hidden">
@@ -84,19 +136,19 @@ export default function About({ settings }: AboutProps) {
 
             {/* Title */}
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-normal text-charcoal-900 tracking-tight mb-6">
-              {t.about.title}
+              {title}
             </h2>
 
             {/* Paragraphs */}
             <div className="space-y-4 text-charcoal-600 text-base sm:text-[16.5px] leading-relaxed mb-8">
-              <p>{t.about.p1}</p>
-              <p>{t.about.p2}</p>
-              <p>{t.about.p3}</p>
+              <p>{p1}</p>
+              <p>{p2}</p>
+              <p>{p3}</p>
             </div>
 
             {/* 4 Core Pillars Checklist */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-10">
-              {t.about.features.map((feature, idx) => (
+              {features.map((feature, idx) => (
                 <div
                   key={idx}
                   className="flex items-start gap-3 p-3 rounded-xl bg-white/70 border border-nude-200/80 shadow-xs"
@@ -113,7 +165,7 @@ export default function About({ settings }: AboutProps) {
 
             {/* Dynamic Counter Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-5 rounded-2xl bg-white border border-nude-200 shadow-soft">
-              {t.about.stats.map((st, i) => (
+              {stats.map((st, i) => (
                 <div key={i} className="flex flex-col text-center sm:text-left">
                   <span className="font-serif text-2xl sm:text-3xl font-bold text-charcoal-900">
                     {st.value}

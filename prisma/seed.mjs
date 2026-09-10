@@ -26,7 +26,7 @@ async function main() {
       sortOrder: 1,
     },
     {
-      category: "gel",
+      category: "manicure",
       titlePl: "Paznokcie żelowe (uzupełnienie / utwardzenie)",
       titleUa: "Гелеві нігті (укріплення / корекція)",
       descriptionPl: "Wzmocnienie naturalnej płytki twardym żelem, architektoniczna budowa apeksu, odporność na złamania.",
@@ -70,7 +70,7 @@ async function main() {
       sortOrder: 5,
     },
     {
-      category: "extension",
+      category: "manicure",
       titlePl: "Przedłużanie paznokci (długość 1-2)",
       titleUa: "Нарощування нігтів (довжина 1-2)",
       descriptionPl: "Przedłużanie na szablonach / górnych formach, idealny kształt migdał lub kwadrat, manicure w cenie.",
@@ -81,7 +81,7 @@ async function main() {
       sortOrder: 6,
     },
     {
-      category: "extension",
+      category: "manicure",
       titlePl: "Przedłużanie paznokci (długość 3-4)",
       titleUa: "Нарощування нігтів (довжина 3-4)",
       descriptionPl: "Długie, eleganckie stylizacje żelowe z zachowaniem idealnej geometrii i lekkości noszenia.",
@@ -92,7 +92,7 @@ async function main() {
       sortOrder: 7,
     },
     {
-      category: "gel",
+      category: "manicure",
       titlePl: "Korekta paznokci żelowych",
       titleUa: "Корекція гелевих нігтів",
       descriptionPl: "Odnowa architektury, podniesienie opadających końców, zmiana koloru lub wzoru.",
@@ -103,7 +103,7 @@ async function main() {
       sortOrder: 8,
     },
     {
-      category: "care",
+      category: "additional",
       titlePl: "Męski manicure higieniczny",
       titleUa: "Чоловічий гігієнічний манікюр",
       descriptionPl: "Estetyczne opracowanie wałów okołopaznokciowych, matowe polerowanie i pielęgnacja dłoni.",

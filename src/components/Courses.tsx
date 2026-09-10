@@ -21,6 +21,8 @@ import {
   UserCheck,
 } from "lucide-react";
 
+import { getSettingText } from "@/lib/settingsHelper";
+
 interface SyllabusDay {
   day: string;
   title: string;
@@ -55,13 +57,34 @@ interface CourseItem {
 
 interface CoursesProps {
   courses: CourseItem[];
+  settings?: Record<string, string>;
 }
 
-export default function Courses({ courses }: CoursesProps) {
+export default function Courses({ courses, settings }: CoursesProps) {
   const { language, t, getLocalized } = useLanguage();
   const [selectedCourse, setSelectedCourse] = useState<CourseItem | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [expandedCourses, setExpandedCourses] = useState<Record<string, boolean>>({});
+
+  const coursesTitle = getSettingText(settings, "text_courses_title", language, t.courses.title);
+  const coursesSubtitle = getSettingText(settings, "text_courses_subtitle", language, t.courses.subtitle);
+  const promoTitle = getSettingText(settings, "text_courses_promo_title", language, t.courses.friendPromoTitle);
+  const promoBadge = getSettingText(settings, "text_courses_promo_badge", language, "-250 zł");
+  const promoText = getSettingText(settings, "text_courses_promo_text", language, t.courses.friendPromoText);
+  const personalizedTitle = getSettingText(
+    settings,
+    "text_courses_personalized_title",
+    language,
+    language === "pl" ? "Indywidualne dopasowanie programu:" : "Індивідуальна адаптація програми:"
+  );
+  const personalizedText = getSettingText(settings, "text_courses_personalized_text", language, t.courses.personalizedNotice);
+  const bookingTitle = getSettingText(
+    settings,
+    "text_courses_booking_title",
+    language,
+    language === "pl" ? "Zasady rezerwacji:" : "Умови бронювання:"
+  );
+  const bookingText = getSettingText(settings, "text_courses_booking_text", language, t.courses.bookingRule);
 
   const toggleAccordion = (courseId: string) => {
     setExpandedCourses((prev) => ({
@@ -110,10 +133,10 @@ export default function Courses({ courses }: CoursesProps) {
             </span>
           </div>
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-normal text-charcoal-900 tracking-tight mb-5">
-            {t.courses.title}
+            {coursesTitle}
           </h2>
           <p className="text-base sm:text-lg text-charcoal-600 leading-relaxed">
-            {t.courses.subtitle}
+            {coursesSubtitle}
           </p>
         </motion.div>
 
@@ -138,14 +161,14 @@ export default function Courses({ courses }: CoursesProps) {
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-2.5 mb-1.5">
                 <h3 className="font-serif text-xl sm:text-2xl font-bold text-charcoal-900 tracking-tight">
-                  {t.courses.friendPromoTitle}
+                  {promoTitle}
                 </h3>
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200">
-                  -250 zł
+                  {promoBadge}
                 </span>
               </div>
               <p className="text-sm sm:text-[15px] text-charcoal-700 leading-relaxed">
-                {t.courses.friendPromoText}
+                {promoText}
               </p>
             </div>
           </div>
@@ -164,9 +187,9 @@ export default function Courses({ courses }: CoursesProps) {
           </div>
           <div className="text-xs sm:text-sm text-charcoal-700 leading-snug">
             <span className="font-semibold text-charcoal-900 mr-1">
-              {language === "pl" ? "Indywidualne dopasowanie programu:" : "Індивідуальна адаптація програми:"}
+              {personalizedTitle}
             </span>
-            {t.courses.personalizedNotice}
+            {personalizedText}
           </div>
         </motion.div>
 
@@ -192,7 +215,7 @@ export default function Courses({ courses }: CoursesProps) {
 
             return (
               <motion.div
-                key={course.id || course.slug}
+                key={course.id || course.slug || `course-${index}`}
                 initial={{ opacity: 0, y: 25 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
@@ -368,9 +391,9 @@ export default function Courses({ courses }: CoursesProps) {
           <ShieldAlert className="w-5 h-5 text-gold-700 shrink-0 hidden sm:block" />
           <p className="text-xs sm:text-sm text-charcoal-600 leading-relaxed">
             <span className="font-semibold text-charcoal-900 block sm:inline mr-1">
-              {language === "pl" ? "Zasady rezerwacji:" : "Умови бронювання:"}
+              {bookingTitle}
             </span>
-            {t.courses.bookingRule}
+            {bookingText}
           </p>
         </div>
       </div>

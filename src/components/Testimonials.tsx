@@ -4,6 +4,7 @@ import React from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { motion } from "framer-motion";
 import { Star, MessageSquareQuote, CheckCircle2 } from "lucide-react";
+import { getSettingText } from "@/lib/settingsHelper";
 
 interface TestimonialItem {
   id: string;
@@ -17,10 +18,11 @@ interface TestimonialItem {
 
 interface TestimonialsProps {
   items: TestimonialItem[];
+  settings?: Record<string, string>;
 }
 
-export default function Testimonials({ items }: TestimonialsProps) {
-  const { t, getLocalized } = useLanguage();
+export default function Testimonials({ items, settings }: TestimonialsProps) {
+  const { language, t, getLocalized } = useLanguage();
 
   return (
     <section id="reviews" className="py-24 bg-[#F5F2EB]/60 relative overflow-hidden">
@@ -36,14 +38,14 @@ export default function Testimonials({ items }: TestimonialsProps) {
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blush-100 border border-blush-200 mb-4 shadow-xs">
             <MessageSquareQuote className="w-3.5 h-3.5 text-gold-700" />
             <span className="text-xs font-semibold tracking-wider uppercase text-charcoal-700">
-              {t.testimonials.badge}
+              {getSettingText(settings, "text_testimonials_badge", language, t.testimonials.badge)}
             </span>
           </div>
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-normal text-charcoal-900 tracking-tight mb-4">
-            {t.testimonials.title}
+            {getSettingText(settings, "text_testimonials_title", language, t.testimonials.title)}
           </h2>
           <p className="text-base text-charcoal-600 leading-relaxed">
-            {t.testimonials.subtitle}
+            {getSettingText(settings, "text_testimonials_subtitle", language, t.testimonials.subtitle)}
           </p>
         </motion.div>
 
@@ -55,7 +57,7 @@ export default function Testimonials({ items }: TestimonialsProps) {
 
             return (
               <motion.div
-                key={item.id}
+                key={item.id || `testimonial-${index}`}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, CheckCircle2, Award, Clock, Users } from "lucide-react";
+import { getSettingText } from "@/lib/settingsHelper";
 
 interface HeroProps {
   settings?: Record<string, string>;
@@ -14,8 +15,22 @@ const DEFAULT_HERO_PHOTO =
   "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1000&auto=format&fit=crop";
 
 export default function Hero({ settings }: HeroProps) {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const heroPhoto = settings?.hero_photo_url || DEFAULT_HERO_PHOTO;
+
+  const titleLine1 = getSettingText(settings, "text_hero_titleLine1", language, t.hero.titleLine1);
+  const titleLine2 = getSettingText(settings, "text_hero_titleLine2", language, t.hero.titleLine2);
+  const titleLine3 = getSettingText(settings, "text_hero_titleLine3", language, t.hero.titleLine3);
+  const titleLine4 = getSettingText(settings, "text_hero_titleLine4", language, t.hero.titleLine4);
+  const subtitle = getSettingText(settings, "text_hero_subtitle", language, t.hero.subtitle);
+
+  const stat1Value = settings?.text_hero_stat1_value || "120+";
+  const stat1Label = getSettingText(settings, "text_hero_stat1_label", language, t.hero.statsTrained);
+  const stat2Value = settings?.text_hero_stat2_value || "6+";
+  const stat2Label = getSettingText(settings, "text_hero_stat2_label", language, t.hero.statsExperience);
+  const stat3Value = settings?.text_hero_stat3_value || "75";
+  const stat3Unit = getSettingText(settings, "text_hero_stat3_unit", language, language === "pl" ? "min" : "хв");
+  const stat3Label = getSettingText(settings, "text_hero_stat3_label", language, t.hero.statsSpeed);
 
   return (
     <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden hero-gradient">
@@ -42,17 +57,17 @@ export default function Hero({ settings }: HeroProps) {
 
             {/* Main Headline */}
             <h1 className="w-full font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[58px] xl:text-[62px] font-normal leading-[1.18] sm:leading-[1.12] text-charcoal-900 tracking-tight mb-6">
-              <span className="block">{t.hero.titleLine1}</span>
+              <span className="block">{titleLine1}</span>
               <span className="block italic font-normal gold-gradient-text pr-3 sm:pr-4 pb-0.5 tracking-normal">
-                {t.hero.titleLine2}
+                {titleLine2}
               </span>
-              <span className="block">{t.hero.titleLine3}</span>
-              <span className="block">{t.hero.titleLine4}</span>
+              <span className="block">{titleLine3}</span>
+              <span className="block">{titleLine4}</span>
             </h1>
 
             {/* Subtitle description */}
             <p className="text-base sm:text-lg text-charcoal-600 font-normal leading-relaxed max-w-2xl mb-8">
-              {t.hero.subtitle}
+              {subtitle}
             </p>
 
             {/* CTAs */}
@@ -79,11 +94,11 @@ export default function Hero({ settings }: HeroProps) {
                 <div className="flex items-center gap-1.5 text-gold-600 mb-1">
                   <Users className="w-4 h-4" />
                   <span className="font-serif text-2xl sm:text-3xl font-bold text-charcoal-900">
-                    120+
+                    {stat1Value}
                   </span>
                 </div>
                 <span className="text-xs text-charcoal-500 font-medium">
-                  {t.hero.statsTrained}
+                  {stat1Label}
                 </span>
               </div>
 
@@ -91,11 +106,11 @@ export default function Hero({ settings }: HeroProps) {
                 <div className="flex items-center gap-1.5 text-gold-600 mb-1">
                   <Award className="w-4 h-4" />
                   <span className="font-serif text-2xl sm:text-3xl font-bold text-charcoal-900">
-                    6+
+                    {stat2Value}
                   </span>
                 </div>
                 <span className="text-xs text-charcoal-500 font-medium">
-                  {t.hero.statsExperience}
+                  {stat2Label}
                 </span>
               </div>
 
@@ -103,12 +118,12 @@ export default function Hero({ settings }: HeroProps) {
                 <div className="flex items-center gap-1.5 text-gold-600 mb-1">
                   <Clock className="w-4 h-4" />
                   <span className="font-serif text-2xl sm:text-3xl font-bold text-charcoal-900">
-                    75
+                    {stat3Value}
                   </span>
-                  <span className="text-xs font-semibold text-charcoal-500">хв</span>
+                  <span className="text-xs font-semibold text-charcoal-500">{stat3Unit}</span>
                 </div>
                 <span className="text-xs text-charcoal-500 font-medium">
-                  {t.hero.statsSpeed}
+                  {stat3Label}
                 </span>
               </div>
             </div>

@@ -29,6 +29,15 @@ async function autoInit() {
       console.log("[auto-init] Seeding complete!");
     } else {
       console.log("[auto-init] Database already contains courses. Preserving existing data.");
+      // Migrate legacy categories if present
+      await prisma.service.updateMany({
+        where: { category: { in: ["gel", "extension"] } },
+        data: { category: "manicure" },
+      });
+      await prisma.service.updateMany({
+        where: { category: "care" },
+        data: { category: "additional" },
+      });
     }
   } catch (err) {
     console.warn("[auto-init] Warning during database check/seeding:", err.message);

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Camera, X, ZoomIn, Sparkles } from "lucide-react";
+import { getSettingText } from "@/lib/settingsHelper";
 
 interface PortfolioItem {
   id: string;
@@ -18,10 +19,11 @@ interface PortfolioItem {
 
 interface PortfolioProps {
   items: PortfolioItem[];
+  settings?: Record<string, string>;
 }
 
-export default function Portfolio({ items }: PortfolioProps) {
-  const { t, getLocalized } = useLanguage();
+export default function Portfolio({ items, settings }: PortfolioProps) {
+  const { language, t, getLocalized } = useLanguage();
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [selectedPhoto, setSelectedPhoto] = useState<PortfolioItem | null>(null);
 
@@ -52,14 +54,14 @@ export default function Portfolio({ items }: PortfolioProps) {
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-nude-100 border border-nude-300 mb-4 shadow-xs">
             <Camera className="w-3.5 h-3.5 text-gold-700" />
             <span className="text-xs font-semibold tracking-wider uppercase text-charcoal-700">
-              {t.portfolio.badge}
+              {getSettingText(settings, "text_portfolio_badge", language, t.portfolio.badge)}
             </span>
           </div>
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-normal text-charcoal-900 tracking-tight mb-4">
-            {t.portfolio.title}
+            {getSettingText(settings, "text_portfolio_title", language, t.portfolio.title)}
           </h2>
           <p className="text-base text-charcoal-600 leading-relaxed">
-            {t.portfolio.subtitle}
+            {getSettingText(settings, "text_portfolio_subtitle", language, t.portfolio.subtitle)}
           </p>
         </motion.div>
 
@@ -105,7 +107,7 @@ export default function Portfolio({ items }: PortfolioProps) {
 
               return (
                 <motion.div
-                  key={item.id}
+                  key={item.id || `portfolio-${index}`}
                   layout
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}

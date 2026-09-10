@@ -187,20 +187,25 @@ export default function PricesTab() {
   const categories = [
     { id: "all", label: "Всі послуги" },
     { id: "manicure", label: "Манікюр" },
-    { id: "gel", label: "Гель" },
     { id: "pedicure", label: "Педикюр" },
-    { id: "extension", label: "Нарощування" },
-    { id: "care", label: "Догляд / Додатково" },
+    { id: "additional", label: "Додатково" },
   ];
 
   const filteredServices =
     activeCategory === "all"
       ? services
-      : services.filter(
-          (s) =>
-            s.category === activeCategory ||
-            (activeCategory === "care" && (s.category === "care" || s.category === "additional"))
-        );
+      : services.filter((s) => {
+          if (activeCategory === "manicure") {
+            return s.category === "manicure" || s.category === "gel" || s.category === "extension";
+          }
+          if (activeCategory === "pedicure") {
+            return s.category === "pedicure";
+          }
+          if (activeCategory === "additional") {
+            return s.category === "additional" || s.category === "care";
+          }
+          return s.category === activeCategory;
+        });
 
   return (
     <div className="space-y-8">
@@ -262,10 +267,8 @@ export default function PricesTab() {
                 className="w-full px-3 py-2 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none bg-white font-medium"
               >
                 <option value="manicure">Манікюр (Manicure)</option>
-                <option value="gel">Гель / Укріплення (Żel)</option>
                 <option value="pedicure">Педикюр (Pedicure)</option>
-                <option value="extension">Нарощування (Przedłużanie)</option>
-                <option value="care">Догляд / Додатково (Pielęgnacja)</option>
+                <option value="additional">Додатково (Dodatkowo)</option>
               </select>
             </div>
 
@@ -419,7 +422,7 @@ export default function PricesTab() {
             const isEditing = editingId === service.id;
 
             return (
-              <div key={service.id} className="py-4 first:pt-0 last:pb-0">
+              <div key={service.id || `service-${displayIdx}`} className="py-4 first:pt-0 last:pb-0">
                 {isEditing ? (
                   <div className="space-y-4 p-4 rounded-xl bg-nude-50 border border-nude-200">
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -428,17 +431,21 @@ export default function PricesTab() {
                           Категорія
                         </label>
                         <select
-                          value={editForm.category}
+                          value={
+                            editForm.category === "gel" || editForm.category === "extension"
+                              ? "manicure"
+                              : editForm.category === "care"
+                              ? "additional"
+                              : editForm.category || "manicure"
+                          }
                           onChange={(e) =>
                             setEditForm({ ...editForm, category: e.target.value })
                           }
                           className="w-full px-2.5 py-1.5 rounded-lg border border-nude-300 text-xs bg-white font-medium"
                         >
                           <option value="manicure">Манікюр</option>
-                          <option value="gel">Гель</option>
                           <option value="pedicure">Педикюр</option>
-                          <option value="extension">Нарощування</option>
-                          <option value="care">Догляд / Додатково</option>
+                          <option value="additional">Додатково</option>
                         </select>
                       </div>
 
@@ -597,13 +604,15 @@ export default function PricesTab() {
                           <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
                             service.category === "pedicure"
                               ? "bg-purple-100 text-purple-800"
-                              : service.category === "gel"
-                              ? "bg-amber-100 text-amber-800"
-                              : service.category === "extension"
-                              ? "bg-pink-100 text-pink-800"
-                              : "bg-nude-100 text-charcoal-700"
+                              : service.category === "manicure" || service.category === "gel" || service.category === "extension"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-amber-100 text-amber-800"
                           }`}>
-                            {service.category === "pedicure" ? "Педикюр" : service.category}
+                            {service.category === "pedicure"
+                              ? "Педикюр"
+                              : service.category === "manicure" || service.category === "gel" || service.category === "extension"
+                              ? "Манікюр"
+                              : "Додатково"}
                           </span>
                           <h4 className="font-serif text-base font-semibold text-charcoal-900">
                             {service.titleUa}{" "}

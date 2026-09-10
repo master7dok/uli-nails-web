@@ -5,9 +5,14 @@ import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { Send, MapPin, Phone, Lock, Heart } from "lucide-react";
 import InstagramIcon from "@/components/icons/InstagramIcon";
+import { getSettingText } from "@/lib/settingsHelper";
 
-export default function Footer() {
-  const { t } = useLanguage();
+interface FooterProps {
+  settings?: Record<string, string>;
+}
+
+export default function Footer({ settings }: FooterProps) {
+  const { language, t } = useLanguage();
 
   return (
     <footer id="contacts" className="bg-[#1F1C1B] text-[#E8DFD8] pt-16 pb-12">
@@ -22,7 +27,7 @@ export default function Footer() {
               Kraków • Gel Expert & Mentor
             </span>
             <p className="text-sm text-[#A89F99] leading-relaxed max-w-sm mb-6">
-              {t.footer.aboutBrand}
+              {getSettingText(settings, "text_footer_about_brand", language, t.footer.aboutBrand)}
             </p>
 
             {/* Social Badges */}

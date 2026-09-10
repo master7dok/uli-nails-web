@@ -71,11 +71,11 @@ export default async function HomePage() {
       <Header />
       <Hero settings={settings} />
       <About settings={settings} />
-      <Courses courses={courses} />
-      <PriceList services={services} />
-      <Portfolio items={portfolio} />
-      <Testimonials items={testimonials} />
-      <Footer />
+      <Courses courses={courses} settings={settings} />
+      <PriceList services={services} settings={settings} />
+      <Portfolio items={portfolio} settings={settings} />
+      <Testimonials items={testimonials} settings={settings} />
+      <Footer settings={settings} />
     </main>
   );
 }

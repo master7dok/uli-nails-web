@@ -8,6 +8,7 @@ import PricesTab from "@/components/admin/PricesTab";
 import CoursesTab from "@/components/admin/CoursesTab";
 import SettingsTab from "@/components/admin/SettingsTab";
 import TestimonialsTab from "@/components/admin/TestimonialsTab";
+import SiteTextsTab from "@/components/admin/SiteTextsTab";
 import {
   Image as ImageIcon,
   DollarSign,
@@ -16,9 +17,10 @@ import {
   LogOut,
   ExternalLink,
   MessageSquareQuote,
+  Type,
 } from "lucide-react";
 
-type ActiveTab = "portfolio" | "prices" | "courses" | "testimonials" | "settings";
+type ActiveTab = "portfolio" | "prices" | "courses" | "testimonials" | "texts" | "settings";
 
 function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -108,6 +110,7 @@ export default function AdminPage() {
     { id: "courses" as ActiveTab, label: "Курси & Менторинг", icon: GraduationCap },
     { id: "portfolio" as ActiveTab, label: "Портфоліо / Фото", icon: ImageIcon },
     { id: "testimonials" as ActiveTab, label: "Відгуки (Редагування)", icon: MessageSquareQuote },
+    { id: "texts" as ActiveTab, label: "Редагування тексту", icon: Type },
     { id: "settings" as ActiveTab, label: "Налаштування & Фото сайту", icon: Settings },
   ];
 
@@ -179,6 +182,7 @@ export default function AdminPage() {
           {activeTab === "courses" && <CoursesTab />}
           {activeTab === "portfolio" && <PortfolioTab />}
           {activeTab === "testimonials" && <TestimonialsTab />}
+          {activeTab === "texts" && <SiteTextsTab />}
           {activeTab === "settings" && <SettingsTab />}
         </div>
       </div>
