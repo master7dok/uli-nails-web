@@ -33,8 +33,18 @@ export async function POST(request: Request) {
 
     fs.writeFileSync(filePath, buffer);
 
+    const sizeInBytes = buffer.length;
+    let formattedSize = `${(sizeInBytes / 1024).toFixed(1)} KB`;
+    if (sizeInBytes >= 1024 * 1024) {
+      formattedSize = `${(sizeInBytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
     const publicUrl = `/uploads/${filename}`;
-    return NextResponse.json({ url: publicUrl });
+    return NextResponse.json({
+      url: publicUrl,
+      fileName: file.name,
+      fileSize: formattedSize,
+    });
   } catch (error: any) {
     console.error("Upload error:", error);
     return NextResponse.json(

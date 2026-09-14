@@ -6,6 +6,7 @@ import AdminLogin from "@/components/admin/AdminLogin";
 import PortfolioTab from "@/components/admin/PortfolioTab";
 import PricesTab from "@/components/admin/PricesTab";
 import CoursesTab from "@/components/admin/CoursesTab";
+import ChecklistsTab from "@/components/admin/ChecklistsTab";
 import TrainingPhotosTab from "@/components/admin/TrainingPhotosTab";
 import SettingsTab from "@/components/admin/SettingsTab";
 import TestimonialsTab from "@/components/admin/TestimonialsTab";
@@ -20,9 +21,10 @@ import {
   ExternalLink,
   MessageSquareQuote,
   Type,
+  FileDown,
 } from "lucide-react";
 
-type ActiveTab = "portfolio" | "training" | "prices" | "courses" | "testimonials" | "texts" | "settings";
+type ActiveTab = "portfolio" | "training" | "prices" | "courses" | "checklists" | "testimonials" | "texts" | "settings";
 
 function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -138,6 +140,7 @@ export default function AdminPage() {
   const navItems = [
     { id: "prices" as ActiveTab, label: "Прайс-лист", icon: DollarSign },
     { id: "courses" as ActiveTab, label: "Курси & Менторинг", icon: GraduationCap },
+    { id: "checklists" as ActiveTab, label: "Чек-листи / PDF", icon: FileDown },
     { id: "training" as ActiveTab, label: "Фото з навчань", icon: Award },
     { id: "portfolio" as ActiveTab, label: "Портфоліо / Фото", icon: ImageIcon },
     { id: "testimonials" as ActiveTab, label: "Відгуки (Редагування)", icon: MessageSquareQuote },
@@ -211,6 +214,7 @@ export default function AdminPage() {
         <div className="animate-fadeIn">
           {activeTab === "prices" && <PricesTab />}
           {activeTab === "courses" && <CoursesTab />}
+          {activeTab === "checklists" && <ChecklistsTab />}
           {activeTab === "training" && <TrainingPhotosTab />}
           {activeTab === "portfolio" && <PortfolioTab />}
           {activeTab === "testimonials" && <TestimonialsTab />}

@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Courses from "@/components/Courses";
+import LeadMagnetSection from "@/components/LeadMagnetSection";
 import TrainingGallery from "@/components/TrainingGallery";
 import PriceList from "@/components/PriceList";
 import Portfolio from "@/components/Portfolio";
@@ -13,6 +14,7 @@ import {
   defaultServices,
   defaultPortfolio,
   defaultTrainingPhotos,
+  defaultLeadMagnets,
   defaultTestimonials,
   defaultSettings,
 } from "@/lib/defaultData";
@@ -24,13 +26,14 @@ export default async function HomePage() {
   let services: any[] = [];
   let portfolio: any[] = [];
   let trainingPhotos: any[] = [];
+  let leadMagnets: any[] = [];
   let testimonials: any[] = [];
   let settingsList: any[] = [];
 
   try {
     const dbOnline = await isDatabaseAvailable();
     if (dbOnline) {
-      [courses, services, portfolio, trainingPhotos, testimonials, settingsList] = await Promise.all([
+      [courses, services, portfolio, trainingPhotos, leadMagnets, testimonials, settingsList] = await Promise.all([
         prisma.course.findMany({
           where: { isActive: true },
           orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
@@ -42,6 +45,10 @@ export default async function HomePage() {
           orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
         }),
         prisma.trainingPhoto.findMany({
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+        }),
+        prisma.leadMagnet.findMany({
+          where: { isActive: true },
           orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
         }),
         prisma.testimonial.findMany({
@@ -74,6 +81,9 @@ export default async function HomePage() {
   if (!trainingPhotos || (settings.training_photos_initialized !== "true" && trainingPhotos.length === 0)) {
     trainingPhotos = defaultTrainingPhotos;
   }
+  if (!leadMagnets || (settings.lead_magnets_initialized !== "true" && leadMagnets.length === 0)) {
+    leadMagnets = defaultLeadMagnets;
+  }
   if (!testimonials || testimonials.length === 0) {
     testimonials = defaultTestimonials;
   }
@@ -84,6 +94,7 @@ export default async function HomePage() {
       <Hero settings={settings} />
       <About settings={settings} />
       <Courses courses={courses} settings={settings} />
+      <LeadMagnetSection items={leadMagnets} settings={settings} />
       <TrainingGallery items={trainingPhotos} settings={settings} />
       <PriceList services={services} settings={settings} />
       <Portfolio items={portfolio} settings={settings} />

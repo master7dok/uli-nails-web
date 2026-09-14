@@ -6,6 +6,7 @@ export const translations = {
       about: "Про майстра",
       courses: "Офлайн-курси",
       training: "Фото з курсів",
+      checklist: "Чек-лист 🎁",
       prices: "Прайс послуг",
       portfolio: "Портфоліо",
       reviews: "Відгуки",
@@ -115,6 +116,17 @@ export const translations = {
       tabCertificates: "Випускниці та дипломи",
       tabPractice: "Практика на моделях",
     },
+    checklist: {
+      badge: "🎁 Подарунок від Уляни",
+      title: "Отримай безкоштовно CHECKLIST",
+      subtitle:
+        "Авторський практичний посібник для nail-майстрів. Завантажуй PDF прямо зараз та впроваджуй перевірені фішки у свою роботу!",
+      download: "Завантажити чек-лист (PDF)",
+      downloaded: "Завантажено",
+      size: "Розмір файлу",
+      format: "Формат PDF",
+      instantNote: "Миттєве завантаження в 1 клік • Безкоштовно для майстрів",
+    },
     testimonials: {
       badge: "Відгуки та результати",
       title: "Що кажуть учениці та клієнти",
@@ -136,6 +148,7 @@ export const translations = {
       about: "O mnie",
       courses: "Kursy stacjonarne",
       training: "Zdjęcia ze szkoleń",
+      checklist: "Checklist 🎁",
       prices: "Cennik",
       portfolio: "Portfolio",
       reviews: "Opinie",
@@ -244,6 +257,17 @@ export const translations = {
       tabProcess: "Proces szkoleń",
       tabCertificates: "Kursantki i certyfikaty",
       tabPractice: "Praktyka na modelkach",
+    },
+    checklist: {
+      badge: "🎁 Prezent od Uliany",
+      title: "Odbierz darmowy CHECKLIST",
+      subtitle:
+        "Autorski praktyczny poradnik dla stylistek paznokci. Pobierz darmowy PDF już teraz i wprowadź sprawdzone techniki do swojej pracy!",
+      download: "Pobierz darmowy checklist (PDF)",
+      downloaded: "Pobrano",
+      size: "Rozmiar pliku",
+      format: "Format PDF",
+      instantNote: "Błyskawiczne pobieranie w 1 kliknięcie • Za darmo dla stylistek",
     },
     testimonials: {
       badge: "Opinie i efekty",

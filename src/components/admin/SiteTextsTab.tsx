@@ -14,6 +14,8 @@ import {
   Layout,
   Globe,
   Info,
+  Gift,
+  FileDown,
 } from "lucide-react";
 import { getAdminHeaders } from "@/lib/adminClient";
 import { defaultSettings } from "@/lib/defaultData";
@@ -169,6 +171,9 @@ export default function SiteTextsTab() {
         </a>
         <a href="#sec-courses" className="px-3.5 py-1.5 rounded-xl bg-white border border-nude-200 text-charcoal-700 hover:border-gold-500 hover:text-gold-700 whitespace-nowrap shadow-2xs font-medium">
           3. Курси & Акції
+        </a>
+        <a href="#sec-checklist" className="px-3.5 py-1.5 rounded-xl bg-white border border-nude-200 text-charcoal-700 hover:border-gold-500 hover:text-gold-700 whitespace-nowrap shadow-2xs font-medium">
+          🎁 Безкоштовний CHECKLIST
         </a>
         <a href="#sec-training" className="px-3.5 py-1.5 rounded-xl bg-white border border-nude-200 text-charcoal-700 hover:border-gold-500 hover:text-gold-700 whitespace-nowrap shadow-2xs font-medium">
           Фото з навчань
@@ -666,6 +671,77 @@ export default function SiteTextsTab() {
               className="w-full px-2.5 py-1.5 rounded-lg border border-nude-300 text-xs bg-white leading-relaxed"
             />
           </div>
+        </div>
+      </div>
+
+      {/* LEAD MAGNET / CHECKLIST SECTION */}
+      <div id="sec-checklist" className="bg-white rounded-3xl p-6 sm:p-8 shadow-card border border-nude-200 space-y-4 scroll-mt-36">
+        <div className="flex items-center gap-3 border-b border-nude-200 pb-4">
+          <div className="w-10 h-10 rounded-2xl bg-gold-50 border border-gold-300 text-gold-800 flex items-center justify-center">
+            <Gift className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="font-serif text-lg font-bold text-charcoal-900">
+              Секція &quot;Отримай безкоштовно CHECKLIST (Lead Magnet)&quot;
+            </h4>
+            <p className="text-xs text-charcoal-500">
+              Бейдж, заголовок, підзаголовок та примітка для залучення трафіку з реклами
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-charcoal-700 mb-1.5">
+              Бейдж секції ({activeLang.toUpperCase()})
+            </label>
+            <input
+              type="text"
+              value={getVal("text_checklist_badge")}
+              onChange={(e) => setVal("text_checklist_badge", e.target.value)}
+              className="w-full px-3 py-2 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none"
+              placeholder="🎁 Подарунок від Уляни"
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-semibold text-charcoal-700 mb-1.5">
+              Головний заголовок ({activeLang.toUpperCase()})
+            </label>
+            <input
+              type="text"
+              value={getVal("text_checklist_title")}
+              onChange={(e) => setVal("text_checklist_title", e.target.value)}
+              className="w-full px-3 py-2 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none font-medium"
+              placeholder="Отримай безкоштовно CHECKLIST"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-charcoal-700 mb-1.5">
+            Підзаголовок секції ({activeLang.toUpperCase()})
+          </label>
+          <textarea
+            rows={2}
+            value={getVal("text_checklist_subtitle")}
+            onChange={(e) => setVal("text_checklist_subtitle", e.target.value)}
+            className="w-full px-3 py-2 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none leading-relaxed"
+            placeholder="Авторський практичний посібник для nail-майстрів..."
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-charcoal-700 mb-1.5">
+            Примітка під кнопкою ({activeLang.toUpperCase()})
+          </label>
+          <input
+            type="text"
+            value={getVal("text_checklist_note")}
+            onChange={(e) => setVal("text_checklist_note", e.target.value)}
+            className="w-full px-3 py-2 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none"
+            placeholder="⚡ Миттєве завантаження в 1 клік • Безкоштовно для майстрів"
+          />
         </div>
       </div>
 

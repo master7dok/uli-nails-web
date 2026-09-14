@@ -32,12 +32,19 @@ export async function GET(
     if (ext === ".webp") contentType = "image/webp";
     if (ext === ".gif") contentType = "image/gif";
     if (ext === ".svg") contentType = "image/svg+xml";
+    if (ext === ".pdf") contentType = "application/pdf";
+
+    const responseHeaders: Record<string, string> = {
+      "Content-Type": contentType,
+      "Cache-Control": "public, max-age=31536000, immutable",
+    };
+
+    if (ext === ".pdf") {
+      responseHeaders["Content-Disposition"] = `inline; filename="${encodeURIComponent(cleanFilename)}"`;
+    }
 
     return new NextResponse(fileBuffer, {
-      headers: {
-        "Content-Type": contentType,
-        "Cache-Control": "public, max-age=31536000, immutable",
-      },
+      headers: responseHeaders,
     });
   } catch (error) {
     console.error("Error serving uploaded file:", error);

@@ -29,6 +29,7 @@ export default function Header({ settings }: HeaderProps = {}) {
   const navLinks = [
     { href: "#about", label: t.nav.about },
     { href: "#courses", label: t.nav.courses },
+    { href: "#checklist", label: (t.nav as any).checklist || (language === "ua" ? "Чек-лист 🎁" : "Checklist 🎁") },
     { href: "#training", label: (t.nav as any).training || (language === "ua" ? "Фото з курсів" : "Zdjęcia ze szkoleń") },
     { href: "#prices", label: t.nav.prices },
     { href: "#portfolio", label: t.nav.portfolio },

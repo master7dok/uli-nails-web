@@ -75,6 +75,25 @@ export interface DefaultTrainingPhoto {
   sortOrder: number;
 }
 
+export interface DefaultLeadMagnet {
+  id?: string;
+  fileUrl: string;
+  fileName?: string | null;
+  fileSize?: string | null;
+  titlePl: string;
+  titleUa: string;
+  descriptionPl?: string | null;
+  descriptionUa?: string | null;
+  badgePl?: string | null;
+  badgeUa?: string | null;
+  buttonTextPl?: string | null;
+  buttonTextUa?: string | null;
+  coverUrl?: string | null;
+  downloadCount?: number;
+  sortOrder?: number;
+  isActive?: boolean;
+}
+
 export const defaultServices: DefaultService[] = [
   {
     id: "service-1",
@@ -656,6 +675,29 @@ export const defaultTrainingPhotos: DefaultTrainingPhoto[] = [
   },
 ];
 
+export const defaultLeadMagnets: DefaultLeadMagnet[] = [
+  {
+    id: "lead-magnet-1",
+    fileUrl: "/uploads/checklist-nail-expert.pdf",
+    fileName: "Checklist_Nail_Expert_Uliana.pdf",
+    fileSize: "2.8 MB",
+    titleUa: "Чек-лист: 10 фатальних помилок в апаратному манікюрі та архітектурі",
+    titlePl: "Checklist: 10 krytycznych błędów w manicure sprzętowym i architekturze",
+    descriptionUa:
+      "Покроковий розбір: чому з'являються відшарування на 2-му тижні, як уникнути пропилів біля кутикули, техніка чистих пазух та секрет міцних тонких торців без сколів.",
+    descriptionPl:
+      "Analiza krok po kroku: dlaczego powstają zapowietrzenia w drugim tygodniu, jak uniknąć przepiłowań przy skórkach, czysta praca frezem i sekret trwałych, cienkich krawędzi.",
+    badgeUa: "🔥 Топ для майстрів",
+    badgePl: "🔥 Bestseller dla stylistek",
+    buttonTextUa: "Завантажити чек-лист (PDF)",
+    buttonTextPl: "Pobierz darmowy checklist (PDF)",
+    coverUrl: null,
+    downloadCount: 142,
+    sortOrder: 1,
+    isActive: true,
+  },
+];
+
 export const defaultTestimonials: DefaultTestimonial[] = [
   {
     id: "test-1",
@@ -825,6 +867,18 @@ export const defaultSettings: Record<string, string> = {
     "Реальні історії майстрів, які змінили свій підхід до роботи.",
   text_testimonials_subtitle_pl:
     "Prawdziwe historie stylistek, które wzniosły swoją pracę na wyższy poziom.",
+
+  // --- Lead Magnet / Checklist Section ---
+  text_checklist_badge_ua: "🎁 Подарунок від Уляни",
+  text_checklist_badge_pl: "🎁 Prezent od Uliany",
+  text_checklist_title_ua: "Отримай безкоштовно CHECKLIST",
+  text_checklist_title_pl: "Odbierz darmowy CHECKLIST",
+  text_checklist_subtitle_ua:
+    "Авторський практичний посібник для nail-майстрів. Завантажуй PDF прямо зараз та впроваджуй перевірені фішки у свою роботу!",
+  text_checklist_subtitle_pl:
+    "Autorski praktyczny poradnik dla stylistek paznokci. Pobierz darmowy PDF już teraz i wprowadź sprawdzone techniki do swojej pracy!",
+  text_checklist_note_ua: "⚡ Миттєве завантаження в 1 клік • Безкоштовно для майстрів",
+  text_checklist_note_pl: "⚡ Błyskawiczne pobieranie w 1 kliknięcie • Za darmo dla stylistek",
 
   // --- 7. Footer Section ---
   text_footer_about_brand_ua:
