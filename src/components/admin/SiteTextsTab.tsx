@@ -170,6 +170,9 @@ export default function SiteTextsTab() {
         <a href="#sec-courses" className="px-3.5 py-1.5 rounded-xl bg-white border border-nude-200 text-charcoal-700 hover:border-gold-500 hover:text-gold-700 whitespace-nowrap shadow-2xs font-medium">
           3. Курси & Акції
         </a>
+        <a href="#sec-training" className="px-3.5 py-1.5 rounded-xl bg-white border border-nude-200 text-charcoal-700 hover:border-gold-500 hover:text-gold-700 whitespace-nowrap shadow-2xs font-medium">
+          Фото з навчань
+        </a>
         <a href="#sec-prices" className="px-3.5 py-1.5 rounded-xl bg-white border border-nude-200 text-charcoal-700 hover:border-gold-500 hover:text-gold-700 whitespace-nowrap shadow-2xs font-medium">
           4. Прайс-лист
         </a>
@@ -661,6 +664,64 @@ export default function SiteTextsTab() {
               value={getVal("text_courses_booking_text")}
               onChange={(e) => setVal("text_courses_booking_text", e.target.value)}
               className="w-full px-2.5 py-1.5 rounded-lg border border-nude-300 text-xs bg-white leading-relaxed"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* TRAINING GALLERY SECTION */}
+      <div id="sec-training" className="bg-white rounded-3xl p-6 sm:p-8 shadow-card border border-nude-200 space-y-4 scroll-mt-36">
+        <div className="flex items-center gap-3 border-b border-nude-200 pb-4">
+          <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-300 text-amber-800 flex items-center justify-center">
+            <GraduationCap className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="font-serif text-lg font-bold text-charcoal-900">
+              Секція &quot;Фото з навчань / Атмосфера&quot;
+            </h4>
+            <p className="text-xs text-charcoal-500">
+              Бейдж, заголовок та підзаголовок секції з фотографіями попередніх навчань та випускниць
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-charcoal-700 mb-1.5">
+              Бейдж секції
+            </label>
+            <input
+              type="text"
+              value={getVal("text_training_badge")}
+              onChange={(e) => setVal("text_training_badge", e.target.value)}
+              className="w-full px-3 py-2 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none"
+              placeholder="Атмосфера навчання"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-charcoal-700 mb-1.5">
+              Заголовок ({activeLang.toUpperCase()})
+            </label>
+            <input
+              type="text"
+              value={getVal("text_training_title")}
+              onChange={(e) => setVal("text_training_title", e.target.value)}
+              className="w-full px-3 py-2 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none font-medium"
+              placeholder="Фото з курсів та випускниці"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-charcoal-700 mb-1.5">
+              Підзаголовок ({activeLang.toUpperCase()})
+            </label>
+            <input
+              type="text"
+              value={getVal("text_training_subtitle")}
+              onChange={(e) => setVal("text_training_subtitle", e.target.value)}
+              className="w-full px-3 py-2 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none"
+              placeholder="Живі моменти з авторських курсів..."
             />
           </div>
         </div>

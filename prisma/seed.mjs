@@ -9,6 +9,9 @@ async function main() {
   await prisma.service.deleteMany();
   await prisma.course.deleteMany();
   await prisma.portfolioItem.deleteMany();
+  if (prisma.trainingPhoto) {
+    await prisma.trainingPhoto.deleteMany();
+  }
   await prisma.testimonial.deleteMany();
   await prisma.setting.deleteMany();
 
@@ -527,6 +530,64 @@ async function main() {
 
   for (const p of portfolio) {
     await prisma.portfolioItem.create({ data: p });
+  }
+
+  // 3b. Training Photos
+  const trainingPhotos = [
+    {
+      imageUrl: "https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=1000&auto=format&fit=crop",
+      titlePl: "Indywidualna postawa ręki i praca z frezarką",
+      titleUa: "Індивідуальна постановка руки та робота з фрезером",
+      category: "process",
+      featured: true,
+      sortOrder: 1,
+    },
+    {
+      imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1000&auto=format&fit=crop",
+      titlePl: "Uroczyste wręczenie certyfikatów i podsumowanie kursu",
+      titleUa: "Урочисте вручення сертифікатів та підсумки навчання",
+      category: "certificates",
+      featured: true,
+      sortOrder: 2,
+    },
+    {
+      imageUrl: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=1000&auto=format&fit=crop",
+      titlePl: "Praktyczne odpracowanie techniki na modelkach",
+      titleUa: "Практичне відпрацювання техніки на реальних моделях",
+      category: "practice",
+      featured: true,
+      sortOrder: 3,
+    },
+    {
+      imageUrl: "https://images.unsplash.com/photo-1582095133179-bfd08e2fc6b3?q=80&w=1000&auto=format&fit=crop",
+      titlePl: "Nasze wspaniałe kursantki z autorskimi dyplomami",
+      titleUa: "Наші талановиті випускниці з авторськими дипломами",
+      category: "students",
+      featured: false,
+      sortOrder: 4,
+    },
+    {
+      imageUrl: "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?q=80&w=1000&auto=format&fit=crop",
+      titlePl: "Rozbór architektury żelowej i anatomii płytki krok po kroku",
+      titleUa: "Покроковий розбір архітектури гелю та тонкощів підготовки",
+      category: "process",
+      featured: false,
+      sortOrder: 5,
+    },
+    {
+      imageUrl: "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?q=80&w=1000&auto=format&fit=crop",
+      titlePl: "Czysta praca i skupienie podczas egzaminu praktycznego",
+      titleUa: "Концентрація та чиста робота під час практичного іспиту",
+      category: "practice",
+      featured: false,
+      sortOrder: 6,
+    },
+  ];
+
+  if (prisma.trainingPhoto) {
+    for (const tp of trainingPhotos) {
+      await prisma.trainingPhoto.create({ data: tp });
+    }
   }
 
   // 4. Testimonials

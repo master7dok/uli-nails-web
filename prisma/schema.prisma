@@ -83,3 +83,14 @@ model Setting {
   value     String
   updatedAt DateTime @updatedAt
 }
+
+model TrainingPhoto {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  titlePl   String?
+  titleUa   String?
+  category  String   @default("process") // process, students, certificates, practice
+  featured  Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}

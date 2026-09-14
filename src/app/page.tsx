@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Courses from "@/components/Courses";
+import TrainingGallery from "@/components/TrainingGallery";
 import PriceList from "@/components/PriceList";
 import Portfolio from "@/components/Portfolio";
 import Testimonials from "@/components/Testimonials";
@@ -11,6 +12,7 @@ import {
   defaultCourses,
   defaultServices,
   defaultPortfolio,
+  defaultTrainingPhotos,
   defaultTestimonials,
   defaultSettings,
 } from "@/lib/defaultData";
@@ -21,13 +23,14 @@ export default async function HomePage() {
   let courses: any[] = [];
   let services: any[] = [];
   let portfolio: any[] = [];
+  let trainingPhotos: any[] = [];
   let testimonials: any[] = [];
   let settingsList: any[] = [];
 
   try {
     const dbOnline = await isDatabaseAvailable();
     if (dbOnline) {
-      [courses, services, portfolio, testimonials, settingsList] = await Promise.all([
+      [courses, services, portfolio, trainingPhotos, testimonials, settingsList] = await Promise.all([
         prisma.course.findMany({
           where: { isActive: true },
           orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
@@ -36,6 +39,9 @@ export default async function HomePage() {
           orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
         }),
         prisma.portfolioItem.findMany({
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+        }),
+        prisma.trainingPhoto.findMany({
           orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
         }),
         prisma.testimonial.findMany({
@@ -58,6 +64,9 @@ export default async function HomePage() {
   if (!portfolio || portfolio.length === 0) {
     portfolio = defaultPortfolio;
   }
+  if (!trainingPhotos || trainingPhotos.length === 0) {
+    trainingPhotos = defaultTrainingPhotos;
+  }
   if (!testimonials || testimonials.length === 0) {
     testimonials = defaultTestimonials;
   }
@@ -75,6 +84,7 @@ export default async function HomePage() {
       <Hero settings={settings} />
       <About settings={settings} />
       <Courses courses={courses} settings={settings} />
+      <TrainingGallery items={trainingPhotos} settings={settings} />
       <PriceList services={services} settings={settings} />
       <Portfolio items={portfolio} settings={settings} />
       <Testimonials items={testimonials} settings={settings} />

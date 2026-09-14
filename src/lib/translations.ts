@@ -5,6 +5,7 @@ export const translations = {
     nav: {
       about: "Про майстра",
       courses: "Офлайн-курси",
+      training: "Фото з курсів",
       prices: "Прайс послуг",
       portfolio: "Портфоліо",
       reviews: "Відгуки",
@@ -104,6 +105,16 @@ export const translations = {
       tabFrench: "Френч & Нюд",
       tabCorrection: "Складні випадки / Трапеції",
     },
+    trainingGallery: {
+      badge: "Атмосфера навчання",
+      title: "Фото з курсів та випускниці",
+      subtitle:
+        "Живі моменти з авторських курсів: практика на моделях, постановка руки, вручення дипломів та перші впевнені кроки в професії.",
+      tabAll: "Всі фото",
+      tabProcess: "Процес навчання",
+      tabCertificates: "Випускниці та дипломи",
+      tabPractice: "Практика на моделях",
+    },
     testimonials: {
       badge: "Відгуки та результати",
       title: "Що кажуть учениці та клієнти",
@@ -124,6 +135,7 @@ export const translations = {
     nav: {
       about: "O mnie",
       courses: "Kursy stacjonarne",
+      training: "Zdjęcia ze szkoleń",
       prices: "Cennik",
       portfolio: "Portfolio",
       reviews: "Opinie",
@@ -222,6 +234,16 @@ export const translations = {
       tabManicure: "Czysty manicure",
       tabFrench: "French & Nude",
       tabCorrection: "Trudne płytki / Trapez",
+    },
+    trainingGallery: {
+      badge: "Atmosfera szkoleń",
+      title: "Zdjęcia ze szkoleń i kursantki",
+      subtitle:
+        "Żywe chwile z kursów autorskich: praktyka na modelkach, ułożenie ręki, wręczenie certyfikatów i pierwsze pewne kroki w zawodzie.",
+      tabAll: "Wszystkie",
+      tabProcess: "Proces szkoleń",
+      tabCertificates: "Kursantki i certyfikaty",
+      tabPractice: "Praktyka na modelkach",
     },
     testimonials: {
       badge: "Opinie i efekty",
