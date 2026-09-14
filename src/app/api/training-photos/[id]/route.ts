@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma, isDatabaseAvailable } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
+import { defaultTrainingPhotos } from "@/lib/defaultData";
 
 export async function DELETE(
   request: Request,
@@ -19,12 +20,59 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    await prisma.trainingPhoto.delete({ where: { id } });
+
+    // Check if training_photos_initialized is set
+    const isInit = await prisma.setting.findUnique({
+      where: { key: "training_photos_initialized" },
+    });
+
+    if (!isInit) {
+      // If not yet initialized, seed all default photos EXCEPT the one being deleted!
+      for (const photo of defaultTrainingPhotos) {
+        if (photo.id !== id) {
+          await prisma.trainingPhoto.upsert({
+            where: { id: photo.id || "" },
+            create: {
+              id: photo.id,
+              imageUrl: photo.imageUrl,
+              titlePl: photo.titlePl || "",
+              titleUa: photo.titleUa || "",
+              category: photo.category || "process",
+              featured: photo.featured,
+              sortOrder: photo.sortOrder,
+            },
+            update: {},
+          });
+        }
+      }
+      await prisma.setting.upsert({
+        where: { key: "training_photos_initialized" },
+        create: { key: "training_photos_initialized", value: "true" },
+        update: { value: "true" },
+      });
+      return NextResponse.json({ success: true });
+    }
+
+    // If already initialized: check if the item exists in the DB before deleting
+    const existing = await prisma.trainingPhoto.findUnique({
+      where: { id },
+    });
+
+    if (existing) {
+      await prisma.trainingPhoto.delete({
+        where: { id },
+      });
+    } else {
+      console.log(`Training photo ${id} was not found in DB or was already deleted.`);
+    }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error deleting training photo:", error);
-    return NextResponse.json({ error: "Failed to delete training photo" }, { status: 500 });
+    return NextResponse.json(
+      { error: error?.message || "Failed to delete training photo" },
+      { status: 500 }
+    );
   }
 }
 
@@ -59,8 +107,11 @@ export async function PUT(
     });
 
     return NextResponse.json(updated);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating training photo:", error);
-    return NextResponse.json({ error: "Failed to update training photo" }, { status: 500 });
+    return NextResponse.json(
+      { error: error?.message || "Failed to update training photo" },
+      { status: 500 }
+    );
   }
 }

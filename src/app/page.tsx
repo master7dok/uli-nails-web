@@ -54,6 +54,13 @@ export default async function HomePage() {
     console.warn("Could not query database directly, utilizing fallback data:", error);
   }
 
+  const settings: Record<string, string> = { ...defaultSettings };
+  if (Array.isArray(settingsList) && settingsList.length > 0) {
+    settingsList.forEach((s) => {
+      settings[s.key] = s.value;
+    });
+  }
+
   // Graceful fallback to default data if database is empty or during migration
   if (!courses || courses.length === 0) {
     courses = defaultCourses;
@@ -61,21 +68,14 @@ export default async function HomePage() {
   if (!services || services.length === 0) {
     services = defaultServices;
   }
-  if (!portfolio || portfolio.length === 0) {
+  if (!portfolio || (settings.portfolio_initialized !== "true" && portfolio.length === 0)) {
     portfolio = defaultPortfolio;
   }
-  if (!trainingPhotos || trainingPhotos.length === 0) {
+  if (!trainingPhotos || (settings.training_photos_initialized !== "true" && trainingPhotos.length === 0)) {
     trainingPhotos = defaultTrainingPhotos;
   }
   if (!testimonials || testimonials.length === 0) {
     testimonials = defaultTestimonials;
-  }
-
-  const settings: Record<string, string> = { ...defaultSettings };
-  if (Array.isArray(settingsList) && settingsList.length > 0) {
-    settingsList.forEach((s) => {
-      settings[s.key] = s.value;
-    });
   }
 
   return (
