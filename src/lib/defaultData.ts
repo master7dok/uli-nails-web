@@ -47,6 +47,7 @@ export interface DefaultPortfolioItem {
   titlePl?: string | null;
   titleUa?: string | null;
   category: string;
+  objectPosition?: string | null;
   featured: boolean;
   sortOrder: number;
 }
@@ -69,6 +70,7 @@ export interface DefaultTrainingPhoto {
   titlePl?: string | null;
   titleUa?: string | null;
   category: string; // process, students, certificates, practice
+  objectPosition?: string | null;
   featured: boolean;
   sortOrder: number;
 }

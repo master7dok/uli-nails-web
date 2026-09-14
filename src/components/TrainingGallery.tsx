@@ -13,6 +13,7 @@ export interface TrainingPhotoItem {
   titlePl?: string | null;
   titleUa?: string | null;
   category: string;
+  objectPosition?: string | null;
   featured: boolean;
   sortOrder: number;
 }
@@ -167,7 +168,8 @@ export default function TrainingGallery({ items, settings }: TrainingGalleryProp
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 400px"
                     priority={index < 2}
                     loading={index < 4 ? "eager" : "lazy"}
-                    className="object-cover object-center transition-transform duration-500 group-hover:scale-106"
+                    style={{ objectPosition: item.objectPosition || "center" }}
+                    className="object-cover transition-transform duration-500 group-hover:scale-106"
                   />
 
                   {/* Top Category Badge */}

@@ -95,16 +95,42 @@ export async function PUT(
     const { id } = await params;
     const data = await request.json();
 
-    const updated = await prisma.trainingPhoto.update({
+    const existing = await prisma.trainingPhoto.findUnique({
       where: { id },
-      data: {
-        ...(data.titlePl !== undefined && { titlePl: data.titlePl }),
-        ...(data.titleUa !== undefined && { titleUa: data.titleUa }),
-        ...(data.category !== undefined && { category: data.category }),
-        ...(data.featured !== undefined && { featured: Boolean(data.featured) }),
-        ...(data.sortOrder !== undefined && { sortOrder: Number(data.sortOrder) }),
-      },
     });
+
+    let updated;
+    if (existing) {
+      updated = await prisma.trainingPhoto.update({
+        where: { id },
+        data: {
+          ...(data.titlePl !== undefined && { titlePl: data.titlePl }),
+          ...(data.titleUa !== undefined && { titleUa: data.titleUa }),
+          ...(data.category !== undefined && { category: data.category }),
+          ...(data.objectPosition !== undefined && { objectPosition: data.objectPosition }),
+          ...(data.featured !== undefined && { featured: Boolean(data.featured) }),
+          ...(data.sortOrder !== undefined && { sortOrder: Number(data.sortOrder) }),
+        },
+      });
+    } else {
+      const def = defaultTrainingPhotos.find((p) => p.id === id);
+      if (def) {
+        updated = await prisma.trainingPhoto.create({
+          data: {
+            id: def.id,
+            imageUrl: def.imageUrl,
+            titlePl: data.titlePl ?? def.titlePl ?? "",
+            titleUa: data.titleUa ?? def.titleUa ?? "",
+            category: data.category ?? def.category ?? "process",
+            objectPosition: data.objectPosition ?? def.objectPosition ?? "center",
+            featured: data.featured !== undefined ? Boolean(data.featured) : def.featured,
+            sortOrder: data.sortOrder !== undefined ? Number(data.sortOrder) : def.sortOrder,
+          },
+        });
+      } else {
+        return NextResponse.json({ error: "Photo not found" }, { status: 404 });
+      }
+    }
 
     return NextResponse.json(updated);
   } catch (error: any) {

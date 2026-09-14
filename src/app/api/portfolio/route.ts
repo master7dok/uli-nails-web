@@ -75,6 +75,7 @@ export async function POST(request: Request) {
         titlePl: data.titlePl || "",
         titleUa: data.titleUa || "",
         category: data.category || "gel",
+        objectPosition: data.objectPosition || "center",
         featured: Boolean(data.featured),
         sortOrder: Number(data.sortOrder) || 0,
       },

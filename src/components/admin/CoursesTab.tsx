@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Plus,
   Trash2,
@@ -21,6 +21,7 @@ import {
   Copy,
 } from "lucide-react";
 import { getAdminHeaders } from "@/lib/adminClient";
+import UnsavedChangesModal from "./UnsavedChangesModal";
 
 export interface SyllabusDay {
   day: string;
@@ -125,6 +126,61 @@ export function syllabusToJson(days?: SyllabusDay[] | null): string {
       practice: (d.practice || "").trim(),
     }));
   return JSON.stringify(cleaned);
+}
+
+function serializeCourseForm(form: any): string {
+  if (!form) return "";
+  return JSON.stringify({
+    titleUa: (form.titleUa || "").trim(),
+    titlePl: (form.titlePl || "").trim(),
+    subtitleUa: (form.subtitleUa || "").trim(),
+    subtitlePl: (form.subtitlePl || "").trim(),
+    pricePln: Number(form.pricePln) || 0,
+    durationUa: (form.durationUa || "").trim(),
+    durationPl: (form.durationPl || "").trim(),
+    levelUa: (form.levelUa || "").trim(),
+    levelPl: (form.levelPl || "").trim(),
+    badgeUa: (form.badgeUa || "").trim(),
+    badgePl: (form.badgePl || "").trim(),
+    bonusUa: (form.bonusUa || "").trim(),
+    bonusPl: (form.bonusPl || "").trim(),
+    descriptionUa: (form.descriptionUa || "").trim(),
+    descriptionPl: (form.descriptionPl || "").trim(),
+    featuresUaText: (form.featuresUaText || "").trim(),
+    featuresPlText: (form.featuresPlText || "").trim(),
+    syllabusUaList: (form.syllabusUaList || []).map((d: any) => ({
+      day: (d?.day || "").trim(),
+      title: (d?.title || "").trim(),
+      theory: (d?.theory || "").trim(),
+      practice: (d?.practice || "").trim(),
+    })),
+    syllabusPlList: (form.syllabusPlList || []).map((d: any) => ({
+      day: (d?.day || "").trim(),
+      title: (d?.title || "").trim(),
+      theory: (d?.theory || "").trim(),
+      practice: (d?.practice || "").trim(),
+    })),
+    formUrl: (form.formUrl || "").trim(),
+    sortOrder: Number(form.sortOrder) || 0,
+  });
+}
+
+function isNewCourseFormDirty(form: typeof defaultNewCourse): boolean {
+  if (!form) return false;
+  return (
+    form.titleUa.trim() !== "" ||
+    form.titlePl.trim() !== "" ||
+    (form.subtitleUa || "").trim() !== "" ||
+    (form.subtitlePl || "").trim() !== "" ||
+    form.descriptionUa.trim() !== "" ||
+    form.descriptionPl.trim() !== "" ||
+    form.featuresUaText.trim() !== "" ||
+    form.featuresPlText.trim() !== "" ||
+    (form.syllabusUaList && form.syllabusUaList.length > 0) ||
+    (form.syllabusPlList && form.syllabusPlList.length > 0) ||
+    (form.formUrl || "").trim() !== "" ||
+    Number(form.pricePln) !== 1500
+  );
 }
 
 interface SyllabusEditorProps {
@@ -436,9 +492,101 @@ export default function CoursesTab() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
 
+  // Snapshots and unsaved changes tracking
+  const initialEditSnapshotRef = useRef<string>("");
+  const isDirtyRef = useRef<boolean>(false);
+  const historyPushedRef = useRef<boolean>(false);
+  const isCleanExitRef = useRef<boolean>(false);
+
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [isSavingPending, setIsSavingPending] = useState(false);
+  const [pendingAction, setPendingAction] = useState<
+    | { type: "browser-back" }
+    | { type: "cancel" }
+    | { type: "switch-course"; targetCourse: CourseItem }
+    | { type: "start-add" }
+    | null
+  >(null);
+
   // Accordion preview states
   const [expandedSyllabus, setExpandedSyllabus] = useState<Record<string, boolean>>({});
   const [previewLang, setPreviewLang] = useState<Record<string, "ua" | "pl">>({});
+
+  // Determine dirty state
+  const isEditDirty = useMemo(() => {
+    if (!editingId) return false;
+    return serializeCourseForm(editForm) !== initialEditSnapshotRef.current;
+  }, [editingId, editForm]);
+
+  const isAddDirty = useMemo(() => {
+    if (!isAdding) return false;
+    return isNewCourseFormDirty(newForm);
+  }, [isAdding, newForm]);
+
+  const isDirty = isEditDirty || isAddDirty;
+
+  useEffect(() => {
+    isDirtyRef.current = isDirty;
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("admin:unsaved-changes", { detail: { hasUnsaved: isDirty } })
+      );
+    }
+  }, [isDirty]);
+
+  // Handle beforeunload (page refresh or tab close)
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirtyRef.current) {
+        e.preventDefault();
+        e.returnValue = "";
+        return "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
+  const cleanExitHistory = () => {
+    if (historyPushedRef.current && typeof window !== "undefined") {
+      isCleanExitRef.current = true;
+      historyPushedRef.current = false;
+      window.history.back();
+    }
+  };
+
+  // Intercept browser Back / Forward navigation (popstate)
+  useEffect(() => {
+    const handlePopState = () => {
+      if (isCleanExitRef.current) {
+        isCleanExitRef.current = false;
+        historyPushedRef.current = false;
+        return;
+      }
+
+      if (editingId || isAdding) {
+        if (isDirtyRef.current) {
+          // Re-push history entry so URL remains on /admin and future Back clicks can be caught
+          if (typeof window !== "undefined") {
+            window.history.pushState(
+              { adminModal: editingId ? "course-edit" : "course-add" },
+              ""
+            );
+          }
+          setPendingAction({ type: "browser-back" });
+          setShowUnsavedModal(true);
+        } else {
+          // Not dirty, quietly cancel edit mode
+          historyPushedRef.current = false;
+          setEditingId(null);
+          setIsAdding(false);
+        }
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [editingId, isAdding]);
 
   const toggleSyllabus = (courseId: string) => {
     setExpandedSyllabus((prev) => ({
@@ -465,8 +613,12 @@ export default function CoursesTab() {
     fetchCourses();
   }, []);
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitCreate = async (): Promise<boolean> => {
+    if (!newForm.titleUa.trim() || !newForm.titlePl.trim()) {
+      alert("Будь ласка, заповніть назву курсу (UA та PL)");
+      return false;
+    }
+
     try {
       const payload = {
         titleUa: newForm.titleUa,
@@ -501,28 +653,90 @@ export default function CoursesTab() {
       if (res.ok) {
         setIsAdding(false);
         setNewForm(defaultNewCourse);
-        fetchCourses();
+        cleanExitHistory();
+        await fetchCourses();
+        return true;
       } else {
         const err = await res.json();
         alert("Помилка створення курсу: " + (err.error || "Невідома помилка"));
+        return false;
       }
     } catch (e) {
       console.error(e);
+      alert("Не вдалося створити курс.");
+      return false;
     }
   };
 
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await submitCreate();
+  };
+
   const startEdit = (course: CourseItem) => {
-    setEditingId(course.id);
-    setEditForm({
+    if (isDirtyRef.current) {
+      if (editingId === course.id) return;
+      setPendingAction({ type: "switch-course", targetCourse: course });
+      setShowUnsavedModal(true);
+      return;
+    }
+
+    const editState = {
       ...course,
       featuresUaText: stringToLines(course.featuresUa),
       featuresPlText: stringToLines(course.featuresPl),
       syllabusUaList: parseSyllabus(course.syllabusUa),
       syllabusPlList: parseSyllabus(course.syllabusPl),
-    });
+    };
+
+    initialEditSnapshotRef.current = serializeCourseForm(editState);
+    setEditingId(course.id);
+    setEditForm(editState);
+    setIsAdding(false);
+
+    if (!historyPushedRef.current && typeof window !== "undefined") {
+      window.history.pushState({ adminModal: "course-edit", courseId: course.id }, "");
+      historyPushedRef.current = true;
+    }
   };
 
-  const handleUpdate = async (id: string) => {
+  const handleToggleAdd = () => {
+    if (isAdding) {
+      if (isDirtyRef.current) {
+        setPendingAction({ type: "cancel" });
+        setShowUnsavedModal(true);
+      } else {
+        setIsAdding(false);
+        cleanExitHistory();
+      }
+    } else {
+      if (isDirtyRef.current && editingId) {
+        setPendingAction({ type: "start-add" });
+        setShowUnsavedModal(true);
+      } else {
+        setIsAdding(true);
+        setEditingId(null);
+        setNewForm(defaultNewCourse);
+        if (!historyPushedRef.current && typeof window !== "undefined") {
+          window.history.pushState({ adminModal: "course-add" }, "");
+          historyPushedRef.current = true;
+        }
+      }
+    }
+  };
+
+  const handleCancelClick = () => {
+    if (isDirtyRef.current) {
+      setPendingAction({ type: "cancel" });
+      setShowUnsavedModal(true);
+    } else {
+      setEditingId(null);
+      setIsAdding(false);
+      cleanExitHistory();
+    }
+  };
+
+  const handleUpdate = async (id: string): Promise<boolean> => {
     try {
       const payload = {
         ...editForm,
@@ -542,14 +756,79 @@ export default function CoursesTab() {
 
       if (res.ok) {
         setEditingId(null);
-        fetchCourses();
+        cleanExitHistory();
+        await fetchCourses();
+        return true;
       } else {
         const err = await res.json();
         alert("Помилка оновлення: " + (err.error || "Невідома помилка"));
+        return false;
       }
     } catch (e) {
       console.error(e);
+      alert("Не вдалося оновити курс.");
+      return false;
     }
+  };
+
+  const executePendingAction = () => {
+    const action = pendingAction;
+    setPendingAction(null);
+
+    if (action?.type === "switch-course") {
+      const course = action.targetCourse;
+      const editState = {
+        ...course,
+        featuresUaText: stringToLines(course.featuresUa),
+        featuresPlText: stringToLines(course.featuresPl),
+        syllabusUaList: parseSyllabus(course.syllabusUa),
+        syllabusPlList: parseSyllabus(course.syllabusPl),
+      };
+      initialEditSnapshotRef.current = serializeCourseForm(editState);
+      setEditingId(course.id);
+      setEditForm(editState);
+      setIsAdding(false);
+    } else if (action?.type === "start-add") {
+      setEditingId(null);
+      setIsAdding(true);
+      setNewForm(defaultNewCourse);
+    } else {
+      // browser-back or cancel
+      setEditingId(null);
+      setIsAdding(false);
+      cleanExitHistory();
+    }
+  };
+
+  const handleModalSave = async () => {
+    setIsSavingPending(true);
+    try {
+      let success = false;
+      if (editingId) {
+        success = await handleUpdate(editingId);
+      } else if (isAdding) {
+        success = await submitCreate();
+      }
+
+      if (success) {
+        isDirtyRef.current = false;
+        setShowUnsavedModal(false);
+        executePendingAction();
+      }
+    } finally {
+      setIsSavingPending(false);
+    }
+  };
+
+  const handleModalDiscard = () => {
+    isDirtyRef.current = false;
+    setShowUnsavedModal(false);
+    executePendingAction();
+  };
+
+  const handleModalCancel = () => {
+    setShowUnsavedModal(false);
+    setPendingAction(null);
   };
 
   const handleDelete = async (id: string) => {
@@ -609,10 +888,7 @@ export default function CoursesTab() {
         </div>
 
         <button
-          onClick={() => {
-            setIsAdding(!isAdding);
-            if (!isAdding) setEditingId(null);
-          }}
+          onClick={handleToggleAdd}
           className="px-4 py-2 rounded-xl bg-charcoal-900 hover:bg-gold-600 text-white text-xs font-semibold uppercase tracking-wider transition-colors inline-flex items-center gap-2 shadow-sm"
         >
           {isAdding ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
@@ -637,7 +913,7 @@ export default function CoursesTab() {
             </div>
             <button
               type="button"
-              onClick={() => setIsAdding(false)}
+              onClick={handleCancelClick}
               className="p-1.5 rounded-lg text-charcoal-400 hover:text-charcoal-700 hover:bg-nude-100"
             >
               <X className="w-5 h-5" />
@@ -931,7 +1207,7 @@ export default function CoursesTab() {
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-nude-200">
             <button
               type="button"
-              onClick={() => setIsAdding(false)}
+              onClick={handleCancelClick}
               className="px-5 py-2.5 rounded-xl border border-nude-300 text-xs font-semibold text-charcoal-600 hover:bg-nude-50 transition-colors"
             >
               Скасувати
@@ -1001,7 +1277,7 @@ export default function CoursesTab() {
                         Редагування курсу: {course.titleUa}
                       </h4>
                       <button
-                        onClick={() => setEditingId(null)}
+                        onClick={handleCancelClick}
                         className="p-1.5 rounded-lg text-charcoal-400 hover:text-charcoal-700"
                       >
                         <X className="w-4 h-4" />
@@ -1312,7 +1588,7 @@ export default function CoursesTab() {
                     <div className="flex items-center justify-end gap-2 pt-3 border-t border-nude-100">
                       <button
                         type="button"
-                        onClick={() => setEditingId(null)}
+                        onClick={handleCancelClick}
                         className="px-4 py-2 rounded-xl border border-nude-300 text-xs text-charcoal-600 hover:bg-nude-50 transition-colors"
                       >
                         Скасувати
@@ -1528,6 +1804,21 @@ export default function CoursesTab() {
           })
         )}
       </div>
+
+      {/* Unsaved Changes Confirmation Modal */}
+      <UnsavedChangesModal
+        isOpen={showUnsavedModal}
+        itemName={
+          editingId
+            ? editForm.titleUa || courses.find((c) => c.id === editingId)?.titleUa || "Курс"
+            : newForm.titleUa || "Новий курс"
+        }
+        itemType="курс"
+        isSaving={isSavingPending}
+        onSave={handleModalSave}
+        onDiscard={handleModalDiscard}
+        onCancel={handleModalCancel}
+      />
     </div>
   );
 }

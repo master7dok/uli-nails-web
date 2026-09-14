@@ -80,7 +80,35 @@ export default function AdminPage() {
     setIsAuthenticated(true);
   };
 
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  useEffect(() => {
+    const handleUnsavedEvent = (e: any) => {
+      setHasUnsavedChanges(Boolean(e.detail?.hasUnsaved));
+    };
+    window.addEventListener("admin:unsaved-changes", handleUnsavedEvent);
+    return () => window.removeEventListener("admin:unsaved-changes", handleUnsavedEvent);
+  }, []);
+
+  const handleTabChange = (tabId: ActiveTab) => {
+    if (tabId === activeTab) return;
+    if (hasUnsavedChanges) {
+      const confirmLeave = confirm(
+        "⚠️ У вас є незбережені зміни в поточному розділі!\n\nЯкщо ви перейдете до іншої вкладки, усі незбережені дані буде втрачено.\n\nБажаєте перейти без збереження?"
+      );
+      if (!confirmLeave) return;
+      setHasUnsavedChanges(false);
+    }
+    setActiveTab(tabId);
+  };
+
   const handleLogout = async () => {
+    if (hasUnsavedChanges) {
+      const confirmLeave = confirm(
+        "⚠️ У вас є незбережені зміни!\n\nБажаєте вийти з адмін-панелі без збереження змін?"
+      );
+      if (!confirmLeave) return;
+    }
     if (typeof window !== "undefined") {
       localStorage.removeItem("uli_admin_token");
     }
@@ -165,7 +193,7 @@ export default function AdminPage() {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-200 whitespace-nowrap cursor-pointer ${
                   isActive
                     ? "bg-charcoal-900 text-white shadow-soft"

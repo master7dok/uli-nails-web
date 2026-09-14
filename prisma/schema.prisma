@@ -55,14 +55,15 @@ model Course {
 }
 
 model PortfolioItem {
-  id        String   @id @default(cuid())
-  imageUrl  String
-  titlePl   String?
-  titleUa   String?
-  category  String   @default("gel") // gel, manicure, french, correction
-  featured  Boolean  @default(false)
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
+  id             String   @id @default(cuid())
+  imageUrl       String
+  titlePl        String?
+  titleUa        String?
+  category       String   @default("gel") // gel, manicure, french, correction
+  objectPosition String?  @default("center") // e.g. "center", "center top", "center bottom", or "50% 25%"
+  featured       Boolean  @default(false)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
 }
 
 model Testimonial {
@@ -85,12 +86,13 @@ model Setting {
 }
 
 model TrainingPhoto {
-  id        String   @id @default(cuid())
-  imageUrl  String
-  titlePl   String?
-  titleUa   String?
-  category  String   @default("process") // process, students, certificates, practice
-  featured  Boolean  @default(false)
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
+  id             String   @id @default(cuid())
+  imageUrl       String
+  titlePl        String?
+  titleUa        String?
+  category       String   @default("process") // process, students, certificates, practice
+  objectPosition String?  @default("center") // e.g. "center", "center top", "center bottom", or "50% 25%"
+  featured       Boolean  @default(false)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
 }

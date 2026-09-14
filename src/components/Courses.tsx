@@ -193,8 +193,8 @@ export default function Courses({ courses, settings }: CoursesProps) {
           </div>
         </motion.div>
 
-        {/* 3. COURSES CARDS GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 mb-16">
+        {/* 3. COURSES CARDS LIST (Single column - one below another) */}
+        <div className="flex flex-col gap-8 sm:gap-10 max-w-4xl mx-auto mb-16">
           {courses.map((course, index) => {
             const badge = getLocalized(course, "badge");
             const title = getLocalized(course, "title");
@@ -279,7 +279,7 @@ export default function Courses({ courses, settings }: CoursesProps) {
                 </div>
 
                 {/* Key Highlights Checkmarks */}
-                <div className="space-y-2 mb-6 flex-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 mb-6">
                   {features.map((item, idx) => (
                     <div key={idx} className="flex items-start gap-2.5 text-xs sm:text-[13px] text-charcoal-700">
                       <CheckCircle className="w-4 h-4 text-gold-600 shrink-0 mt-0.5" />

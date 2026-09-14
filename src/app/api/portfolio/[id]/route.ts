@@ -69,3 +69,69 @@ export async function DELETE(
     return NextResponse.json({ error: error?.message || "Failed to delete portfolio item" }, { status: 500 });
   }
 }
+
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    if (!(await isAuthenticated(request))) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!(await isDatabaseAvailable())) {
+      return NextResponse.json(
+        { error: "База даних тимчасово недоступна. Будь ласка, перевірте PostgreSQL / Baza danych jest niedostępna." },
+        { status: 503 }
+      );
+    }
+
+    const { id } = await params;
+    const data = await request.json();
+
+    const existing = await prisma.portfolioItem.findUnique({
+      where: { id },
+    });
+
+    let updated;
+    if (existing) {
+      updated = await prisma.portfolioItem.update({
+        where: { id },
+        data: {
+          ...(data.titlePl !== undefined && { titlePl: data.titlePl }),
+          ...(data.titleUa !== undefined && { titleUa: data.titleUa }),
+          ...(data.category !== undefined && { category: data.category }),
+          ...(data.objectPosition !== undefined && { objectPosition: data.objectPosition }),
+          ...(data.featured !== undefined && { featured: Boolean(data.featured) }),
+          ...(data.sortOrder !== undefined && { sortOrder: Number(data.sortOrder) }),
+        },
+      });
+    } else {
+      const def = defaultPortfolio.find((p) => p.id === id);
+      if (def) {
+        updated = await prisma.portfolioItem.create({
+          data: {
+            id: def.id,
+            imageUrl: def.imageUrl,
+            titlePl: data.titlePl ?? def.titlePl ?? "",
+            titleUa: data.titleUa ?? def.titleUa ?? "",
+            category: data.category ?? def.category ?? "gel",
+            objectPosition: data.objectPosition ?? def.objectPosition ?? "center",
+            featured: data.featured !== undefined ? Boolean(data.featured) : def.featured,
+            sortOrder: data.sortOrder !== undefined ? Number(data.sortOrder) : def.sortOrder,
+          },
+        });
+      } else {
+        return NextResponse.json({ error: "Portfolio item not found" }, { status: 404 });
+      }
+    }
+
+    return NextResponse.json(updated);
+  } catch (error: any) {
+    console.error("Error updating portfolio item:", error);
+    return NextResponse.json(
+      { error: error?.message || "Failed to update portfolio item" },
+      { status: 500 }
+    );
+  }
+}
