@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, isDatabaseAvailable } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
 export async function PUT(
@@ -9,6 +9,13 @@ export async function PUT(
   try {
     if (!(await isAuthenticated(request))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!(await isDatabaseAvailable())) {
+      return NextResponse.json(
+        { error: "База даних тимчасово недоступна. Будь ласка, перевірте PostgreSQL." },
+        { status: 503 }
+      );
     }
 
     const { id } = await params;
@@ -56,6 +63,13 @@ export async function DELETE(
   try {
     if (!(await isAuthenticated(request))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!(await isDatabaseAvailable())) {
+      return NextResponse.json(
+        { error: "База даних тимчасово недоступна. Будь ласка, перевірте PostgreSQL." },
+        { status: 503 }
+      );
     }
 
     const { id } = await params;

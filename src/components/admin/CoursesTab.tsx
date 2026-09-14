@@ -15,8 +15,19 @@ import {
   BookOpen,
   Award,
   Gift,
+  ChevronDown,
+  ArrowUp,
+  ArrowDown,
+  Copy,
 } from "lucide-react";
 import { getAdminHeaders } from "@/lib/adminClient";
+
+export interface SyllabusDay {
+  day: string;
+  title: string;
+  theory: string;
+  practice: string;
+}
 
 interface CourseItem {
   id: string;
@@ -63,6 +74,8 @@ const defaultNewCourse = {
   descriptionPl: "",
   featuresUaText: "",
   featuresPlText: "",
+  syllabusUaList: [] as SyllabusDay[],
+  syllabusPlList: [] as SyllabusDay[],
   formUrl: "",
   sortOrder: 0,
 };
@@ -85,6 +98,331 @@ function linesToJson(val?: string | null): string {
   return JSON.stringify(lines);
 }
 
+export function parseSyllabus(val?: string | null): SyllabusDay[] {
+  if (!val) return [];
+  try {
+    const parsed = typeof val === "string" ? JSON.parse(val) : val;
+    if (Array.isArray(parsed)) {
+      return parsed.map((item, idx) => ({
+        day: item?.day || `День ${idx + 1}`,
+        title: item?.title || "",
+        theory: item?.theory || "",
+        practice: item?.practice || "",
+      }));
+    }
+  } catch {}
+  return [];
+}
+
+export function syllabusToJson(days?: SyllabusDay[] | null): string {
+  if (!days || !Array.isArray(days) || days.length === 0) return "[]";
+  const cleaned = days
+    .filter((d) => d && (d.day || d.title || d.theory || d.practice))
+    .map((d) => ({
+      day: (d.day || "").trim(),
+      title: (d.title || "").trim(),
+      theory: (d.theory || "").trim(),
+      practice: (d.practice || "").trim(),
+    }));
+  return JSON.stringify(cleaned);
+}
+
+interface SyllabusEditorProps {
+  daysUa: SyllabusDay[];
+  daysPl: SyllabusDay[];
+  onChangeUa: (days: SyllabusDay[]) => void;
+  onChangePl: (days: SyllabusDay[]) => void;
+}
+
+function SyllabusEditor({
+  daysUa,
+  daysPl,
+  onChangeUa,
+  onChangePl,
+}: SyllabusEditorProps) {
+  const [activeLang, setActiveLang] = useState<"ua" | "pl">("ua");
+
+  const currentDays = activeLang === "ua" ? daysUa : daysPl;
+  const otherDays = activeLang === "ua" ? daysPl : daysUa;
+
+  const updateCurrentDays = (newDays: SyllabusDay[]) => {
+    if (activeLang === "ua") {
+      onChangeUa(newDays);
+    } else {
+      onChangePl(newDays);
+    }
+  };
+
+  const handleAddDay = () => {
+    const nextNum = currentDays.length + 1;
+    const newDay: SyllabusDay = {
+      day: activeLang === "pl" ? `Dzień ${nextNum}` : `День ${nextNum}`,
+      title: "",
+      theory: "",
+      practice: "",
+    };
+    updateCurrentDays([...currentDays, newDay]);
+  };
+
+  const handleFieldChange = (idx: number, field: keyof SyllabusDay, value: string) => {
+    const updated = currentDays.map((d, i) => (i === idx ? { ...d, [field]: value } : d));
+    updateCurrentDays(updated);
+  };
+
+  const handleRemoveDay = (idx: number) => {
+    const updated = currentDays.filter((_, i) => i !== idx);
+    updateCurrentDays(updated);
+  };
+
+  const handleMoveDay = (idx: number, direction: "up" | "down") => {
+    const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= currentDays.length) return;
+    const copy = [...currentDays];
+    const temp = copy[idx];
+    copy[idx] = copy[targetIdx];
+    copy[targetIdx] = temp;
+    updateCurrentDays(copy);
+  };
+
+  const handleCopyFromOther = () => {
+    if (otherDays.length === 0) {
+      alert(
+        activeLang === "ua"
+          ? "Польська версія ще не має створених днів для копіювання."
+          : "Українська версія ще не має створених днів для копіювання."
+      );
+      return;
+    }
+    if (
+      currentDays.length > 0 &&
+      !confirm(
+        activeLang === "ua"
+          ? "Замінити поточні дні структурою з польської версії? Поточні дані будуть перезаписані."
+          : "Замінити поточні дні структурою з української версії? Поточні дані будуть перезаписані."
+      )
+    ) {
+      return;
+    }
+    const copied: SyllabusDay[] = otherDays.map((d, idx) => ({
+      day: activeLang === "pl" ? `Dzień ${idx + 1}` : `День ${idx + 1}`,
+      title: d.title,
+      theory: d.theory,
+      practice: d.practice,
+    }));
+    updateCurrentDays(copied);
+  };
+
+  return (
+    <div className="rounded-2xl border-2 border-gold-400/40 bg-nude-50/50 p-5 sm:p-6 space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-nude-200">
+        <div>
+          <div className="flex items-center gap-2 text-charcoal-900 font-serif font-bold text-base">
+            <BookOpen className="w-5 h-5 text-gold-700" />
+            <span>Програма курсу по днях / модулях</span>
+          </div>
+          <p className="text-xs text-charcoal-500 mt-0.5">
+            Текст для спадаючого меню «Переглянути програму курсу» (Теорія та Практика для кожного дня)
+          </p>
+        </div>
+
+        {/* Language Tabs & Copy Button */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="inline-flex rounded-xl bg-white p-1 border border-nude-200 shadow-xs">
+            <button
+              type="button"
+              onClick={() => setActiveLang("ua")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                activeLang === "ua"
+                  ? "bg-charcoal-900 text-white shadow-xs"
+                  : "text-charcoal-600 hover:text-charcoal-900"
+              }`}
+            >
+              🇺🇦 UA ({daysUa.length} дн.)
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveLang("pl")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                activeLang === "pl"
+                  ? "bg-charcoal-900 text-white shadow-xs"
+                  : "text-charcoal-600 hover:text-charcoal-900"
+              }`}
+            >
+              🇵🇱 PL ({daysPl.length} dni)
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleCopyFromOther}
+            className="px-3 py-1.5 rounded-xl border border-nude-300 hover:border-gold-500 bg-white hover:bg-gold-50 text-charcoal-700 text-xs font-medium inline-flex items-center gap-1.5 transition-colors shadow-xs"
+            title="Скопіювати структуру з іншої мови"
+          >
+            <Copy className="w-3.5 h-3.5 text-gold-700" />
+            <span>{activeLang === "ua" ? "Скопіювати з PL" : "Skopiuj z UA"}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Days List */}
+      {currentDays.length === 0 ? (
+        <div className="text-center py-8 px-4 rounded-xl border border-dashed border-nude-300 bg-white/70">
+          <BookOpen className="w-8 h-8 text-gold-500 mx-auto mb-2 opacity-60" />
+          <h5 className="font-serif text-sm font-semibold text-charcoal-900 mb-1">
+            Програма для {activeLang === "ua" ? "української" : "польської"} версії ще не створена
+          </h5>
+          <p className="text-xs text-charcoal-500 max-w-md mx-auto mb-4">
+            Додайте дні з теорією та практикою, щоб на сторінці курсу зʼявилася інтерактивна кнопка «Переглянути програму курсу».
+          </p>
+          <div className="flex items-center justify-center gap-2">
+            <button
+              type="button"
+              onClick={handleAddDay}
+              className="px-4 py-2 rounded-xl bg-charcoal-900 hover:bg-gold-600 text-white text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-xs"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Додати 1-й день програми</span>
+            </button>
+            {otherDays.length > 0 && (
+              <button
+                type="button"
+                onClick={handleCopyFromOther}
+                className="px-4 py-2 rounded-xl border border-nude-300 hover:border-gold-500 bg-white text-charcoal-800 text-xs font-medium inline-flex items-center gap-1.5 transition-colors"
+              >
+                <Copy className="w-3.5 h-3.5 text-gold-700" />
+                <span>Скопіювати структуру ({otherDays.length} дн.)</span>
+              </button>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {currentDays.map((dayItem, idx) => (
+            <div
+              key={idx}
+              className="p-4 sm:p-5 rounded-xl bg-white border border-nude-200 shadow-xs space-y-3.5 hover:border-gold-300 transition-colors"
+            >
+              {/* Day Card Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-nude-100">
+                <div className="flex items-center gap-2 flex-1">
+                  <span className="w-6 h-6 rounded-full bg-gold-100 text-gold-800 text-xs font-bold flex items-center justify-center shrink-0">
+                    {idx + 1}
+                  </span>
+                  <div className="w-28 sm:w-32 shrink-0">
+                    <input
+                      type="text"
+                      value={dayItem.day}
+                      onChange={(e) => handleFieldChange(idx, "day", e.target.value)}
+                      placeholder={activeLang === "pl" ? "Dzień 1" : "День 1"}
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-nude-300 text-xs font-bold uppercase tracking-wider bg-nude-50/50 focus:bg-white focus:border-gold-500 focus:outline-none"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={dayItem.title}
+                      onChange={(e) => handleFieldChange(idx, "title", e.target.value)}
+                      placeholder={
+                        activeLang === "pl"
+                          ? "np. Anatomia i bezpieczny manicure sprzętowy"
+                          : "напр. Анатомія та безпечний апаратний манікюр"
+                      }
+                      className="w-full px-3 py-1.5 rounded-lg border border-nude-300 text-xs font-serif font-bold text-charcoal-900 focus:border-gold-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Day Reorder & Remove Actions */}
+                <div className="flex items-center gap-1 self-end sm:self-center">
+                  <button
+                    type="button"
+                    disabled={idx === 0}
+                    onClick={() => handleMoveDay(idx, "up")}
+                    className="p-1.5 rounded-lg text-charcoal-400 hover:text-charcoal-700 hover:bg-nude-100 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                    title="Підняти вище"
+                  >
+                    <ArrowUp className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={idx === currentDays.length - 1}
+                    onClick={() => handleMoveDay(idx, "down")}
+                    className="p-1.5 rounded-lg text-charcoal-400 hover:text-charcoal-700 hover:bg-nude-100 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                    title="Опустити нижче"
+                  >
+                    <ArrowDown className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveDay(idx)}
+                    className="p-1.5 rounded-lg text-charcoal-400 hover:text-rose-600 hover:bg-rose-50 transition-colors ml-1"
+                    title="Видалити цей день"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Day Body: Theory & Practice */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-[11px] font-semibold text-gold-800 uppercase tracking-wider mb-1">
+                    📚 Теоретична частина ({activeLang.toUpperCase()})
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={dayItem.theory}
+                    onChange={(e) => handleFieldChange(idx, "theory", e.target.value)}
+                    placeholder={
+                      activeLang === "pl"
+                        ? "Przyczyny powstawania zapowietrzeń, czysty manicure bez zacięć, fizyka i chemia żeli..."
+                        : "Будова нігтя, причини відшарувань, безпечна техніка підготовки, хімія гелів..."
+                    }
+                    className="w-full p-2.5 rounded-xl border border-nude-200 text-xs leading-relaxed focus:border-gold-500 focus:outline-none bg-[#FAFAF8]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-charcoal-800 uppercase tracking-wider mb-1">
+                    💅 Практична частина ({activeLang.toUpperCase()})
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={dayItem.practice}
+                    onChange={(e) => handleFieldChange(idx, "practice", e.target.value)}
+                    placeholder={
+                      activeLang === "pl"
+                        ? "Praktyka na modelce: pełna korekta architektury, malowanie kolorem pod skórki..."
+                        : "Відпрацювання на моделі: корекція архітектури, створення бездоганного бліку..."
+                    }
+                    className="w-full p-2.5 rounded-xl border border-nude-200 text-xs leading-relaxed focus:border-gold-500 focus:outline-none bg-[#FAFAF8]"
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* Add Another Day Button */}
+          <div className="pt-2 flex justify-start">
+            <button
+              type="button"
+              onClick={handleAddDay}
+              className="px-4 py-2 rounded-xl bg-white hover:bg-gold-50 border border-nude-300 hover:border-gold-500 text-charcoal-800 text-xs font-semibold inline-flex items-center gap-2 transition-colors shadow-xs"
+            >
+              <Plus className="w-4 h-4 text-gold-600" />
+              <span>
+                {activeLang === "pl"
+                  ? `+ Dodaj Dzień ${currentDays.length + 1} do programu`
+                  : `+ Додати День ${currentDays.length + 1} до програми`}
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function CoursesTab() {
   const [courses, setCourses] = useState<CourseItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -97,6 +435,17 @@ export default function CoursesTab() {
   // Edit course state
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
+
+  // Accordion preview states
+  const [expandedSyllabus, setExpandedSyllabus] = useState<Record<string, boolean>>({});
+  const [previewLang, setPreviewLang] = useState<Record<string, "ua" | "pl">>({});
+
+  const toggleSyllabus = (courseId: string) => {
+    setExpandedSyllabus((prev) => ({
+      ...prev,
+      [courseId]: !prev[courseId],
+    }));
+  };
 
   const fetchCourses = async () => {
     try {
@@ -137,6 +486,8 @@ export default function CoursesTab() {
         descriptionPl: newForm.descriptionPl,
         featuresUa: linesToJson(newForm.featuresUaText),
         featuresPl: linesToJson(newForm.featuresPlText),
+        syllabusUa: syllabusToJson(newForm.syllabusUaList),
+        syllabusPl: syllabusToJson(newForm.syllabusPlList),
         formUrl: newForm.formUrl || null,
         sortOrder: Number(newForm.sortOrder) || 0,
       };
@@ -166,6 +517,8 @@ export default function CoursesTab() {
       ...course,
       featuresUaText: stringToLines(course.featuresUa),
       featuresPlText: stringToLines(course.featuresPl),
+      syllabusUaList: parseSyllabus(course.syllabusUa),
+      syllabusPlList: parseSyllabus(course.syllabusPl),
     });
   };
 
@@ -177,6 +530,8 @@ export default function CoursesTab() {
         sortOrder: Number(editForm.sortOrder) || 0,
         featuresUa: linesToJson(editForm.featuresUaText),
         featuresPl: linesToJson(editForm.featuresPlText),
+        syllabusUa: syllabusToJson(editForm.syllabusUaList),
+        syllabusPl: syllabusToJson(editForm.syllabusPlList),
       };
 
       const res = await fetch(`/api/courses/${id}`, {
@@ -564,6 +919,14 @@ export default function CoursesTab() {
             />
           </div>
 
+          {/* Row 9: Course Syllabus / Program Details */}
+          <SyllabusEditor
+            daysUa={newForm.syllabusUaList}
+            daysPl={newForm.syllabusPlList}
+            onChangeUa={(days) => setNewForm({ ...newForm, syllabusUaList: days })}
+            onChangePl={(days) => setNewForm({ ...newForm, syllabusPlList: days })}
+          />
+
           {/* Submit Actions */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-nude-200">
             <button
@@ -937,6 +1300,14 @@ export default function CoursesTab() {
                       />
                     </div>
 
+                    {/* Course Syllabus / Program Details */}
+                    <SyllabusEditor
+                      daysUa={editForm.syllabusUaList || []}
+                      daysPl={editForm.syllabusPlList || []}
+                      onChangeUa={(days) => setEditForm({ ...editForm, syllabusUaList: days })}
+                      onChangePl={(days) => setEditForm({ ...editForm, syllabusPlList: days })}
+                    />
+
                     {/* Actions */}
                     <div className="flex items-center justify-end gap-2 pt-3 border-t border-nude-100">
                       <button
@@ -1022,6 +1393,134 @@ export default function CoursesTab() {
                         </p>
                       )}
                     </div>
+
+                    {/* View Course Program Accordion */}
+                    {(() => {
+                      const syllabusUa = parseSyllabus(course.syllabusUa);
+                      const syllabusPl = parseSyllabus(course.syllabusPl);
+                      const isExpanded = !!expandedSyllabus[course.id];
+                      const activePreview = previewLang[course.id] || "ua";
+                      const curSyllabus = activePreview === "ua" ? syllabusUa : syllabusPl;
+
+                      return (
+                        <div className="mt-4 pt-3 border-t border-nude-100">
+                          <button
+                            type="button"
+                            onClick={() => toggleSyllabus(course.id)}
+                            className="w-full flex items-center justify-between py-2 px-3.5 rounded-xl bg-nude-50 hover:bg-nude-100 text-charcoal-800 text-xs font-semibold transition-colors"
+                          >
+                            <div className="flex items-center gap-2">
+                              <BookOpen className="w-4 h-4 text-gold-700" />
+                              <span>
+                                {isExpanded ? "Згорнути програму курсу" : "Переглянути програму курсу"}
+                              </span>
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white text-gold-800 border border-nude-200 shadow-xs">
+                                {syllabusUa.length > 0 || syllabusPl.length > 0
+                                  ? `${syllabusUa.length} дн. (UA) / ${syllabusPl.length} дн. (PL)`
+                                  : "Програма не заповнена"}
+                              </span>
+                            </div>
+                            <ChevronDown
+                              className={`w-4 h-4 text-charcoal-500 transition-transform duration-200 ${
+                                isExpanded ? "rotate-180" : ""
+                              }`}
+                            />
+                          </button>
+
+                          {isExpanded && (
+                            <div className="mt-3 p-4 rounded-xl bg-nude-50/70 border border-nude-200 space-y-3">
+                              {/* Preview Header & Language Toggle */}
+                              <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-nude-200">
+                                <span className="text-[11px] font-semibold text-charcoal-500 uppercase tracking-wider">
+                                  Попередній перегляд програми:
+                                </span>
+                                <div className="flex items-center gap-1 bg-white p-0.5 rounded-lg border border-nude-200 text-xs">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setPreviewLang((prev) => ({ ...prev, [course.id]: "ua" }))
+                                    }
+                                    className={`px-2.5 py-0.5 rounded-md font-medium transition-colors ${
+                                      activePreview === "ua"
+                                        ? "bg-charcoal-900 text-white shadow-xs"
+                                        : "text-charcoal-600 hover:text-charcoal-900"
+                                    }`}
+                                  >
+                                    🇺🇦 UA ({syllabusUa.length})
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setPreviewLang((prev) => ({ ...prev, [course.id]: "pl" }))
+                                    }
+                                    className={`px-2.5 py-0.5 rounded-md font-medium transition-colors ${
+                                      activePreview === "pl"
+                                        ? "bg-charcoal-900 text-white shadow-xs"
+                                        : "text-charcoal-600 hover:text-charcoal-900"
+                                    }`}
+                                  >
+                                    🇵🇱 PL ({syllabusPl.length})
+                                  </button>
+                                </div>
+                              </div>
+
+                              {curSyllabus.length === 0 ? (
+                                <div className="text-center py-4 text-xs text-charcoal-400">
+                                  Для {activePreview === "ua" ? "української" : "польської"} версії програму ще не додано.
+                                </div>
+                              ) : (
+                                <div className="space-y-2.5">
+                                  {curSyllabus.map((dayItem, dIdx) => (
+                                    <div
+                                      key={dIdx}
+                                      className="p-3.5 bg-white rounded-xl border border-nude-200/80 shadow-xs space-y-1.5 text-xs"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-charcoal-900 text-gold-300 uppercase">
+                                          {dayItem.day}
+                                        </span>
+                                        <h5 className="font-serif font-bold text-charcoal-900 text-sm">
+                                          {dayItem.title}
+                                        </h5>
+                                      </div>
+
+                                      {dayItem.theory && (
+                                        <p className="text-charcoal-700 text-xs pl-1">
+                                          <strong className="text-gold-800 font-semibold">
+                                            Теорія:{" "}
+                                          </strong>
+                                          {dayItem.theory}
+                                        </p>
+                                      )}
+
+                                      {dayItem.practice && (
+                                        <p className="text-charcoal-700 text-xs pl-1 pt-1 border-t border-nude-100">
+                                          <strong className="text-charcoal-900 font-semibold">
+                                            Практика:{" "}
+                                          </strong>
+                                          {dayItem.practice}
+                                        </p>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              <div className="pt-2 flex justify-end">
+                                <button
+                                  type="button"
+                                  onClick={() => startEdit(course)}
+                                  className="text-xs font-semibold text-gold-700 hover:text-gold-900 flex items-center gap-1 transition-colors"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                  <span>Редагувати текст програми</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
