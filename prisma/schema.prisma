@@ -98,23 +98,42 @@ model TrainingPhoto {
 }
 
 model LeadMagnet {
-  id            String   @id @default(cuid())
-  fileUrl       String
+  id            String          @id @default(cuid())
+  fileUrl       String          @default("")
   fileName      String?
   fileSize      String?
+  fileUrlUa     String?
+  fileNameUa    String?
+  fileSizeUa    String?
+  fileUrlPl     String?
+  fileNamePl    String?
+  fileSizePl    String?
   titlePl       String
   titleUa       String
   descriptionPl String?
   descriptionUa String?
-  badgePl       String?  @default("Darmowy PDF")
-  badgeUa       String?  @default("Безкоштовний PDF")
-  buttonTextPl  String?  @default("Pobierz Checklist")
-  buttonTextUa  String?  @default("Отримати чек-лист")
+  badgePl       String?         @default("Darmowy PDF")
+  badgeUa       String?         @default("Безкоштовний PDF")
+  buttonTextPl  String?         @default("Pobierz Checklist")
+  buttonTextUa  String?         @default("Отримати чек-лист")
   coverUrl      String?
-  downloadCount Int      @default(0)
-  sortOrder     Int      @default(0)
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  downloadCount Int             @default(0)
+  sortOrder     Int             @default(0)
+  isActive      Boolean         @default(true)
+  leads         ChecklistLead[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model ChecklistLead {
+  id             String      @id @default(cuid())
+  leadMagnetId   String?
+  leadMagnet     LeadMagnet? @relation(fields: [leadMagnetId], references: [id], onDelete: SetNull)
+  checklistTitle String
+  instagram      String
+  email          String
+  experience     String
+  language       String      @default("ua")
+  createdAt      DateTime    @default(now())
 }
 

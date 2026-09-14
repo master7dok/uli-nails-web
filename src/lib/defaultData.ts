@@ -80,6 +80,12 @@ export interface DefaultLeadMagnet {
   fileUrl: string;
   fileName?: string | null;
   fileSize?: string | null;
+  fileUrlUa?: string | null;
+  fileNameUa?: string | null;
+  fileSizeUa?: string | null;
+  fileUrlPl?: string | null;
+  fileNamePl?: string | null;
+  fileSizePl?: string | null;
   titlePl: string;
   titleUa: string;
   descriptionPl?: string | null;
@@ -92,6 +98,17 @@ export interface DefaultLeadMagnet {
   downloadCount?: number;
   sortOrder?: number;
   isActive?: boolean;
+}
+
+export interface DefaultChecklistLead {
+  id: string;
+  leadMagnetId?: string | null;
+  checklistTitle: string;
+  instagram: string;
+  email: string;
+  experience: string;
+  language: string;
+  createdAt: string;
 }
 
 export const defaultServices: DefaultService[] = [
@@ -681,6 +698,12 @@ export const defaultLeadMagnets: DefaultLeadMagnet[] = [
     fileUrl: "/uploads/checklist-nail-expert.pdf",
     fileName: "Checklist_Nail_Expert_Uliana.pdf",
     fileSize: "2.8 MB",
+    fileUrlUa: "/uploads/checklist-nail-expert.pdf",
+    fileNameUa: "Checklist_Nail_Expert_Uliana_UA.pdf",
+    fileSizeUa: "2.8 MB",
+    fileUrlPl: "/uploads/checklist-nail-expert.pdf",
+    fileNamePl: "Checklist_Nail_Expert_Uliana_PL.pdf",
+    fileSizePl: "2.8 MB",
     titleUa: "Чек-лист: 10 фатальних помилок в апаратному манікюрі та архітектурі",
     titlePl: "Checklist: 10 krytycznych błędów w manicure sprzętowym i architekturze",
     descriptionUa:
@@ -695,6 +718,29 @@ export const defaultLeadMagnets: DefaultLeadMagnet[] = [
     downloadCount: 142,
     sortOrder: 1,
     isActive: true,
+  },
+];
+
+export const fallbackLeads: DefaultChecklistLead[] = [
+  {
+    id: "lead-demo-1",
+    leadMagnetId: "lead-magnet-1",
+    checklistTitle: "Чек-лист: 10 фатальних помилок в апаратному манікюрі та архітектурі",
+    instagram: "@anna.nails_art",
+    email: "anna.beauty@gmail.com",
+    experience: "1–3 роки",
+    language: "ua",
+    createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
+  },
+  {
+    id: "lead-demo-2",
+    leadMagnetId: "lead-magnet-1",
+    checklistTitle: "Checklist: 10 krytycznych błędów w manicure sprzętowym i architekturze",
+    instagram: "@kasia_stylistka_krk",
+    email: "katarzyna.w@wp.pl",
+    experience: "Powyżej 3 lat",
+    language: "pl",
+    createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
   },
 ];
 

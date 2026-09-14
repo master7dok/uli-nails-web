@@ -74,7 +74,8 @@ export async function POST(request: Request) {
     });
 
     const data = await request.json();
-    if (!data.fileUrl) {
+    const primaryFileUrl = data.fileUrl || data.fileUrlUa || data.fileUrlPl;
+    if (!primaryFileUrl) {
       return NextResponse.json({ error: "File URL is required" }, { status: 400 });
     }
     if (!data.titleUa || !data.titlePl) {
@@ -85,9 +86,15 @@ export async function POST(request: Request) {
 
     const item = await prisma.leadMagnet.create({
       data: {
-        fileUrl: data.fileUrl,
-        fileName: data.fileName || "checklist.pdf",
-        fileSize: data.fileSize || "1.5 MB",
+        fileUrl: primaryFileUrl,
+        fileName: data.fileName || data.fileNameUa || data.fileNamePl || "checklist.pdf",
+        fileSize: data.fileSize || data.fileSizeUa || data.fileSizePl || "1.5 MB",
+        fileUrlUa: data.fileUrlUa || data.fileUrl || null,
+        fileNameUa: data.fileNameUa || data.fileName || null,
+        fileSizeUa: data.fileSizeUa || data.fileSize || null,
+        fileUrlPl: data.fileUrlPl || data.fileUrl || null,
+        fileNamePl: data.fileNamePl || data.fileName || null,
+        fileSizePl: data.fileSizePl || data.fileSize || null,
         titleUa: data.titleUa,
         titlePl: data.titlePl,
         descriptionUa: data.descriptionUa || "",

@@ -20,16 +20,39 @@ import {
   Save,
   ChevronDown,
   ChevronUp,
+  Users,
+  Copy,
+  Mail,
+  CheckCheck,
+  FileCheck,
 } from "lucide-react";
+import InstagramIcon from "@/components/icons/InstagramIcon";
 import { getAdminHeaders } from "@/lib/adminClient";
 import UnsavedChangesModal from "./UnsavedChangesModal";
 import { defaultLeadMagnets, defaultSettings, DefaultLeadMagnet } from "@/lib/defaultData";
+
+export interface ChecklistLeadItem {
+  id: string;
+  leadMagnetId?: string | null;
+  checklistTitle: string;
+  instagram: string;
+  email: string;
+  experience: string;
+  language: string;
+  createdAt: string;
+}
 
 interface LeadMagnetItem {
   id: string;
   fileUrl: string;
   fileName?: string | null;
   fileSize?: string | null;
+  fileUrlUa?: string | null;
+  fileNameUa?: string | null;
+  fileSizeUa?: string | null;
+  fileUrlPl?: string | null;
+  fileNamePl?: string | null;
+  fileSizePl?: string | null;
   titlePl: string;
   titleUa: string;
   descriptionPl?: string | null;
@@ -48,6 +71,12 @@ const defaultNewLeadMagnet = {
   fileUrl: "",
   fileName: "",
   fileSize: "",
+  fileUrlUa: "",
+  fileNameUa: "",
+  fileSizeUa: "",
+  fileUrlPl: "",
+  fileNamePl: "",
+  fileSizePl: "",
   titleUa: "",
   titlePl: "",
   descriptionUa: "",
@@ -66,6 +95,15 @@ export default function ChecklistsTab() {
   const [reordering, setReordering] = useState(false);
   const [reorderSuccess, setReorderSuccess] = useState(false);
 
+  // Subtab switcher: checklists vs leads
+  const [activeSubTab, setActiveSubTab] = useState<"checklists" | "leads">("checklists");
+
+  // Leads state
+  const [leads, setLeads] = useState<ChecklistLeadItem[]>([]);
+  const [loadingLeads, setLoadingLeads] = useState(false);
+  const [deletingLeadId, setDeletingLeadId] = useState<string | null>(null);
+  const [copyStatus, setCopyStatus] = useState<string | null>(null);
+
   // Section texts settings
   const [settings, setSettings] = useState<Record<string, string>>({ ...defaultSettings });
   const [showTextEditor, setShowTextEditor] = useState(false);
@@ -75,12 +113,14 @@ export default function ChecklistsTab() {
   // Add item form state
   const [isAdding, setIsAdding] = useState(false);
   const [newForm, setNewForm] = useState(defaultNewLeadMagnet);
-  const [uploadingPdf, setUploadingPdf] = useState(false);
+  const [uploadingPdfUa, setUploadingPdfUa] = useState(false);
+  const [uploadingPdfPl, setUploadingPdfPl] = useState(false);
 
   // Edit item state
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<LeadMagnetItem>>({});
-  const [uploadingEditPdf, setUploadingEditPdf] = useState(false);
+  const [uploadingEditPdfUa, setUploadingEditPdfUa] = useState(false);
+  const [uploadingEditPdfPl, setUploadingEditPdfPl] = useState(false);
 
   // Unsaved changes tracking
   const initialEditSnapshotRef = useRef<string>("");
@@ -96,6 +136,24 @@ export default function ChecklistsTab() {
     | { type: "start-add" }
     | null
   >(null);
+
+  // Fetch leads
+  const fetchLeads = async () => {
+    setLoadingLeads(true);
+    try {
+      const res = await fetch("/api/lead-magnets/leads", {
+        headers: getAdminHeaders(),
+      });
+      const data = await res.json();
+      if (Array.isArray(data.leads)) {
+        setLeads(data.leads);
+      }
+    } catch (e) {
+      console.error("Failed to load leads:", e);
+    } finally {
+      setLoadingLeads(false);
+    }
+  };
 
   // Load items and settings
   const fetchData = async () => {
@@ -124,6 +182,7 @@ export default function ChecklistsTab() {
 
   useEffect(() => {
     fetchData();
+    fetchLeads();
   }, []);
 
   // Determine dirty state
@@ -136,6 +195,8 @@ export default function ChecklistsTab() {
     if (!isAdding) return false;
     return (
       Boolean(newForm.fileUrl) ||
+      Boolean(newForm.fileUrlUa) ||
+      Boolean(newForm.fileUrlPl) ||
       Boolean(newForm.titleUa.trim()) ||
       Boolean(newForm.titlePl.trim()) ||
       Boolean(newForm.descriptionUa.trim()) ||
@@ -206,12 +267,22 @@ export default function ChecklistsTab() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, [editingId, isAdding]);
 
-  // Handle PDF file upload
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean = false) => {
+  // Handle PDF file upload for specific language (UA or PL)
+  const handleFileUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    lang: "ua" | "pl",
+    isEdit: boolean = false
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const setter = isEdit ? setUploadingEditPdf : setUploadingPdf;
+    const setter = isEdit
+      ? lang === "ua"
+        ? setUploadingEditPdfUa
+        : setUploadingEditPdfPl
+      : lang === "ua"
+      ? setUploadingPdfUa
+      : setUploadingPdfPl;
     setter(true);
 
     try {
@@ -230,19 +301,28 @@ export default function ChecklistsTab() {
 
       const data = await res.json();
       if (data.url) {
+        const sizeStr = data.fileSize || `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
+        const nameStr = data.fileName || file.name;
+
         if (isEdit) {
           setEditForm((prev) => ({
             ...prev,
-            fileUrl: data.url,
-            fileName: data.fileName || file.name,
-            fileSize: data.fileSize || `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+            ...(lang === "ua"
+              ? { fileUrlUa: data.url, fileNameUa: nameStr, fileSizeUa: sizeStr }
+              : { fileUrlPl: data.url, fileNamePl: nameStr, fileSizePl: sizeStr }),
+            fileUrl: prev.fileUrl || data.url,
+            fileName: prev.fileName || nameStr,
+            fileSize: prev.fileSize || sizeStr,
           }));
         } else {
           setNewForm((prev) => ({
             ...prev,
-            fileUrl: data.url,
-            fileName: data.fileName || file.name,
-            fileSize: data.fileSize || `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+            ...(lang === "ua"
+              ? { fileUrlUa: data.url, fileNameUa: nameStr, fileSizeUa: sizeStr }
+              : { fileUrlPl: data.url, fileNamePl: nameStr, fileSizePl: sizeStr }),
+            fileUrl: prev.fileUrl || data.url,
+            fileName: prev.fileName || nameStr,
+            fileSize: prev.fileSize || sizeStr,
           }));
         }
       }
@@ -251,6 +331,70 @@ export default function ChecklistsTab() {
     } finally {
       setter(false);
     }
+  };
+
+  // Lead actions
+  const handleDeleteLead = async (id: string) => {
+    if (!confirm("Видалити цей контакт зі списку?")) return;
+    setDeletingLeadId(id);
+    try {
+      const res = await fetch(`/api/lead-magnets/leads/${id}`, {
+        method: "DELETE",
+        headers: getAdminHeaders(),
+      });
+      if (res.ok) {
+        setLeads((prev) => prev.filter((l) => l.id !== id));
+      } else {
+        alert("Не вдалося видалити контакт.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Помилка видалення.");
+    } finally {
+      setDeletingLeadId(null);
+    }
+  };
+
+  const copyEmails = () => {
+    const emails = Array.from(new Set(leads.map((l) => l.email.trim()).filter(Boolean)));
+    if (emails.length === 0) {
+      alert("Немає email для копіювання");
+      return;
+    }
+    navigator.clipboard.writeText(emails.join(", "));
+    setCopyStatus("Emails скопійовано!");
+    setTimeout(() => setCopyStatus(null), 3000);
+  };
+
+  const copyInstagrams = () => {
+    const igs = Array.from(new Set(leads.map((l) => l.instagram.trim()).filter(Boolean)));
+    if (igs.length === 0) {
+      alert("Немає ніків Instagram для копіювання");
+      return;
+    }
+    navigator.clipboard.writeText(igs.join("\n"));
+    setCopyStatus("Instagram ніки скопійовано!");
+    setTimeout(() => setCopyStatus(null), 3000);
+  };
+
+  const exportCsv = () => {
+    if (leads.length === 0) {
+      alert("Немає лідів для експорту");
+      return;
+    }
+    const headers = "Дата;Instagram;Email;Досвід;Чек-лист;Мова\n";
+    const rows = leads
+      .map((l) =>
+        `"${new Date(l.createdAt).toLocaleString("uk-UA")}";"${l.instagram}";"${l.email}";"${l.experience}";"${l.checklistTitle.replace(/"/g, '""')}";"${l.language.toUpperCase()}"`
+      )
+      .join("\n");
+    const blob = new Blob(["\uFEFF" + headers + rows], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `leads_checklists_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   // Save section settings
@@ -279,8 +423,9 @@ export default function ChecklistsTab() {
 
   // Add Item Submit
   const submitCreate = async (): Promise<boolean> => {
-    if (!newForm.fileUrl) {
-      alert("Будь ласка, завантажте PDF-файл");
+    const hasAnyFile = newForm.fileUrl || newForm.fileUrlUa || newForm.fileUrlPl;
+    if (!hasAnyFile) {
+      alert("Будь ласка, завантажте хоча б один PDF-файл (для UA чи PL версії)");
       return false;
     }
     if (!newForm.titleUa.trim() || !newForm.titlePl.trim()) {
@@ -537,28 +682,81 @@ export default function ChecklistsTab() {
         </div>
 
         <div className="flex items-center gap-2 self-end sm:self-center">
-          <button
-            type="button"
-            onClick={() => setShowTextEditor(!showTextEditor)}
-            className="px-3.5 py-2 rounded-xl border border-nude-300 hover:border-gold-500 text-charcoal-700 bg-white text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-xs"
-          >
-            <Edit2 className="w-3.5 h-3.5 text-gold-600" />
-            <span>{showTextEditor ? "Приховати тексти" : "Редагувати тексти секції"}</span>
-            {showTextEditor ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-          </button>
+          {activeSubTab === "checklists" ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setShowTextEditor(!showTextEditor)}
+                className="px-3.5 py-2 rounded-xl border border-nude-300 hover:border-gold-500 text-charcoal-700 bg-white text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-xs"
+              >
+                <Edit2 className="w-3.5 h-3.5 text-gold-600" />
+                <span>{showTextEditor ? "Приховати тексти" : "Редагувати тексти секції"}</span>
+                {showTextEditor ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </button>
 
-          <button
-            type="button"
-            onClick={handleToggleAdd}
-            className="px-4 py-2 rounded-xl bg-charcoal-900 hover:bg-gold-600 text-white text-xs font-semibold uppercase tracking-wider transition-colors inline-flex items-center gap-2 shadow-sm"
-          >
-            {isAdding ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-            <span>{isAdding ? "Скасувати" : "Додати PDF"}</span>
-          </button>
+              <button
+                type="button"
+                onClick={handleToggleAdd}
+                className="px-4 py-2 rounded-xl bg-charcoal-900 hover:bg-gold-600 text-white text-xs font-semibold uppercase tracking-wider transition-colors inline-flex items-center gap-2 shadow-sm"
+              >
+                {isAdding ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                <span>{isAdding ? "Скасувати" : "Додати PDF"}</span>
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={fetchLeads}
+              disabled={loadingLeads}
+              className="px-3.5 py-2 rounded-xl border border-nude-300 hover:border-gold-500 text-charcoal-700 bg-white text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-xs"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loadingLeads ? "animate-spin" : ""}`} />
+              <span>Оновити контакти</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Accordion: Quick Section Header Texts Editor */}
+      {/* Sub-tabs Switcher: Checklists vs Leads */}
+      <div className="flex flex-wrap items-center gap-3 border-b border-nude-200 pb-3">
+        <button
+          type="button"
+          onClick={() => setActiveSubTab("checklists")}
+          className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all inline-flex items-center gap-2 ${
+            activeSubTab === "checklists"
+              ? "bg-charcoal-900 text-white shadow-md"
+              : "bg-white text-charcoal-600 hover:text-charcoal-900 border border-nude-200 hover:border-gold-300"
+          }`}
+        >
+          <FileDown className="w-4 h-4 text-gold-400" />
+          <span>Чек-листи & PDF ({items.length})</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setActiveSubTab("leads");
+            fetchLeads();
+          }}
+          className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all inline-flex items-center gap-2 ${
+            activeSubTab === "leads"
+              ? "bg-charcoal-900 text-white shadow-md"
+              : "bg-white text-charcoal-600 hover:text-charcoal-900 border border-nude-200 hover:border-gold-300"
+          }`}
+        >
+          <Users className="w-4 h-4 text-gold-400" />
+          <span>Хто завантажив / Ліди ({leads.length})</span>
+          {leads.length > 0 && (
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-gold-500 text-white">
+              {leads.length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {activeSubTab === "checklists" ? (
+        <>
+          {/* Accordion: Quick Section Header Texts Editor */}
       {showTextEditor && (
         <form
           onSubmit={handleSaveSettings}
@@ -695,49 +893,113 @@ export default function ChecklistsTab() {
             </button>
           </div>
 
-          {/* 1. PDF File Upload Area */}
-          <div>
-            <label className="block text-xs font-semibold text-charcoal-700 mb-2">
-              Завантажити PDF-файл *
-            </label>
-            <div className="flex flex-col sm:flex-row items-center gap-4 p-5 rounded-2xl border-2 border-dashed border-nude-300 hover:border-gold-500 bg-nude-50/50 transition-colors">
-              <div className="w-12 h-12 rounded-xl bg-gold-100 text-gold-700 flex items-center justify-center shrink-0">
-                <Upload className={`w-6 h-6 ${uploadingPdf ? "animate-bounce" : ""}`} />
-              </div>
-
-              <div className="flex-1 text-center sm:text-left space-y-1">
-                {newForm.fileUrl ? (
-                  <div className="space-y-1">
-                    <p className="text-xs font-bold text-emerald-700 flex items-center gap-1.5 justify-center sm:justify-start">
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span>PDF успішно завантажено!</span>
-                    </p>
-                    <p className="text-xs text-charcoal-600 font-mono">
-                      {newForm.fileName} ({newForm.fileSize})
-                    </p>
-                  </div>
-                ) : (
-                  <div>
-                    <p className="text-xs font-semibold text-charcoal-800">
-                      Виберіть PDF-файл з вашого комп'ютера або телефона
-                    </p>
-                    <p className="text-[11px] text-charcoal-500">
-                      Підтримуються файли .pdf будь-якого розміру
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <label className="px-4 py-2.5 rounded-xl bg-charcoal-900 hover:bg-gold-600 text-white text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors shadow-xs shrink-0">
-                <span>{uploadingPdf ? "Завантаження..." : newForm.fileUrl ? "Замінити файл" : "Обрати PDF"}</span>
-                <input
-                  type="file"
-                  accept=".pdf,application/pdf"
-                  disabled={uploadingPdf}
-                  onChange={(e) => handleFileUpload(e, false)}
-                  className="hidden"
-                />
+          {/* 1. Dual PDF Upload Area (UA & PL) */}
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-bold text-charcoal-800 uppercase tracking-wider mb-1">
+                Файли PDF для завантаження на сайті *
               </label>
+              <p className="text-xs text-charcoal-500">
+                Завантажте окремий PDF-файл для української версії сайту та для польської версії. Якщо завантажено лише один — він використовуватиметься для обох версій.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+              {/* 🇺🇦 Ukrainian PDF */}
+              <div className="p-4 rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50/20 hover:border-blue-400 transition-colors flex flex-col justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-base">🇺🇦</span>
+                    <span className="text-xs font-bold text-charcoal-800">
+                      PDF для української версії сайту
+                    </span>
+                  </div>
+                  {newForm.fileUrlUa ? (
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold text-emerald-700 flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Файл успішно завантажено!</span>
+                      </p>
+                      <p className="text-xs text-charcoal-700 font-mono break-all">
+                        {newForm.fileNameUa || "checklist_ua.pdf"} ({newForm.fileSizeUa || "—"})
+                      </p>
+                      <a
+                        href={newForm.fileUrlUa}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] text-blue-600 hover:underline inline-flex items-center gap-1 pt-1"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        <span>Переглянути PDF</span>
+                      </a>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-charcoal-500">
+                      Файл для відвідувачів української версії сайту.
+                    </p>
+                  )}
+                </div>
+
+                <label className="w-full py-2.5 px-3 rounded-xl bg-charcoal-900 hover:bg-gold-600 text-white text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors text-center inline-flex items-center justify-center gap-2 shadow-xs">
+                  <Upload className={`w-3.5 h-3.5 ${uploadingPdfUa ? "animate-bounce" : ""}`} />
+                  <span>{uploadingPdfUa ? "Завантаження..." : newForm.fileUrlUa ? "Замінити UA PDF" : "Обрати UA PDF"}</span>
+                  <input
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    disabled={uploadingPdfUa}
+                    onChange={(e) => handleFileUpload(e, "ua", false)}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {/* 🇵🇱 Polish PDF */}
+              <div className="p-4 rounded-2xl border-2 border-dashed border-red-200 bg-red-50/20 hover:border-red-400 transition-colors flex flex-col justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-base">🇵🇱</span>
+                    <span className="text-xs font-bold text-charcoal-800">
+                      PDF dla polskiej wersji strony
+                    </span>
+                  </div>
+                  {newForm.fileUrlPl ? (
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold text-emerald-700 flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Plik załadowany!</span>
+                      </p>
+                      <p className="text-xs text-charcoal-700 font-mono break-all">
+                        {newForm.fileNamePl || "checklist_pl.pdf"} ({newForm.fileSizePl || "—"})
+                      </p>
+                      <a
+                        href={newForm.fileUrlPl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] text-red-600 hover:underline inline-flex items-center gap-1 pt-1"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        <span>Podgląd PDF</span>
+                      </a>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-charcoal-500">
+                      Plik dla użytkowniczek polskiej wersji językowej.
+                    </p>
+                  )}
+                </div>
+
+                <label className="w-full py-2.5 px-3 rounded-xl bg-charcoal-900 hover:bg-gold-600 text-white text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors text-center inline-flex items-center justify-center gap-2 shadow-xs">
+                  <Upload className={`w-3.5 h-3.5 ${uploadingPdfPl ? "animate-bounce" : ""}`} />
+                  <span>{uploadingPdfPl ? "Завантаження..." : newForm.fileUrlPl ? "Замінити PL PDF" : "Обрати PL PDF"}</span>
+                  <input
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    disabled={uploadingPdfPl}
+                    onChange={(e) => handleFileUpload(e, "pl", false)}
+                    className="hidden"
+                  />
+                </label>
+              </div>
             </div>
           </div>
 
@@ -919,27 +1181,90 @@ export default function ChecklistsTab() {
                       </button>
                     </div>
 
-                    {/* PDF Replace */}
-                    <div className="p-4 rounded-2xl bg-nude-50 border border-nude-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-                      <div>
-                        <p className="text-xs font-semibold text-charcoal-800">
-                          Поточний файл: <span className="font-mono text-charcoal-600">{editForm.fileName || "checklist.pdf"}</span>
-                        </p>
-                        <p className="text-[11px] text-charcoal-500">
-                          Розмір: {editForm.fileSize || "—"} • URL: {editForm.fileUrl}
-                        </p>
-                      </div>
-
-                      <label className="px-3.5 py-1.5 rounded-xl border border-nude-300 bg-white hover:bg-gold-50 text-charcoal-700 text-xs font-semibold cursor-pointer transition-colors shadow-xs shrink-0">
-                        <span>{uploadingEditPdf ? "Завантаження..." : "Замінити PDF файл"}</span>
-                        <input
-                          type="file"
-                          accept=".pdf,application/pdf"
-                          disabled={uploadingEditPdf}
-                          onChange={(e) => handleFileUpload(e, true)}
-                          className="hidden"
-                        />
+                    {/* Dual PDF Replace (UA & PL) */}
+                    <div className="space-y-2">
+                      <label className="block text-xs font-bold text-charcoal-800 uppercase tracking-wider">
+                        Файли PDF для версій сайту
                       </label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* UA */}
+                        <div className="p-3.5 rounded-2xl bg-blue-50/30 border border-blue-200 flex flex-col justify-between gap-2.5">
+                          <div>
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <span>🇺🇦</span>
+                              <span className="text-xs font-bold text-charcoal-800">Файл для сайту UA</span>
+                            </div>
+                            <p className="font-mono text-xs text-charcoal-700 break-all">
+                              {editForm.fileNameUa || editForm.fileName || "Не встановлено"}
+                            </p>
+                            <p className="text-[11px] text-charcoal-500">
+                              Розмір: {editForm.fileSizeUa || editForm.fileSize || "—"}
+                            </p>
+                            {(editForm.fileUrlUa || editForm.fileUrl) && (
+                              <a
+                                href={editForm.fileUrlUa || editForm.fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[11px] text-blue-600 hover:underline inline-flex items-center gap-1 pt-0.5"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                <span>Переглянути файл UA</span>
+                              </a>
+                            )}
+                          </div>
+
+                          <label className="w-full py-2 px-3 rounded-xl border border-nude-300 bg-white hover:bg-gold-50 text-charcoal-800 text-xs font-semibold cursor-pointer transition-colors shadow-xs text-center inline-flex items-center justify-center gap-1.5">
+                            <Upload className={`w-3.5 h-3.5 ${uploadingEditPdfUa ? "animate-bounce" : ""}`} />
+                            <span>{uploadingEditPdfUa ? "Завантаження..." : "Замінити UA PDF"}</span>
+                            <input
+                              type="file"
+                              accept=".pdf,application/pdf"
+                              disabled={uploadingEditPdfUa}
+                              onChange={(e) => handleFileUpload(e, "ua", true)}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+
+                        {/* PL */}
+                        <div className="p-3.5 rounded-2xl bg-red-50/30 border border-red-200 flex flex-col justify-between gap-2.5">
+                          <div>
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <span>🇵🇱</span>
+                              <span className="text-xs font-bold text-charcoal-800">Plik dla strony PL</span>
+                            </div>
+                            <p className="font-mono text-xs text-charcoal-700 break-all">
+                              {editForm.fileNamePl || editForm.fileName || "Nie ustawiono"}
+                            </p>
+                            <p className="text-[11px] text-charcoal-500">
+                              Rozmiar: {editForm.fileSizePl || editForm.fileSize || "—"}
+                            </p>
+                            {(editForm.fileUrlPl || editForm.fileUrl) && (
+                              <a
+                                href={editForm.fileUrlPl || editForm.fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[11px] text-red-600 hover:underline inline-flex items-center gap-1 pt-0.5"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                <span>Podgląd pliku PL</span>
+                              </a>
+                            )}
+                          </div>
+
+                          <label className="w-full py-2 px-3 rounded-xl border border-nude-300 bg-white hover:bg-gold-50 text-charcoal-800 text-xs font-semibold cursor-pointer transition-colors shadow-xs text-center inline-flex items-center justify-center gap-1.5">
+                            <Upload className={`w-3.5 h-3.5 ${uploadingEditPdfPl ? "animate-bounce" : ""}`} />
+                            <span>{uploadingEditPdfPl ? "Завантаження..." : "Замінити PL PDF"}</span>
+                            <input
+                              type="file"
+                              accept=".pdf,application/pdf"
+                              disabled={uploadingEditPdfPl}
+                              onChange={(e) => handleFileUpload(e, "pl", true)}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Titles */}
@@ -1099,6 +1424,43 @@ export default function ChecklistsTab() {
                             {item.descriptionUa}
                           </p>
                         )}
+
+                        {/* Dual PDF links */}
+                        <div className="flex flex-wrap items-center gap-2 pt-1.5 text-[11px]">
+                          {(item.fileUrlUa || item.fileUrl) ? (
+                            <a
+                              href={item.fileUrlUa || item.fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 font-medium transition-colors"
+                            >
+                              <span>🇺🇦 UA: {item.fileNameUa || item.fileName || "PDF"}</span>
+                              {item.fileSizeUa && <span className="font-mono text-[10px] text-blue-500">({item.fileSizeUa})</span>}
+                              <ExternalLink className="w-3 h-3 text-blue-500" />
+                            </a>
+                          ) : (
+                            <span className="text-charcoal-400 bg-nude-50 px-2 py-0.5 rounded text-[10px]">
+                              🇺🇦 UA: не завантажено
+                            </span>
+                          )}
+
+                          {(item.fileUrlPl || item.fileUrl) ? (
+                            <a
+                              href={item.fileUrlPl || item.fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 font-medium transition-colors"
+                            >
+                              <span>🇵🇱 PL: {item.fileNamePl || item.fileName || "PDF"}</span>
+                              {item.fileSizePl && <span className="font-mono text-[10px] text-red-500">({item.fileSizePl})</span>}
+                              <ExternalLink className="w-3 h-3 text-red-500" />
+                            </a>
+                          ) : (
+                            <span className="text-charcoal-400 bg-nude-50 px-2 py-0.5 rounded text-[10px]">
+                              🇵🇱 PL: nie załadowano
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -1166,6 +1528,181 @@ export default function ChecklistsTab() {
           })
         )}
       </div>
+        </>
+      ) : (
+        /* Leads Management View */
+        <div className="space-y-6 animate-fadeIn">
+          {/* Leads Action Card */}
+          <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-soft border border-nude-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="font-serif text-lg font-bold text-charcoal-900">
+                  Зібрані контакти відвідувачів (Ліди)
+                </h4>
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                  Всього: {leads.length}
+                </span>
+              </div>
+              <p className="text-xs text-charcoal-500 mt-1 max-w-2xl">
+                Список майстрів, які завантажили безкоштовні PDF-матеріали з реклами Instagram. Використовуйте ці дані для розсилок, зв'язку в Direct та націленої реклами.
+              </p>
+              {copyStatus && (
+                <p className="text-xs font-semibold text-emerald-600 flex items-center gap-1.5 mt-2">
+                  <CheckCheck className="w-4 h-4" />
+                  <span>{copyStatus}</span>
+                </p>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={copyInstagrams}
+                disabled={leads.length === 0}
+                className="px-3.5 py-2 rounded-xl bg-nude-100 hover:bg-gold-100 text-charcoal-800 text-xs font-semibold inline-flex items-center gap-1.5 transition-colors disabled:opacity-40"
+                title="Скопіювати всі нікнейми Instagram"
+              >
+                <InstagramIcon className="w-3.5 h-3.5 text-pink-600" />
+                <span>Копіювати Instagram</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={copyEmails}
+                disabled={leads.length === 0}
+                className="px-3.5 py-2 rounded-xl bg-nude-100 hover:bg-gold-100 text-charcoal-800 text-xs font-semibold inline-flex items-center gap-1.5 transition-colors disabled:opacity-40"
+                title="Скопіювати всі Email"
+              >
+                <Mail className="w-3.5 h-3.5 text-gold-600" />
+                <span>Копіювати Emails</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={exportCsv}
+                disabled={leads.length === 0}
+                className="px-4 py-2 rounded-xl bg-charcoal-900 hover:bg-gold-600 text-white text-xs font-semibold uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors shadow-xs disabled:opacity-40"
+              >
+                <FileDown className="w-4 h-4 text-gold-400" />
+                <span>Експорт CSV</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={fetchLeads}
+                disabled={loadingLeads}
+                className="p-2 rounded-xl border border-nude-300 text-charcoal-600 hover:text-charcoal-900 hover:bg-white transition-colors disabled:opacity-50"
+                title="Оновити список"
+              >
+                <RefreshCw className={`w-4 h-4 ${loadingLeads ? "animate-spin" : ""}`} />
+              </button>
+            </div>
+          </div>
+
+          {/* Table of Leads */}
+          {leads.length === 0 ? (
+            <div className="bg-white rounded-3xl p-12 text-center border border-nude-200 shadow-soft">
+              <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-gold-100 text-gold-700 flex items-center justify-center">
+                <Users className="w-7 h-7" />
+              </div>
+              <h4 className="font-serif text-lg font-semibold text-charcoal-900">
+                Поки що немає завантажень
+              </h4>
+              <p className="text-xs text-charcoal-500 max-w-md mx-auto mt-1">
+                Коли відвідувачі завантажуватимуть чек-листи на сайті або з реклами, їхні контакти та досвід автоматично фіксуватимуться в цій таблиці.
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-3xl shadow-soft border border-nude-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-nude-50/80 border-b border-nude-200 text-[11px] font-bold text-charcoal-600 uppercase tracking-wider">
+                      <th className="py-3.5 px-4 sm:px-6">Дата & Час</th>
+                      <th className="py-3.5 px-4">Instagram</th>
+                      <th className="py-3.5 px-4">Email</th>
+                      <th className="py-3.5 px-4">Досвід</th>
+                      <th className="py-3.5 px-4">Чек-лист</th>
+                      <th className="py-3.5 px-4 text-center">Мова</th>
+                      <th className="py-3.5 px-4 text-right">Дії</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-nude-100 text-xs text-charcoal-800">
+                    {leads.map((lead) => {
+                      const igClean = lead.instagram.replace(/^@/, "");
+                      const dateStr = new Date(lead.createdAt).toLocaleString("uk-UA", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      });
+
+                      return (
+                        <tr key={lead.id} className="hover:bg-nude-50/50 transition-colors">
+                          <td className="py-3.5 px-4 sm:px-6 font-mono text-[11px] text-charcoal-500 whitespace-nowrap">
+                            {dateStr}
+                          </td>
+                          <td className="py-3.5 px-4 font-medium">
+                            <a
+                              href={`https://instagram.com/${igClean}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-charcoal-900 hover:text-gold-600 font-semibold group"
+                            >
+                              <InstagramIcon className="w-3.5 h-3.5 text-pink-600 shrink-0" />
+                              <span>{lead.instagram}</span>
+                              <ExternalLink className="w-3 h-3 text-charcoal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </a>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <a
+                              href={`mailto:${lead.email}`}
+                              className="text-charcoal-700 hover:text-gold-700 hover:underline font-mono text-[11.5px]"
+                            >
+                              {lead.email}
+                            </a>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-gold-50 text-gold-900 border border-gold-200 whitespace-nowrap">
+                              {lead.experience}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 max-w-xs truncate text-charcoal-600" title={lead.checklistTitle}>
+                            {lead.checklistTitle}
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <span
+                              className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${
+                                lead.language === "pl"
+                                  ? "bg-red-50 text-red-700 border border-red-200"
+                                  : "bg-blue-50 text-blue-700 border border-blue-200"
+                              }`}
+                            >
+                              {lead.language === "pl" ? "🇵🇱 PL" : "🇺🇦 UA"}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            <button
+                              type="button"
+                              disabled={deletingLeadId === lead.id}
+                              onClick={() => handleDeleteLead(lead.id)}
+                              className="p-1.5 rounded-lg text-charcoal-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
+                              title="Видалити запис"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Unsaved Changes Confirmation Modal */}
       <UnsavedChangesModal

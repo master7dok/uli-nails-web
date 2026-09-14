@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { getSettingText } from "@/lib/settingsHelper";
 import { DefaultLeadMagnet } from "@/lib/defaultData";
+import LeadCaptureModal from "@/components/LeadCaptureModal";
 
 interface LeadMagnetSectionProps {
   items?: DefaultLeadMagnet[];
@@ -26,8 +27,8 @@ export default function LeadMagnetSection({
   settings = {},
 }: LeadMagnetSectionProps) {
   const { language, t, getLocalized } = useLanguage();
-  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [downloadedIds, setDownloadedIds] = useState<Record<string, boolean>>({});
+  const [selectedItemForModal, setSelectedItemForModal] = useState<DefaultLeadMagnet | null>(null);
 
   const activeItems = items.filter((item) => item.isActive !== false);
 
@@ -69,33 +70,8 @@ export default function LeadMagnetSection({
         : "⚡ Błyskawiczne pobieranie w 1 kliknięcie • Za darmo dla stylistek")
   );
 
-  const handleDownload = async (item: DefaultLeadMagnet) => {
-    if (!item.id || !item.fileUrl) return;
-
-    setDownloadingId(item.id);
-
-    try {
-      // Increment counter asynchronously on backend
-      fetch(`/api/lead-magnets/${item.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "download" }),
-      }).catch(() => {});
-
-      // Trigger actual download / open
-      const link = document.createElement("a");
-      link.href = item.fileUrl;
-      link.download = item.fileName || "checklist.pdf";
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      setDownloadedIds((prev) => ({ ...prev, [item.id!]: true }));
-    } finally {
-      setTimeout(() => setDownloadingId(null), 1200);
-    }
+  const handleDownload = (item: DefaultLeadMagnet) => {
+    setSelectedItemForModal(item);
   };
 
   return (
@@ -135,7 +111,10 @@ export default function LeadMagnetSection({
             const badge = getLocalized(item, "badge") || (language === "ua" ? "Безкоштовний PDF" : "Darmowy PDF");
             const buttonText = getLocalized(item, "buttonText") || (language === "ua" ? "Завантажити чек-лист" : "Pobierz checklist");
             const isDownloaded = Boolean(item.id && downloadedIds[item.id]);
-            const isDownloading = downloadingId === item.id;
+            const displaySize =
+              language === "pl"
+                ? item.fileSizePl || item.fileSize || item.fileSizeUa
+                : item.fileSizeUa || item.fileSize || item.fileSizePl;
 
             return (
               <motion.div
@@ -160,9 +139,9 @@ export default function LeadMagnetSection({
                       <span className="text-[10px] sm:text-[11px] font-bold tracking-widest text-gold-200 uppercase">
                         PDF
                       </span>
-                      {item.fileSize && (
+                      {displaySize && (
                         <span className="text-[9px] text-charcoal-300 font-mono mt-0.5">
-                          {item.fileSize}
+                          {displaySize}
                         </span>
                       )}
                     </div>
@@ -203,7 +182,6 @@ export default function LeadMagnetSection({
                   <div className="flex flex-col sm:flex-row md:flex-col items-stretch sm:items-center md:items-end gap-2.5 w-full md:w-auto shrink-0">
                     <button
                       type="button"
-                      disabled={isDownloading}
                       onClick={() => handleDownload(item)}
                       className={`px-7 py-4 rounded-2xl font-semibold text-xs sm:text-sm uppercase tracking-wider inline-flex items-center justify-center gap-2.5 shadow-md transition-all duration-300 cursor-pointer ${
                         isDownloaded
@@ -215,12 +193,12 @@ export default function LeadMagnetSection({
                         <>
                           <CheckCircle2 className="w-4 h-4 text-white" />
                           <span>
-                            {language === "ua" ? "Завантажено знову!" : "Pobrano ponownie!"}
+                            {language === "ua" ? "Завантажити ще раз" : "Pobierz ponownie"}
                           </span>
                         </>
                       ) : (
                         <>
-                          <ArrowDownToLine className={`w-4 h-4 text-gold-400 ${isDownloading ? "animate-bounce" : ""}`} />
+                          <ArrowDownToLine className="w-4 h-4 text-gold-400" />
                           <span>{buttonText}</span>
                         </>
                       )}
@@ -237,6 +215,20 @@ export default function LeadMagnetSection({
           })}
         </div>
       </div>
+
+      <LeadCaptureModal
+        isOpen={Boolean(selectedItemForModal)}
+        onClose={() => setSelectedItemForModal(null)}
+        leadMagnetId={selectedItemForModal?.id}
+        checklistTitle={selectedItemForModal ? getLocalized(selectedItemForModal, "title") : ""}
+        language={language}
+        t={t}
+        onSuccess={() => {
+          if (selectedItemForModal?.id) {
+            setDownloadedIds((prev) => ({ ...prev, [selectedItemForModal.id!]: true }));
+          }
+        }}
+      />
     </section>
   );
 }
