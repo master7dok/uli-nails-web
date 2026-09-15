@@ -134,6 +134,29 @@ model ChecklistLead {
   email          String
   experience     String
   language       String      @default("ua")
+  type           String      @default("checklist") // "checklist" | "video"
   createdAt      DateTime    @default(now())
 }
+
+model BonusVideo {
+  id            String    @id @default(cuid())
+  videoUrlUa    String?
+  videoUrlPl    String?
+  titleUa       String
+  titlePl       String
+  descriptionUa String?
+  descriptionPl String?
+  badgeUa       String?   @default("Безкоштовний відеоурок")
+  badgePl       String?   @default("Darmowa lekcja wideo")
+  buttonTextUa  String?   @default("Дивитися відео")
+  buttonTextPl  String?   @default("Oglądaj wideo")
+  coverUrl      String?
+  duration      String?
+  viewsCount    Int       @default(0)
+  sortOrder     Int       @default(0)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
 

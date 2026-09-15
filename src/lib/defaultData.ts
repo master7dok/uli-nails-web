@@ -100,6 +100,25 @@ export interface DefaultLeadMagnet {
   isActive?: boolean;
 }
 
+export interface DefaultBonusVideo {
+  id?: string;
+  videoUrlUa?: string | null;
+  videoUrlPl?: string | null;
+  titleUa: string;
+  titlePl: string;
+  descriptionUa?: string | null;
+  descriptionPl?: string | null;
+  badgeUa?: string | null;
+  badgePl?: string | null;
+  buttonTextUa?: string | null;
+  buttonTextPl?: string | null;
+  coverUrl?: string | null;
+  duration?: string | null;
+  viewsCount?: number;
+  sortOrder?: number;
+  isActive?: boolean;
+}
+
 export interface DefaultChecklistLead {
   id: string;
   leadMagnetId?: string | null;
@@ -108,6 +127,7 @@ export interface DefaultChecklistLead {
   email: string;
   experience: string;
   language: string;
+  type?: string; // "checklist" | "video"
   createdAt: string;
 }
 
@@ -720,6 +740,8 @@ export const defaultLeadMagnets: DefaultLeadMagnet[] = [
     isActive: true,
   },
 ];
+
+export const defaultBonusVideos: DefaultBonusVideo[] = [];
 
 export const fallbackLeads: DefaultChecklistLead[] = [
   {

@@ -140,7 +140,7 @@ export default function AdminPage() {
   const navItems = [
     { id: "prices" as ActiveTab, label: "Прайс-лист", icon: DollarSign },
     { id: "courses" as ActiveTab, label: "Курси & Менторинг", icon: GraduationCap },
-    { id: "checklists" as ActiveTab, label: "Чек-листи / PDF", icon: FileDown },
+    { id: "checklists" as ActiveTab, label: "Корисне (PDF & Відео)", icon: FileDown },
     { id: "training" as ActiveTab, label: "Фото з навчань", icon: Award },
     { id: "portfolio" as ActiveTab, label: "Портфоліо / Фото", icon: ImageIcon },
     { id: "testimonials" as ActiveTab, label: "Відгуки (Редагування)", icon: MessageSquareQuote },

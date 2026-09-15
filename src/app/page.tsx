@@ -15,6 +15,7 @@ import {
   defaultPortfolio,
   defaultTrainingPhotos,
   defaultLeadMagnets,
+  defaultBonusVideos,
   defaultTestimonials,
   defaultSettings,
 } from "@/lib/defaultData";
@@ -27,13 +28,14 @@ export default async function HomePage() {
   let portfolio: any[] = [];
   let trainingPhotos: any[] = [];
   let leadMagnets: any[] = [];
+  let bonusVideos: any[] = [];
   let testimonials: any[] = [];
   let settingsList: any[] = [];
 
   try {
     const dbOnline = await isDatabaseAvailable();
     if (dbOnline) {
-      [courses, services, portfolio, trainingPhotos, leadMagnets, testimonials, settingsList] = await Promise.all([
+      [courses, services, portfolio, trainingPhotos, leadMagnets, bonusVideos, testimonials, settingsList] = await Promise.all([
         prisma.course.findMany({
           where: { isActive: true },
           orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
@@ -48,6 +50,10 @@ export default async function HomePage() {
           orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
         }),
         prisma.leadMagnet.findMany({
+          where: { isActive: true },
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+        }),
+        prisma.bonusVideo.findMany({
           where: { isActive: true },
           orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
         }),
@@ -84,6 +90,9 @@ export default async function HomePage() {
   if (!leadMagnets || (settings.lead_magnets_initialized !== "true" && leadMagnets.length === 0)) {
     leadMagnets = defaultLeadMagnets;
   }
+  if (!bonusVideos) {
+    bonusVideos = defaultBonusVideos;
+  }
   if (!testimonials || testimonials.length === 0) {
     testimonials = defaultTestimonials;
   }
@@ -94,7 +103,7 @@ export default async function HomePage() {
       <Hero settings={settings} />
       <About settings={settings} />
       <Courses courses={courses} settings={settings} />
-      <LeadMagnetSection items={leadMagnets} settings={settings} />
+      <LeadMagnetSection items={leadMagnets} videos={bonusVideos} settings={settings} />
       <TrainingGallery items={trainingPhotos} settings={settings} />
       <PriceList services={services} settings={settings} />
       <Portfolio items={portfolio} settings={settings} />

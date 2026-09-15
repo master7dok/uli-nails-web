@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Download, CheckCircle2, AlertCircle, Sparkles, Loader2 } from "lucide-react";
+import { X, Download, CheckCircle2, AlertCircle, Sparkles, Loader2, Play } from "lucide-react";
 import InstagramIcon from "@/components/icons/InstagramIcon";
 
 interface LeadCaptureModalProps {
@@ -12,7 +12,11 @@ interface LeadCaptureModalProps {
   checklistTitle: string;
   language: "ua" | "pl";
   t: any;
+  mode?: "checklist" | "video";
+  videoId?: string;
+  videoTitle?: string;
   onSuccess?: () => void;
+  onVideoUnlocked?: (videoUrl: string) => void;
 }
 
 export default function LeadCaptureModal({
@@ -22,38 +26,75 @@ export default function LeadCaptureModal({
   checklistTitle,
   language,
   t,
+  mode = "checklist",
+  videoId,
+  videoTitle,
   onSuccess,
+  onVideoUnlocked,
 }: LeadCaptureModalProps) {
-  const modalTexts = t?.leadModal || {
-    badge: language === "pl" ? "Darmowy materiał" : "Безкоштовний матеріал",
-    title: language === "pl" ? "Pobierz checklist" : "Отримати чек-лист",
-    subtitle:
-      language === "pl"
-        ? "Wypełnij krótki formularz, aby natychmiast pobrać PDF na swoje urządzenie:"
-        : "Заповніть контакти, щоб миттєво завантажити PDF-посібник:",
-    instagramLabel: language === "pl" ? "Twój Instagram" : "Ваш Instagram",
-    instagramPlaceholder: "@nik_instagram",
-    emailLabel: language === "pl" ? "Email do kontaktu" : "Email для зворотного зв'язку",
-    emailPlaceholder: "example@gmail.com",
-    experienceLabel: language === "pl" ? "Ile lat w zawodzie?" : "Скільки років у професії?",
-    expOptions:
-      language === "pl"
-        ? ["Początkująca / planuję zacząć", "Do 1 roku", "1–3 lata", "Powyżej 3 lat"]
-        : ["Початківець / планую почати", "До 1 року", "1–3 роки", "Понад 3 роки"],
-    submitBtn: language === "pl" ? "Pobierz darmowy PDF" : "Завантажити чек-лист PDF",
-    downloading: language === "pl" ? "Przygotowujemy plik..." : "Готуємо ваш файл...",
-    successTitle: language === "pl" ? "Dziękujemy! Plik gotowy 🎉" : "Дякуємо! Файл готовий 🎉",
-    successText:
-      language === "pl"
-        ? "Pobieranie pliku PDF rozpoczęło się automatycznie."
-        : "Завантаження PDF розпочалося автоматично.",
-    privacyNote:
-      language === "pl"
-        ? "🔒 Zero spamu. Tylko przydatne materiały i autorskie wskazówki od Uliany."
-        : "🔒 Без спаму. Тільки корисні матеріали та авторські фішки від Уляни.",
-    fieldRequired: language === "pl" ? "Proszę wypełnić to pole" : "Будь ласка, заповніть це поле",
-    invalidEmail: language === "pl" ? "Wpisz poprawny adres e-mail" : "Введіть коректну електронну пошту",
-  };
+  const isVideoMode = mode === "video";
+
+  const modalTexts = isVideoMode
+    ? {
+        badge: language === "pl" ? "Darmowa lekcja wideo" : "Безкоштовний відеоурок",
+        title: language === "pl" ? "Oglądaj lekcję wideo" : "Отримати доступ до відео",
+        subtitle:
+          language === "pl"
+            ? "Wypełnij formularz, aby natychmiast odtworzyć wideo na stronie:"
+            : "Заповніть контакти, щоб миттєво відкрити відеоурок прямо на сайті:",
+        instagramLabel: language === "pl" ? "Twój Instagram" : "Ваш Instagram",
+        instagramPlaceholder: "@nik_instagram",
+        emailLabel: language === "pl" ? "Email do kontaktu" : "Email для зворотного зв'язку",
+        emailPlaceholder: "example@gmail.com",
+        experienceLabel: language === "pl" ? "Ile lat w zawodzie?" : "Скільки років у професії?",
+        expOptions:
+          language === "pl"
+            ? ["Początkująca / planuję zacząć", "Do 1 roku", "1–3 lata", "Powyżej 3 lat"]
+            : ["Початківець / планую почати", "До 1 року", "1–3 роки", "Понад 3 роки"],
+        submitBtn: language === "pl" ? "Oglądaj wideo teraz" : "Дивитися відео зараз",
+        downloading: language === "pl" ? "Otwieramy wideo..." : "Відкриваємо відео...",
+        successTitle: language === "pl" ? "Dostęp odblokowany! 🎉" : "Доступ відкрито! 🎉",
+        successText:
+          language === "pl"
+            ? "Uruchamianie odtwarzacza wideo..."
+            : "Запускаємо відеоплеєр...",
+        privacyNote:
+          language === "pl"
+            ? "🔒 Zero spamu. Tylko przydatne materiały i autorskie wskazówki od Uliany."
+            : "🔒 Без спаму. Тільки корисні матеріали та авторські фішки від Уляни.",
+        fieldRequired: language === "pl" ? "Proszę wypełnić to pole" : "Будь ласка, заповніть це поле",
+        invalidEmail: language === "pl" ? "Wpisz poprawny adres e-mail" : "Введіть коректну електронну пошту",
+      }
+    : (t?.leadModal || {
+        badge: language === "pl" ? "Darmowy materiał" : "Безкоштовний матеріал",
+        title: language === "pl" ? "Pobierz checklist" : "Отримати чек-лист",
+        subtitle:
+          language === "pl"
+            ? "Wypełnij krótki formularz, aby natychmiast pobrać PDF na swoje urządzenie:"
+            : "Заповніть контакти, щоб миттєво завантажити PDF-посібник:",
+        instagramLabel: language === "pl" ? "Twój Instagram" : "Ваш Instagram",
+        instagramPlaceholder: "@nik_instagram",
+        emailLabel: language === "pl" ? "Email do kontaktu" : "Email для зворотного зв'язку",
+        emailPlaceholder: "example@gmail.com",
+        experienceLabel: language === "pl" ? "Ile lat w zawodzie?" : "Скільки років у професії?",
+        expOptions:
+          language === "pl"
+            ? ["Początkująca / planuję zacząć", "Do 1 roku", "1–3 lata", "Powyżej 3 lat"]
+            : ["Початківець / планую почати", "До 1 року", "1–3 роки", "Понад 3 роки"],
+        submitBtn: language === "pl" ? "Pobierz darmowy PDF" : "Завантажити чек-лист PDF",
+        downloading: language === "pl" ? "Przygotowujemy plik..." : "Готуємо ваш файл...",
+        successTitle: language === "pl" ? "Dziękujemy! Plik gotowy 🎉" : "Дякуємо! Файл готовий 🎉",
+        successText:
+          language === "pl"
+            ? "Pobieranie pliku PDF розпочалося автоматично."
+            : "Завантаження PDF розпочалося автоматично.",
+        privacyNote:
+          language === "pl"
+            ? "🔒 Zero spamu. Tylko przydatne materiały i autorskie wskazówki od Uliany."
+            : "🔒 Без спаму. Тільки корисні матеріали та авторські фішки від Уляни.",
+        fieldRequired: language === "pl" ? "Proszę wypełnić to pole" : "Будь ласка, заповніть це поле",
+        invalidEmail: language === "pl" ? "Wpisz poprawny adres e-mail" : "Введіть коректну електронну пошту",
+      });
 
   const [instagram, setInstagram] = useState("");
   const [email, setEmail] = useState("");
@@ -99,17 +140,26 @@ export default function LeadCaptureModal({
     try {
       const formattedIg = cleanIg.startsWith("@") ? cleanIg : `@${cleanIg}`;
 
+      const payload: any = {
+        instagram: formattedIg,
+        email: cleanMail,
+        experience,
+        language,
+        type: isVideoMode ? "video" : "checklist",
+      };
+
+      if (isVideoMode) {
+        payload.videoId = videoId;
+        payload.videoTitle = videoTitle || checklistTitle;
+      } else {
+        payload.leadMagnetId = leadMagnetId;
+        payload.checklistTitle = checklistTitle;
+      }
+
       const res = await fetch("/api/lead-magnets/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          leadMagnetId,
-          checklistTitle,
-          instagram: formattedIg,
-          email: cleanMail,
-          experience,
-          language,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -121,23 +171,33 @@ export default function LeadCaptureModal({
       setIsSuccess(true);
       if (onSuccess) onSuccess();
 
-      // Trigger actual download of the language-specific PDF
-      const downloadUrl = data.downloadUrl || "/uploads/checklist-nail-expert.pdf";
-      const fileName = data.fileName || (language === "pl" ? "Checklist_Nail_Expert_PL.pdf" : "Checklist_Nail_Expert_UA.pdf");
+      if (isVideoMode) {
+        const resolvedVideoUrl = data.videoUrl;
+        setTimeout(() => {
+          handleClose();
+          if (onVideoUnlocked && resolvedVideoUrl) {
+            onVideoUnlocked(resolvedVideoUrl);
+          }
+        }, 1200);
+      } else {
+        // Trigger actual download of the language-specific PDF
+        const downloadUrl = data.downloadUrl || "/uploads/checklist-nail-expert.pdf";
+        const fileName = data.fileName || (language === "pl" ? "Checklist_Nail_Expert_PL.pdf" : "Checklist_Nail_Expert_UA.pdf");
 
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.download = fileName;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = fileName;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
 
-      // Close modal smoothly after brief celebration
-      setTimeout(() => {
-        handleClose();
-      }, 2400);
+        // Close modal smoothly after brief celebration
+        setTimeout(() => {
+          handleClose();
+        }, 2400);
+      }
     } catch (err: any) {
       setError(err?.message || "Помилка при збереженні. Спробуйте ще раз.");
     } finally {
@@ -310,7 +370,11 @@ export default function LeadCaptureModal({
                       </>
                     ) : (
                       <>
-                        <Download className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
+                        {isVideoMode ? (
+                          <Play className="w-4 h-4 fill-current transition-transform group-hover:scale-110" />
+                        ) : (
+                          <Download className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
+                        )}
                         <span>{modalTexts.submitBtn}</span>
                       </>
                     )}

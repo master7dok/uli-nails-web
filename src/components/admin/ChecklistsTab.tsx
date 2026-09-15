@@ -25,10 +25,13 @@ import {
   Mail,
   CheckCheck,
   FileCheck,
+  Film,
+  Play,
 } from "lucide-react";
 import InstagramIcon from "@/components/icons/InstagramIcon";
 import { getAdminHeaders } from "@/lib/adminClient";
 import UnsavedChangesModal from "./UnsavedChangesModal";
+import VideosManager from "./VideosManager";
 import { defaultLeadMagnets, defaultSettings, DefaultLeadMagnet } from "@/lib/defaultData";
 
 export interface ChecklistLeadItem {
@@ -39,6 +42,7 @@ export interface ChecklistLeadItem {
   email: string;
   experience: string;
   language: string;
+  type?: string;
   createdAt: string;
 }
 
@@ -95,14 +99,27 @@ export default function ChecklistsTab() {
   const [reordering, setReordering] = useState(false);
   const [reorderSuccess, setReorderSuccess] = useState(false);
 
-  // Subtab switcher: checklists vs leads
-  const [activeSubTab, setActiveSubTab] = useState<"checklists" | "leads">("checklists");
+  // Subtab switcher: checklists vs videos vs leads
+  const [activeSubTab, setActiveSubTab] = useState<"checklists" | "videos" | "leads">("checklists");
+  const [videosCount, setVideosCount] = useState(0);
+  const [leadFilter, setLeadFilter] = useState<"all" | "checklist" | "video">("all");
 
   // Leads state
   const [leads, setLeads] = useState<ChecklistLeadItem[]>([]);
   const [loadingLeads, setLoadingLeads] = useState(false);
   const [deletingLeadId, setDeletingLeadId] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
+
+  // Filtered leads
+  const filteredLeads = useMemo(() => {
+    if (leadFilter === "checklist") {
+      return leads.filter((l) => l.type !== "video");
+    }
+    if (leadFilter === "video") {
+      return leads.filter((l) => l.type === "video");
+    }
+    return leads;
+  }, [leads, leadFilter]);
 
   // Section texts settings
   const [settings, setSettings] = useState<Record<string, string>>({ ...defaultSettings });
@@ -159,9 +176,10 @@ export default function ChecklistsTab() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [resItems, resSettings] = await Promise.all([
+      const [resItems, resSettings, resVideos] = await Promise.all([
         fetch("/api/lead-magnets"),
         fetch("/api/settings"),
+        fetch("/api/bonus-videos", { headers: getAdminHeaders() }).catch(() => null),
       ]);
 
       const dataItems = await resItems.json();
@@ -172,6 +190,13 @@ export default function ChecklistsTab() {
       const dataSettings = await resSettings.json();
       if (dataSettings && typeof dataSettings === "object") {
         setSettings((prev) => ({ ...prev, ...dataSettings }));
+      }
+
+      if (resVideos && resVideos.ok) {
+        const dataVideos = await resVideos.json();
+        if (Array.isArray(dataVideos)) {
+          setVideosCount(dataVideos.length);
+        }
       }
     } catch (e) {
       console.error("Failed to load lead magnets data:", e);
@@ -356,7 +381,8 @@ export default function ChecklistsTab() {
   };
 
   const copyEmails = () => {
-    const emails = Array.from(new Set(leads.map((l) => l.email.trim()).filter(Boolean)));
+    const list = filteredLeads.length > 0 ? filteredLeads : leads;
+    const emails = Array.from(new Set(list.map((l) => l.email.trim()).filter(Boolean)));
     if (emails.length === 0) {
       alert("Немає email для копіювання");
       return;
@@ -367,7 +393,8 @@ export default function ChecklistsTab() {
   };
 
   const copyInstagrams = () => {
-    const igs = Array.from(new Set(leads.map((l) => l.instagram.trim()).filter(Boolean)));
+    const list = filteredLeads.length > 0 ? filteredLeads : leads;
+    const igs = Array.from(new Set(list.map((l) => l.instagram.trim()).filter(Boolean)));
     if (igs.length === 0) {
       alert("Немає ніків Instagram для копіювання");
       return;
@@ -378,21 +405,22 @@ export default function ChecklistsTab() {
   };
 
   const exportCsv = () => {
-    if (leads.length === 0) {
+    const list = filteredLeads.length > 0 ? filteredLeads : leads;
+    if (list.length === 0) {
       alert("Немає лідів для експорту");
       return;
     }
-    const headers = "Дата;Instagram;Email;Досвід;Чек-лист;Мова\n";
-    const rows = leads
+    const headers = "Дата;Тип;Instagram;Email;Досвід;Матеріал;Мова\n";
+    const rows = list
       .map((l) =>
-        `"${new Date(l.createdAt).toLocaleString("uk-UA")}";"${l.instagram}";"${l.email}";"${l.experience}";"${l.checklistTitle.replace(/"/g, '""')}";"${l.language.toUpperCase()}"`
+        `"${new Date(l.createdAt).toLocaleString("uk-UA")}";"${l.type === "video" ? "Відео" : "PDF"}";"${l.instagram}";"${l.email}";"${l.experience}";"${l.checklistTitle.replace(/"/g, '""')}";"${l.language.toUpperCase()}"`
       )
       .join("\n");
     const blob = new Blob(["\uFEFF" + headers + rows], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `leads_checklists_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `leads_${leadFilter}_${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -717,7 +745,7 @@ export default function ChecklistsTab() {
         </div>
       </div>
 
-      {/* Sub-tabs Switcher: Checklists vs Leads */}
+      {/* Sub-tabs Switcher: Checklists vs Videos vs Leads */}
       <div className="flex flex-wrap items-center gap-3 border-b border-nude-200 pb-3">
         <button
           type="button"
@@ -734,6 +762,19 @@ export default function ChecklistsTab() {
 
         <button
           type="button"
+          onClick={() => setActiveSubTab("videos")}
+          className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all inline-flex items-center gap-2 ${
+            activeSubTab === "videos"
+              ? "bg-charcoal-900 text-white shadow-md"
+              : "bg-white text-charcoal-600 hover:text-charcoal-900 border border-nude-200 hover:border-gold-300"
+          }`}
+        >
+          <Play className="w-4 h-4 text-gold-400 fill-current" />
+          <span>Відео-уроки ({videosCount})</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => {
             setActiveSubTab("leads");
             fetchLeads();
@@ -745,7 +786,7 @@ export default function ChecklistsTab() {
           }`}
         >
           <Users className="w-4 h-4 text-gold-400" />
-          <span>Хто завантажив / Ліди ({leads.length})</span>
+          <span>База контактів / Ліди ({leads.length})</span>
           {leads.length > 0 && (
             <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-gold-500 text-white">
               {leads.length}
@@ -754,7 +795,7 @@ export default function ChecklistsTab() {
         </button>
       </div>
 
-      {activeSubTab === "checklists" ? (
+      {activeSubTab === "checklists" && (
         <>
           {/* Accordion: Quick Section Header Texts Editor */}
       {showTextEditor && (
@@ -1529,7 +1570,13 @@ export default function ChecklistsTab() {
         )}
       </div>
         </>
-      ) : (
+      )}
+
+      {activeSubTab === "videos" && (
+        <VideosManager onCountChange={(c) => setVideosCount(c)} />
+      )}
+
+      {activeSubTab === "leads" && (
         /* Leads Management View */
         <div className="space-y-6 animate-fadeIn">
           {/* Leads Action Card */}
@@ -1544,7 +1591,7 @@ export default function ChecklistsTab() {
                 </span>
               </div>
               <p className="text-xs text-charcoal-500 mt-1 max-w-2xl">
-                Список майстрів, які завантажили безкоштовні PDF-матеріали з реклами Instagram. Використовуйте ці дані для розсилок, зв'язку в Direct та націленої реклами.
+                Список майстрів, які завантажили безкоштовні PDF-матеріали або відкрили відеоуроки з реклами Instagram.
               </p>
               {copyStatus && (
                 <p className="text-xs font-semibold text-emerald-600 flex items-center gap-1.5 mt-2">
@@ -1552,6 +1599,45 @@ export default function ChecklistsTab() {
                   <span>{copyStatus}</span>
                 </p>
               )}
+
+              {/* Filter pills */}
+              <div className="flex flex-wrap items-center gap-2 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setLeadFilter("all")}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
+                    leadFilter === "all"
+                      ? "bg-charcoal-900 text-white shadow-xs"
+                      : "bg-nude-100/80 text-charcoal-700 hover:bg-nude-200"
+                  }`}
+                >
+                  Всі контакти ({leads.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLeadFilter("checklist")}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors inline-flex items-center gap-1.5 ${
+                    leadFilter === "checklist"
+                      ? "bg-charcoal-900 text-white shadow-xs"
+                      : "bg-nude-100/80 text-charcoal-700 hover:bg-nude-200"
+                  }`}
+                >
+                  <FileDown className="w-3.5 h-3.5 text-gold-600" />
+                  <span>Чек-листи PDF ({leads.filter((l) => l.type !== "video").length})</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLeadFilter("video")}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors inline-flex items-center gap-1.5 ${
+                    leadFilter === "video"
+                      ? "bg-charcoal-900 text-white shadow-xs"
+                      : "bg-nude-100/80 text-charcoal-700 hover:bg-nude-200"
+                  }`}
+                >
+                  <Play className="w-3.5 h-3.5 text-gold-600 fill-current" />
+                  <span>Відеоуроки ({leads.filter((l) => l.type === "video").length})</span>
+                </button>
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 shrink-0">
@@ -1612,6 +1698,18 @@ export default function ChecklistsTab() {
                 Коли відвідувачі завантажуватимуть чек-листи на сайті або з реклами, їхні контакти та досвід автоматично фіксуватимуться в цій таблиці.
               </p>
             </div>
+          ) : filteredLeads.length === 0 ? (
+            <div className="bg-white rounded-3xl p-12 text-center border border-nude-200 shadow-soft">
+              <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-gold-100 text-gold-700 flex items-center justify-center">
+                <Users className="w-7 h-7" />
+              </div>
+              <h4 className="font-serif text-lg font-semibold text-charcoal-900">
+                Контактів за вибраним фільтром не знайдено
+              </h4>
+              <p className="text-xs text-charcoal-500 max-w-md mx-auto mt-1">
+                Спробуйте вибрати іншу категорію матеріалів або перегляньте всі контакти.
+              </p>
+            </div>
           ) : (
             <div className="bg-white rounded-3xl shadow-soft border border-nude-200 overflow-hidden">
               <div className="overflow-x-auto">
@@ -1622,13 +1720,13 @@ export default function ChecklistsTab() {
                       <th className="py-3.5 px-4">Instagram</th>
                       <th className="py-3.5 px-4">Email</th>
                       <th className="py-3.5 px-4">Досвід</th>
-                      <th className="py-3.5 px-4">Чек-лист</th>
+                      <th className="py-3.5 px-4">Матеріал</th>
                       <th className="py-3.5 px-4 text-center">Мова</th>
                       <th className="py-3.5 px-4 text-right">Дії</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-nude-100 text-xs text-charcoal-800">
-                    {leads.map((lead) => {
+                    {filteredLeads.map((lead) => {
                       const igClean = lead.instagram.replace(/^@/, "");
                       const dateStr = new Date(lead.createdAt).toLocaleString("uk-UA", {
                         day: "2-digit",
@@ -1668,8 +1766,21 @@ export default function ChecklistsTab() {
                               {lead.experience}
                             </span>
                           </td>
-                          <td className="py-3.5 px-4 max-w-xs truncate text-charcoal-600" title={lead.checklistTitle}>
-                            {lead.checklistTitle}
+                          <td className="py-3.5 px-4 max-w-xs truncate text-charcoal-700" title={lead.checklistTitle}>
+                            <div className="flex items-center gap-1.5">
+                              {lead.type === "video" ? (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200 shrink-0 inline-flex items-center gap-1">
+                                  <Play className="w-2.5 h-2.5 fill-current" />
+                                  <span>Відео</span>
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200 shrink-0 inline-flex items-center gap-1">
+                                  <FileText className="w-2.5 h-2.5" />
+                                  <span>PDF</span>
+                                </span>
+                              )}
+                              <span className="truncate">{lead.checklistTitle}</span>
+                            </div>
                           </td>
                           <td className="py-3.5 px-4 text-center">
                             <span

@@ -26,7 +26,17 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    const { leadMagnetId, checklistTitle, instagram, email, experience, language } = data;
+    const {
+      leadMagnetId,
+      videoId,
+      checklistTitle,
+      videoTitle,
+      instagram,
+      email,
+      experience,
+      language,
+      type: rawType,
+    } = data;
 
     if (!instagram || !email || !experience) {
       return NextResponse.json(
@@ -35,20 +45,67 @@ export async function POST(request: Request) {
       );
     }
 
+    const isVideo = rawType === "video" || Boolean(videoId);
+    const leadType = isVideo ? "video" : "checklist";
+
     const cleanInstagram = instagram.trim().startsWith("@")
       ? instagram.trim()
       : `@${instagram.trim()}`;
 
     const cleanEmail = email.trim().toLowerCase();
     const cleanLang = language === "pl" ? "pl" : "ua";
-    const title = checklistTitle || "Чек-лист для nail-майстрів";
+    const title =
+      videoTitle ||
+      checklistTitle ||
+      (isVideo ? (cleanLang === "pl" ? "Lekcja wideo" : "Відеоурок") : "Чек-лист для nail-майстрів");
 
     let downloadUrl = "/uploads/checklist-nail-expert.pdf";
     let fileName = cleanLang === "pl" ? "Checklist_Nail_Expert_PL.pdf" : "Checklist_Nail_Expert_UA.pdf";
+    let videoUrl = "";
 
-    // Find lead magnet info to get the correct language-specific PDF
     if (await isDatabaseAvailable()) {
       try {
+        if (isVideo) {
+          let video = null;
+          if (videoId) {
+            video = await prisma.bonusVideo.findUnique({
+              where: { id: videoId },
+            });
+          }
+
+          if (video) {
+            videoUrl =
+              cleanLang === "pl"
+                ? video.videoUrlPl || video.videoUrlUa || ""
+                : video.videoUrlUa || video.videoUrlPl || "";
+
+            await prisma.bonusVideo.update({
+              where: { id: video.id },
+              data: { viewsCount: { increment: 1 } },
+            });
+          }
+
+          const newLead = await prisma.checklistLead.create({
+            data: {
+              leadMagnetId: null,
+              checklistTitle: video ? (cleanLang === "pl" ? video.titlePl : video.titleUa) : title,
+              instagram: cleanInstagram,
+              email: cleanEmail,
+              experience: experience.trim(),
+              language: cleanLang,
+              type: "video",
+            },
+          });
+
+          return NextResponse.json({
+            success: true,
+            type: "video",
+            videoUrl,
+            leadId: newLead.id,
+          });
+        }
+
+        // PDF Checklist handling
         let magnet = null;
         if (leadMagnetId) {
           magnet = await prisma.leadMagnet.findUnique({
@@ -80,11 +137,13 @@ export async function POST(request: Request) {
             email: cleanEmail,
             experience: experience.trim(),
             language: cleanLang,
+            type: "checklist",
           },
         });
 
         return NextResponse.json({
           success: true,
+          type: "checklist",
           downloadUrl,
           fileName,
           leadId: newLead.id,
@@ -95,6 +154,28 @@ export async function POST(request: Request) {
     }
 
     // Fallback in-memory behavior
+    if (isVideo) {
+      const memoryLead = {
+        id: `lead-${Date.now()}`,
+        leadMagnetId: null,
+        checklistTitle: title,
+        instagram: cleanInstagram,
+        email: cleanEmail,
+        experience: experience.trim(),
+        language: cleanLang,
+        type: "video",
+        createdAt: new Date().toISOString(),
+      };
+      fallbackLeads.unshift(memoryLead);
+
+      return NextResponse.json({
+        success: true,
+        type: "video",
+        videoUrl: "/uploads/sample-video.mp4",
+        leadId: memoryLead.id,
+      });
+    }
+
     const fallbackItem = defaultLeadMagnets.find((m) => m.id === leadMagnetId) || defaultLeadMagnets[0];
     if (fallbackItem) {
       if (cleanLang === "pl") {
@@ -117,12 +198,14 @@ export async function POST(request: Request) {
       email: cleanEmail,
       experience: experience.trim(),
       language: cleanLang,
+      type: "checklist",
       createdAt: new Date().toISOString(),
     };
     fallbackLeads.unshift(memoryLead);
 
     return NextResponse.json({
       success: true,
+      type: "checklist",
       downloadUrl,
       fileName,
       leadId: memoryLead.id,
@@ -130,7 +213,7 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error("Error creating checklist lead:", error);
     return NextResponse.json(
-      { error: error?.message || "Internal server error" },
+      { error: error?.message || "Failed to submit form" },
       { status: 500 }
     );
   }
