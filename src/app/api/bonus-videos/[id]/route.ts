@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma, isDatabaseAvailable } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 import fs from "fs";
@@ -67,6 +68,11 @@ export async function DELETE(
       });
     }
 
+    try {
+      revalidatePath("/");
+      revalidatePath("/admin");
+    } catch {}
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("Error deleting bonus video:", error);
@@ -124,6 +130,11 @@ export async function PUT(
         isActive: data.isActive !== undefined ? Boolean(data.isActive) : existing.isActive,
       },
     });
+
+    try {
+      revalidatePath("/");
+      revalidatePath("/admin");
+    } catch {}
 
     return NextResponse.json(updated);
   } catch (error: any) {

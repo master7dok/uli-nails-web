@@ -10,6 +10,7 @@ interface VideoPlayerModalProps {
   videoUrl: string;
   title: string;
   description?: string | null;
+  coverUrl?: string | null;
   language: "ua" | "pl";
 }
 
@@ -46,6 +47,7 @@ export default function VideoPlayerModal({
   videoUrl,
   title,
   description,
+  coverUrl,
   language,
 }: VideoPlayerModalProps) {
   const [embed, setEmbed] = useState<{ type: "youtube" | "vimeo" | "native"; src: string }>({
@@ -129,6 +131,7 @@ export default function VideoPlayerModal({
             ) : embed.src ? (
               <video
                 src={embed.src}
+                poster={coverUrl || undefined}
                 controls
                 autoPlay
                 playsInline

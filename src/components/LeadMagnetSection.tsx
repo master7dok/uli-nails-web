@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { motion } from "framer-motion";
 import {
@@ -36,6 +36,29 @@ export default function LeadMagnetSection({
   const [downloadedIds, setDownloadedIds] = useState<Record<string, boolean>>({});
   const [selectedItemForModal, setSelectedItemForModal] = useState<DefaultLeadMagnet | null>(null);
 
+  // Live video list state synced from props and /api/bonus-videos
+  const [videoList, setVideoList] = useState<DefaultBonusVideo[]>(videos);
+
+  useEffect(() => {
+    if (videos && Array.isArray(videos) && videos.length > 0) {
+      setVideoList(videos);
+    }
+  }, [videos]);
+
+  useEffect(() => {
+    fetch("/api/bonus-videos")
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to fetch");
+      })
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setVideoList(data);
+        }
+      })
+      .catch((err) => console.warn("Failed to fetch live bonus videos:", err));
+  }, []);
+
   // Video playback & modal states
   const [selectedVideoForLead, setSelectedVideoForLead] = useState<DefaultBonusVideo | null>(null);
   const [unlockedVideoIds, setUnlockedVideoIds] = useState<Record<string, boolean>>({});
@@ -43,19 +66,20 @@ export default function LeadMagnetSection({
     url: string;
     title: string;
     description?: string | null;
+    coverUrl?: string | null;
   } | null>(null);
 
   const activeItems = items.filter((item) => item.isActive !== false);
 
   // Filter videos that have a valid URL for the currently selected language
   const availableVideos = useMemo(() => {
-    if (!videos || !Array.isArray(videos)) return [];
-    return videos.filter((video) => {
+    if (!videoList || !Array.isArray(videoList)) return [];
+    return videoList.filter((video) => {
       if (video.isActive === false) return false;
       const url = language === "pl" ? video.videoUrlPl : video.videoUrlUa;
       return Boolean(url && url.trim().length > 0);
     });
-  }, [videos, language]);
+  }, [videoList, language]);
 
   if (activeItems.length === 0 && availableVideos.length === 0) {
     return null;
@@ -104,6 +128,7 @@ export default function LeadMagnetSection({
         url: videoUrl,
         title: getLocalized(video, "title"),
         description: getLocalized(video, "description"),
+        coverUrl: video.coverUrl || null,
       });
       return;
     }
@@ -318,37 +343,39 @@ export default function LeadMagnetSection({
                     {/* Video Visual / Cover Banner */}
                     <div
                       onClick={() => handleWatchVideo(video)}
-                      className="relative w-full aspect-video bg-gradient-to-br from-charcoal-950 via-charcoal-900 to-charcoal-800 cursor-pointer overflow-hidden group/thumb"
+                      className="relative w-full aspect-video bg-[#1A1817] cursor-pointer overflow-hidden group/thumb"
                     >
                       {video.coverUrl ? (
                         <img
                           src={video.coverUrl}
                           alt={title}
-                          className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                          className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105 z-0"
                         />
                       ) : (
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(197,168,128,0.25)_0%,transparent_70%)]" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#1A1817] via-[#2A2421] to-[#1A1817] z-0 flex items-center justify-center">
+                          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(197,168,128,0.25)_0%,transparent_70%)]" />
+                        </div>
                       )}
 
-                      {/* Contrast gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950/75 via-charcoal-950/20 to-charcoal-950/40 group-hover:via-charcoal-950/10 transition-colors z-10" />
+                      {/* Subtle darkening tint so Play button and badges pop, without hiding image */}
+                      <div className="absolute inset-0 bg-black/25 group-hover:bg-black/15 transition-colors z-10 pointer-events-none" />
 
                       {/* Play Button Overlay - ALWAYS centered */}
                       <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
-                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gold-500/90 text-white flex items-center justify-center shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:bg-gold-500 group-active:scale-95 backdrop-blur-xs">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gold-500/95 text-white flex items-center justify-center shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:bg-gold-500 group-active:scale-95 backdrop-blur-xs">
                           <Play className="w-7 h-7 sm:w-8 sm:h-8 fill-current translate-x-0.5 text-white drop-shadow-md" />
                         </div>
                       </div>
 
                       {/* Top Badges */}
                       <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-20 pointer-events-none">
-                        <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-charcoal-900/85 backdrop-blur-md text-gold-300 border border-gold-400/30 shadow-sm">
+                        <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-black/75 backdrop-blur-md text-gold-300 border border-gold-400/30 shadow-sm">
                           {badge}
                         </span>
                       </div>
 
                       {video.duration && (
-                        <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-charcoal-950/85 backdrop-blur-md text-white text-[11px] font-mono shadow-sm pointer-events-none">
+                        <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md text-white text-[11px] font-mono shadow-sm pointer-events-none">
                           <Clock className="w-3 h-3 text-gold-400" />
                           <span>{video.duration}</span>
                         </div>
@@ -440,6 +467,7 @@ export default function LeadMagnetSection({
         videoId={selectedVideoForLead?.id}
         videoTitle={selectedVideoForLead ? getLocalized(selectedVideoForLead, "title") : ""}
         checklistTitle={selectedVideoForLead ? getLocalized(selectedVideoForLead, "title") : ""}
+        coverUrl={selectedVideoForLead?.coverUrl || null}
         language={language}
         t={t}
         mode="video"
@@ -454,6 +482,7 @@ export default function LeadMagnetSection({
                 (language === "pl" ? selectedVideoForLead.videoUrlPl! : selectedVideoForLead.videoUrlUa!),
               title: getLocalized(selectedVideoForLead, "title"),
               description: getLocalized(selectedVideoForLead, "description"),
+              coverUrl: selectedVideoForLead.coverUrl || null,
             });
           }
         }}
@@ -467,6 +496,7 @@ export default function LeadMagnetSection({
           videoUrl={activePlayingVideo.url}
           title={activePlayingVideo.title}
           description={activePlayingVideo.description}
+          coverUrl={activePlayingVideo.coverUrl || null}
           language={language}
         />
       )}

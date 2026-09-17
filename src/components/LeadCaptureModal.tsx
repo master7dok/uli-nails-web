@@ -15,6 +15,7 @@ interface LeadCaptureModalProps {
   mode?: "checklist" | "video";
   videoId?: string;
   videoTitle?: string;
+  coverUrl?: string | null;
   onSuccess?: () => void;
   onVideoUnlocked?: (videoUrl: string) => void;
 }
@@ -29,6 +30,7 @@ export default function LeadCaptureModal({
   mode = "checklist",
   videoId,
   videoTitle,
+  coverUrl,
   onSuccess,
   onVideoUnlocked,
 }: LeadCaptureModalProps) {
@@ -278,6 +280,21 @@ export default function LeadCaptureModal({
                   {modalTexts.subtitle}
                 </p>
               </div>
+
+              {isVideoMode && coverUrl && (
+                <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-charcoal-900 mb-5 border border-gold-400/30 shadow-md">
+                  <img
+                    src={coverUrl}
+                    alt={videoTitle || checklistTitle}
+                    className="absolute inset-0 w-full h-full object-cover object-center"
+                  />
+                  <div className="absolute inset-0 bg-black/25 flex items-center justify-center pointer-events-none">
+                    <div className="w-12 h-12 rounded-full bg-gold-500/95 text-white flex items-center justify-center shadow-lg">
+                      <Play className="w-5 h-5 fill-current translate-x-0.5 text-white" />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {error && (
                 <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center space-x-2">

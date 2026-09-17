@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma, isDatabaseAvailable } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 import { defaultBonusVideos } from "@/lib/defaultData";
@@ -62,6 +63,11 @@ export async function POST(request: Request) {
         isActive: data.isActive !== undefined ? Boolean(data.isActive) : true,
       },
     });
+
+    try {
+      revalidatePath("/");
+      revalidatePath("/admin");
+    } catch {}
 
     return NextResponse.json(item, { status: 201 });
   } catch (error: any) {
