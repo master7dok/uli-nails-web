@@ -318,32 +318,37 @@ export default function LeadMagnetSection({
                     {/* Video Visual / Cover Banner */}
                     <div
                       onClick={() => handleWatchVideo(video)}
-                      className="relative w-full aspect-video bg-gradient-to-br from-charcoal-950 via-charcoal-900 to-charcoal-800 cursor-pointer overflow-hidden flex items-center justify-center"
+                      className="relative w-full aspect-video bg-gradient-to-br from-charcoal-950 via-charcoal-900 to-charcoal-800 cursor-pointer overflow-hidden group/thumb"
                     >
                       {video.coverUrl ? (
                         <img
                           src={video.coverUrl}
                           alt={title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-80"
+                          className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                         />
                       ) : (
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(197,168,128,0.25)_0%,transparent_70%)]" />
                       )}
 
-                      {/* Play Button Overlay */}
-                      <div className="relative z-10 w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gold-500/90 text-white flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110 group-active:scale-95">
-                        <Play className="w-7 h-7 sm:w-8 sm:h-8 fill-current translate-x-0.5 text-white" />
+                      {/* Contrast gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950/75 via-charcoal-950/20 to-charcoal-950/40 group-hover:via-charcoal-950/10 transition-colors z-10" />
+
+                      {/* Play Button Overlay - ALWAYS centered */}
+                      <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gold-500/90 text-white flex items-center justify-center shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:bg-gold-500 group-active:scale-95 backdrop-blur-xs">
+                          <Play className="w-7 h-7 sm:w-8 sm:h-8 fill-current translate-x-0.5 text-white drop-shadow-md" />
+                        </div>
                       </div>
 
                       {/* Top Badges */}
-                      <div className="absolute top-4 left-4 z-10">
-                        <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-charcoal-900/80 backdrop-blur-md text-gold-300 border border-gold-400/30">
+                      <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-20 pointer-events-none">
+                        <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-charcoal-900/85 backdrop-blur-md text-gold-300 border border-gold-400/30 shadow-sm">
                           {badge}
                         </span>
                       </div>
 
                       {video.duration && (
-                        <div className="absolute bottom-4 right-4 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-charcoal-950/80 backdrop-blur-md text-white text-[11px] font-mono">
+                        <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-charcoal-950/85 backdrop-blur-md text-white text-[11px] font-mono shadow-sm pointer-events-none">
                           <Clock className="w-3 h-3 text-gold-400" />
                           <span>{video.duration}</span>
                         </div>

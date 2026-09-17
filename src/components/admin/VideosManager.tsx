@@ -18,6 +18,8 @@ import {
   Eye,
   CheckCircle2,
   Film,
+  Image as ImageIcon,
+  Info,
 } from "lucide-react";
 import { getAdminHeaders } from "@/lib/adminClient";
 import { DefaultBonusVideo, defaultBonusVideos } from "@/lib/defaultData";
@@ -545,37 +547,116 @@ export default function VideosManager({ onCountChange }: VideosManagerProps) {
             </div>
           </div>
 
-          {/* Cover image, Duration, Badges */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            {/* Cover Image */}
-            <div>
-              <label className="block text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-1.5">
-                Обкладинка-прев'ю (необов'язково)
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={newForm.coverUrl}
-                  onChange={(e) => setNewForm({ ...newForm, coverUrl: e.target.value })}
-                  placeholder="/uploads/cover.jpg або URL"
-                  className="flex-1 px-3 py-2 bg-white border border-[#DDD5C7] rounded-xl text-xs text-charcoal-900"
-                />
-                <label className="cursor-pointer p-2 rounded-xl border border-nude-300 hover:bg-nude-50 text-charcoal-600 shrink-0">
-                  <Upload className="w-4 h-4" />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleFileUpload(file, "cover", false);
-                    }}
-                  />
+          {/* Cover image block */}
+          <div className="p-5 rounded-2xl bg-[#FAF8F5] border border-nude-300 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <label className="text-xs font-bold text-charcoal-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <ImageIcon className="w-4 h-4 text-gold-600" />
+                  <span>Обкладинка-прев'ю відео</span>
+                  <span className="text-[10px] font-normal text-charcoal-500 normal-case">(необов'язково)</span>
                 </label>
+                <p className="text-[11px] text-charcoal-500 mt-0.5">
+                  Відображається як постер відео на сайті до моменту запуску.
+                </p>
+              </div>
+
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gold-50 border border-gold-200 text-gold-800 text-[11px] font-semibold shrink-0">
+                <span>📐 Формат: 16:9 (1280×720 або 1920×1080 px)</span>
               </div>
             </div>
 
-            {/* Duration */}
+            <div className="flex flex-col md:flex-row items-start gap-5">
+              {/* Live Preview Box */}
+              <div className="relative w-full md:w-56 aspect-video rounded-2xl bg-charcoal-900 border-2 border-gold-300/60 overflow-hidden shrink-0 shadow-sm flex items-center justify-center group/preview">
+                {newForm.coverUrl ? (
+                  <>
+                    <img
+                      src={newForm.coverUrl}
+                      alt="Прев'ю обкладинки"
+                      className="absolute inset-0 w-full h-full object-cover object-center"
+                    />
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center pointer-events-none">
+                      <div className="w-10 h-10 rounded-full bg-gold-500 text-white flex items-center justify-center shadow-md">
+                        <Play className="w-4 h-4 fill-current translate-x-0.5 text-white" />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setNewForm({ ...newForm, coverUrl: "" })}
+                      className="absolute top-2 right-2 p-1 rounded-lg bg-rose-600/90 text-white hover:bg-rose-700 transition-colors shadow-sm"
+                      title="Видалити обкладинку"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </>
+                ) : (
+                  <div className="p-3 text-center text-charcoal-400">
+                    <Film className="w-8 h-8 text-gold-400/60 mx-auto mb-1" />
+                    <span className="text-[10px] text-charcoal-400 block">
+                      Без фото (темний градієнт)
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Upload Controls & URL input */}
+              <div className="flex-1 space-y-3 w-full">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <label className="cursor-pointer px-4 py-2.5 rounded-xl bg-white border border-gold-400 hover:border-gold-600 hover:bg-gold-50/50 text-charcoal-900 text-xs font-semibold inline-flex items-center gap-2 shadow-xs transition-colors">
+                    <Upload className="w-4 h-4 text-gold-600" />
+                    <span>
+                      {uploadingCover
+                        ? "Завантаження фото..."
+                        : newForm.coverUrl
+                        ? "Замінити фото обкладинки"
+                        : "Завантажити фото з пристрою"}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/jpg"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload(file, "cover", false);
+                      }}
+                    />
+                  </label>
+
+                  {newForm.coverUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setNewForm({ ...newForm, coverUrl: "" })}
+                      className="px-3 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold inline-flex items-center gap-1.5 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Прибрати фото</span>
+                    </button>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-charcoal-600 uppercase tracking-wider mb-1">
+                    Або вкажіть прямий URL / шлях до фото
+                  </label>
+                  <input
+                    type="text"
+                    value={newForm.coverUrl}
+                    onChange={(e) => setNewForm({ ...newForm, coverUrl: e.target.value })}
+                    placeholder="/uploads/cover.jpg або https://..."
+                    className="w-full px-3.5 py-2 bg-white border border-[#DDD5C7] rounded-xl text-xs font-mono text-charcoal-900"
+                  />
+                </div>
+
+                <p className="text-[11px] text-charcoal-500 leading-relaxed bg-white/70 p-2.5 rounded-xl border border-nude-200">
+                  ℹ️ <span className="font-semibold text-charcoal-700">Порада:</span> найкраще підходять чіткі горизонтальні фото з пропорцією <span className="font-semibold text-charcoal-800">16:9</span> (1280×720 або 1920×1080 px, JPG/PNG/WebP). Фото автоматично адаптується під блок без чорних рамок з боків.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Duration & Badges */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <label className="block text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-1.5">
                 Тривалість (напр. 15 хв)
@@ -589,7 +670,6 @@ export default function VideosManager({ onCountChange }: VideosManagerProps) {
               />
             </div>
 
-            {/* Badge UA */}
             <div>
               <label className="block text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-1.5">
                 Бейдж відео
@@ -771,22 +851,117 @@ export default function VideosManager({ onCountChange }: VideosManagerProps) {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-1">
-                        Прев'ю обкладинка
-                      </label>
-                      <input
-                        type="text"
-                        value={editForm.coverUrl || ""}
-                        onChange={(e) => setEditForm({ ...editForm, coverUrl: e.target.value })}
-                        placeholder="/uploads/photo.jpg"
-                        className="w-full px-3 py-1.5 bg-white border border-[#DDD5C7] rounded-xl text-xs"
-                      />
+                  {/* Cover image edit block */}
+                  <div className="p-4 sm:p-5 rounded-2xl bg-[#FAF8F5] border border-nude-300 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <label className="text-xs font-bold text-charcoal-800 uppercase tracking-wider flex items-center gap-1.5">
+                          <ImageIcon className="w-4 h-4 text-gold-600" />
+                          <span>Обкладинка-прев'ю відео</span>
+                        </label>
+                        <p className="text-[11px] text-charcoal-500 mt-0.5">
+                          Зміна або видалення постеру для цього відеоуроку.
+                        </p>
+                      </div>
+
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gold-50 border border-gold-200 text-gold-800 text-[11px] font-semibold shrink-0">
+                        <span>📐 Формат: 16:9 (1280×720 або 1920×1080 px)</span>
+                      </div>
                     </div>
+
+                    <div className="flex flex-col md:flex-row items-start gap-4 sm:gap-5">
+                      {/* Live Preview Box */}
+                      <div className="relative w-full md:w-56 aspect-video rounded-2xl bg-charcoal-900 border-2 border-gold-300/60 overflow-hidden shrink-0 shadow-sm flex items-center justify-center group/preview">
+                        {editForm.coverUrl ? (
+                          <>
+                            <img
+                              src={editForm.coverUrl}
+                              alt="Прев'ю обкладинки"
+                              className="absolute inset-0 w-full h-full object-cover object-center"
+                            />
+                            <div className="absolute inset-0 bg-black/30 flex items-center justify-center pointer-events-none">
+                              <div className="w-10 h-10 rounded-full bg-gold-500 text-white flex items-center justify-center shadow-md">
+                                <Play className="w-4 h-4 fill-current translate-x-0.5 text-white" />
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setEditForm((prev) => ({ ...prev, coverUrl: "" }))}
+                              className="absolute top-2 right-2 p-1 rounded-lg bg-rose-600/90 text-white hover:bg-rose-700 transition-colors shadow-sm"
+                              title="Видалити обкладинку"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        ) : (
+                          <div className="p-3 text-center text-charcoal-400">
+                            <Film className="w-8 h-8 text-gold-400/60 mx-auto mb-1" />
+                            <span className="text-[10px] text-charcoal-400 block">
+                              Без фото (темний градієнт)
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Upload Controls & URL input */}
+                      <div className="flex-1 space-y-3 w-full">
+                        <div className="flex flex-wrap items-center gap-2.5">
+                          <label className="cursor-pointer px-4 py-2.5 rounded-xl bg-white border border-gold-400 hover:border-gold-600 hover:bg-gold-50/50 text-charcoal-900 text-xs font-semibold inline-flex items-center gap-2 shadow-xs transition-colors">
+                            <Upload className="w-4 h-4 text-gold-600" />
+                            <span>
+                              {uploadingCover
+                                ? "Завантаження фото..."
+                                : editForm.coverUrl
+                                ? "Замінити фото обкладинки"
+                                : "Завантажити фото з пристрою"}
+                            </span>
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/webp,image/jpg"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleFileUpload(file, "cover", true);
+                              }}
+                            />
+                          </label>
+
+                          {editForm.coverUrl && (
+                            <button
+                              type="button"
+                              onClick={() => setEditForm((prev) => ({ ...prev, coverUrl: "" }))}
+                              className="px-3 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold inline-flex items-center gap-1.5 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Прибрати фото</span>
+                            </button>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-semibold text-charcoal-600 uppercase tracking-wider mb-1">
+                            URL або шлях до фото
+                          </label>
+                          <input
+                            type="text"
+                            value={editForm.coverUrl || ""}
+                            onChange={(e) => setEditForm({ ...editForm, coverUrl: e.target.value })}
+                            placeholder="/uploads/cover.jpg або https://..."
+                            className="w-full px-3.5 py-2 bg-white border border-[#DDD5C7] rounded-xl text-xs font-mono text-charcoal-900"
+                          />
+                        </div>
+
+                        <p className="text-[11px] text-charcoal-500 leading-relaxed bg-white/70 p-2.5 rounded-xl border border-nude-200">
+                          ℹ️ <span className="font-semibold text-charcoal-700">Порада:</span> найкраще підходять горизонтальні фото <span className="font-semibold text-charcoal-800">16:9</span> (1280×720 або 1920×1080 px, JPG/PNG/WebP). Фото автоматично масштабується на весь блок без чорних смуг.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-1">
-                        Тривалість
+                        Тривалість (напр. 15 хв)
                       </label>
                       <input
                         type="text"
@@ -836,19 +1011,21 @@ export default function VideosManager({ onCountChange }: VideosManagerProps) {
               >
                 {/* Left: Thumbnail and details */}
                 <div className="flex items-start gap-4 sm:gap-5 flex-1 min-w-0">
-                  <div className="relative w-24 h-18 sm:w-28 sm:h-20 rounded-2xl bg-charcoal-900 text-white shrink-0 overflow-hidden flex items-center justify-center border border-gold-400/30">
+                  <div className="relative w-28 sm:w-32 aspect-video rounded-2xl bg-charcoal-900 text-white shrink-0 overflow-hidden border border-gold-400/30">
                     {video.coverUrl ? (
                       <img
                         src={video.coverUrl}
                         alt={video.titleUa}
-                        className="w-full h-full object-cover"
+                        className="absolute inset-0 w-full h-full object-cover object-center"
                       />
                     ) : (
-                      <Film className="w-8 h-8 text-gold-400 opacity-60" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Film className="w-7 h-7 text-gold-400 opacity-60" />
+                      </div>
                     )}
-                    <span className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                      <Play className="w-6 h-6 fill-current text-white/90" />
-                    </span>
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center pointer-events-none">
+                      <Play className="w-5 h-5 fill-current text-white/90" />
+                    </div>
                   </div>
 
                   <div className="space-y-1.5 min-w-0 flex-1">
