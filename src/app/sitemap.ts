@@ -12,11 +12,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1.0,
       alternates: {
         languages: {
-          pl: `${siteUrl}/`,
-          uk: `${siteUrl}/`,
+          pl: `${siteUrl}/pl`,
+          uk: `${siteUrl}/ua`,
           "x-default": `${siteUrl}/`,
         },
       },
+    },
+    {
+      url: `${siteUrl}/pl`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/ua`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.9,
     },
     {
       url: `${siteUrl}/privacy`,
