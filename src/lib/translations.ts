@@ -224,7 +224,7 @@ export const translations = {
         "Od pewnego startu od zera po zaawansowaną architekturę żelu i audyt zespołów salonów beauty.",
       personalizedNotice:
         "Każdy program szkolenia stacjonarnego jest dopasowywany indywidualnie do Twoich celów i aktualnych wyzwań (czystość skórek, tempo pracy, eliminacja zapowietrzeń) na podstawie krótkiej ankiety kwalifikacyjnej.",
-      ctaApply: "Aplikuj na kurs",
+      ctaApply: "Zapisz się na kurs",
       viewDetails: "Więcej szczegółów",
       viewProgram: "Zobacz program szkolenia",
       hideProgram: "Zwiń program",
