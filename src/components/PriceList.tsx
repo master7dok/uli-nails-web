@@ -126,10 +126,10 @@ export default function PriceList({ services, settings }: PriceListProps) {
         >
           {/* Top header labels */}
           <div className="flex items-center justify-between pb-5 mb-3 border-b border-nude-200 text-[11px] font-semibold uppercase tracking-widest text-charcoal-400 px-2 sm:px-4">
-            <span>Usługa / Послуга</span>
+            <span>{(t.prices as any).thService || (language === "pl" ? "Usługa" : "Послуга")}</span>
             <div className="flex items-center gap-8">
-              <span className="hidden sm:inline">Czas / Час</span>
-              <span>Cena / Ціна</span>
+              <span className="hidden sm:inline">{(t.prices as any).thTime || (language === "pl" ? "Czas" : "Час")}</span>
+              <span>{(t.prices as any).thPrice || (language === "pl" ? "Cena" : "Ціна")}</span>
             </div>
           </div>
 

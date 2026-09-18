@@ -94,6 +94,9 @@ export const translations = {
       bookViaTelegram: "Записатися в Telegram",
       bookViaInstagram: "Записатися в Instagram Direct",
       popularBadge: "Популярно",
+      thService: "Послуга",
+      thTime: "Час",
+      thPrice: "Ціна",
     },
     portfolio: {
       badge: "Галерея робіт",
@@ -261,6 +264,9 @@ export const translations = {
       bookViaTelegram: "Napisz na Telegramie",
       bookViaInstagram: "Napisz na Instagramie",
       popularBadge: "Bestseller",
+      thService: "Usługa",
+      thTime: "Czas",
+      thPrice: "Cena",
     },
     portfolio: {
       badge: "Galeria prac",
