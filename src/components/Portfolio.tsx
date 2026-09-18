@@ -32,6 +32,7 @@ export default function Portfolio({ items, settings }: PortfolioProps) {
     { id: "all", label: t.portfolio.tabAll },
     { id: "gel", label: t.portfolio.tabGel },
     { id: "manicure", label: t.portfolio.tabManicure },
+    { id: "pedicure", label: (t.portfolio as any).tabPedicure || (language === "ua" ? "Педикюр" : "Pedicure") },
     { id: "french", label: t.portfolio.tabFrench },
     { id: "correction", label: t.portfolio.tabCorrection },
   ];

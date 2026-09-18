@@ -28,6 +28,7 @@ export default function TrainingGallery({ items, settings }: TrainingGalleryProp
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [selectedPhoto, setSelectedPhoto] = useState<TrainingPhotoItem | null>(null);
 
+  const hasPedicure = items.some((item) => item.category === "pedicure");
   const filterTabs = [
     {
       id: "all",
@@ -45,6 +46,14 @@ export default function TrainingGallery({ items, settings }: TrainingGalleryProp
       id: "practice",
       label: (t as any).trainingGallery?.tabPractice || (language === "ua" ? "Практика на моделях" : "Praktyka na modelkach"),
     },
+    ...(hasPedicure
+      ? [
+          {
+            id: "pedicure",
+            label: language === "ua" ? "Педикюр" : "Pedicure",
+          },
+        ]
+      : []),
   ];
 
   const filteredItems =
@@ -62,6 +71,8 @@ export default function TrainingGallery({ items, settings }: TrainingGalleryProp
         return language === "ua" ? "Практика" : "Praktyka";
       case "students":
         return language === "ua" ? "Учениці" : "Kursantki";
+      case "pedicure":
+        return language === "ua" ? "Педикюр" : "Pedicure";
       default:
         return language === "ua" ? "Курси" : "Szkolenie";
     }

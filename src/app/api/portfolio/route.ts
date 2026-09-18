@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma, isDatabaseAvailable } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 import { defaultPortfolio } from "@/lib/defaultData";
@@ -80,6 +81,11 @@ export async function POST(request: Request) {
         sortOrder: Number(data.sortOrder) || 0,
       },
     });
+
+    try {
+      revalidatePath("/");
+      revalidatePath("/admin");
+    } catch {}
 
     return NextResponse.json(item, { status: 201 });
   } catch (error) {

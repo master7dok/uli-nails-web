@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma, isDatabaseAvailable } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 import { defaultPortfolio } from "@/lib/defaultData";
@@ -63,6 +64,11 @@ export async function DELETE(
       console.log(`Portfolio item ${id} not found in DB or already deleted.`);
     }
 
+    try {
+      revalidatePath("/");
+      revalidatePath("/admin");
+    } catch {}
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("Error deleting portfolio item:", error);
@@ -125,6 +131,11 @@ export async function PUT(
         return NextResponse.json({ error: "Portfolio item not found" }, { status: 404 });
       }
     }
+
+    try {
+      revalidatePath("/");
+      revalidatePath("/admin");
+    } catch {}
 
     return NextResponse.json(updated);
   } catch (error: any) {

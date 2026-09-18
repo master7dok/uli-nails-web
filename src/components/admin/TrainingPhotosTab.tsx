@@ -2,7 +2,21 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Plus, Trash2, Upload, RefreshCw, GraduationCap, Award, Crosshair, X, Check } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Upload,
+  RefreshCw,
+  GraduationCap,
+  Award,
+  Crosshair,
+  X,
+  Check,
+  ArrowLeft,
+  ArrowRight,
+  Pencil,
+  Loader2,
+} from "lucide-react";
 import { getAdminHeaders } from "@/lib/adminClient";
 import CropPositionPicker from "./CropPositionPicker";
 
@@ -16,6 +30,14 @@ interface TrainingPhotoItem {
   featured: boolean;
   sortOrder: number;
 }
+
+const TRAINING_CATEGORIES = [
+  { value: "process", label: "Процес навчання (Proces szkoleń)" },
+  { value: "certificates", label: "Випускниці та дипломи (Kursantki i certyfikaty)" },
+  { value: "practice", label: "Практика на моделях (Praktyka na modelkach)" },
+  { value: "students", label: "Учениці (Kursantki)" },
+  { value: "pedicure", label: "Педикюр (Pedicure)" },
+];
 
 export default function TrainingPhotosTab() {
   const [items, setItems] = useState<TrainingPhotoItem[]>([]);
@@ -31,16 +53,25 @@ export default function TrainingPhotosTab() {
   const [category, setCategory] = useState("process");
   const [objectPosition, setObjectPosition] = useState("50% 50%");
 
-  // Edit Position Modal State
+  // Edit Modal State (Category, Title UA, Title PL, Crop Position)
   const [editingItem, setEditingItem] = useState<TrainingPhotoItem | null>(null);
+  const [editTitleUa, setEditTitleUa] = useState("");
+  const [editTitlePl, setEditTitlePl] = useState("");
+  const [editCategory, setEditCategory] = useState("process");
   const [editingPosition, setEditingPosition] = useState("50% 50%");
   const [savingEdit, setSavingEdit] = useState(false);
+
+  // Reorder State
+  const [reordering, setReordering] = useState(false);
+  const [reorderSuccess, setReorderSuccess] = useState(false);
 
   const fetchItems = async () => {
     try {
       const res = await fetch("/api/training-photos");
       const data = await res.json();
-      setItems(data);
+      if (Array.isArray(data)) {
+        setItems(data);
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -99,6 +130,7 @@ export default function TrainingPhotosTab() {
           category,
           objectPosition,
           featured: false,
+          sortOrder: items.length + 1,
         }),
       });
 
@@ -108,6 +140,7 @@ export default function TrainingPhotosTab() {
         setPreviewUrl("");
         setTitlePl("");
         setTitleUa("");
+        setCategory("process");
         setObjectPosition("50% 50%");
         fetchItems();
       } else {
@@ -130,7 +163,7 @@ export default function TrainingPhotosTab() {
         headers: getAdminHeaders(),
       });
       if (res.ok) {
-        setItems(items.filter((item) => item.id !== id));
+        setItems((prev) => prev.filter((item) => item.id !== id));
       } else {
         const errData = await res.json();
         alert(errData.error || "Не вдалося видалити фото");
@@ -140,7 +173,17 @@ export default function TrainingPhotosTab() {
     }
   };
 
-  const handleSavePosition = async () => {
+  // Open Edit Modal with full photo data
+  const openEditModal = (item: TrainingPhotoItem) => {
+    setEditingItem(item);
+    setEditTitleUa(item.titleUa || "");
+    setEditTitlePl(item.titlePl || "");
+    setEditCategory(item.category || "process");
+    setEditingPosition(item.objectPosition || "50% 50%");
+  };
+
+  // Save changes to Category, Title UA, Title PL, and Framing
+  const handleSaveEdit = async () => {
     if (!editingItem) return;
     setSavingEdit(true);
 
@@ -149,27 +192,76 @@ export default function TrainingPhotosTab() {
         method: "PUT",
         headers: getAdminHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({
+          titleUa: editTitleUa,
+          titlePl: editTitlePl,
+          category: editCategory,
           objectPosition: editingPosition,
         }),
       });
 
       if (res.ok) {
-        setItems(
-          items.map((item) =>
-            item.id === editingItem.id
-              ? { ...item, objectPosition: editingPosition }
-              : item
-          )
+        const updated = await res.json();
+        setItems((prev) =>
+          prev.map((item) => (item.id === editingItem.id ? { ...item, ...updated } : item))
         );
         setEditingItem(null);
       } else {
         const errData = await res.json();
-        alert(errData.error || "Не вдалося оновити кадрування");
+        alert(errData.error || "Не вдалося зберегти зміни");
       }
     } catch (e: any) {
       alert(e?.message || "Помилка оновлення");
     } finally {
       setSavingEdit(false);
+    }
+  };
+
+  // Reorder Handler (move item left/prev or right/next in training gallery)
+  const handleMove = async (index: number, direction: "prev" | "next") => {
+    if (direction === "prev" && index === 0) return;
+    if (direction === "next" && index === items.length - 1) return;
+
+    const targetIndex = direction === "prev" ? index - 1 : index + 1;
+    const newItems = [...items];
+
+    // Swap items
+    const temp = newItems[index];
+    newItems[index] = newItems[targetIndex];
+    newItems[targetIndex] = temp;
+
+    // Recalculate sortOrder sequence
+    const reorderedPayload = newItems.map((item, idx) => ({
+      ...item,
+      sortOrder: idx + 1,
+    }));
+
+    setItems(reorderedPayload);
+    setReordering(true);
+
+    try {
+      const res = await fetch("/api/training-photos/reorder", {
+        method: "POST",
+        headers: getAdminHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({
+          items: reorderedPayload.map((item) => ({
+            id: item.id,
+            sortOrder: item.sortOrder,
+          })),
+        }),
+      });
+
+      if (res.ok) {
+        setReorderSuccess(true);
+        setTimeout(() => setReorderSuccess(false), 2000);
+      } else {
+        console.error("Reorder request failed");
+        fetchItems(); // revert on failure
+      }
+    } catch (e) {
+      console.error("Reorder failed:", e);
+      fetchItems();
+    } finally {
+      setReordering(false);
     }
   };
 
@@ -183,6 +275,8 @@ export default function TrainingPhotosTab() {
         return "Практика на моделях";
       case "students":
         return "Учениці";
+      case "pedicure":
+        return "Педикюр";
       default:
         return cat;
     }
@@ -260,7 +354,7 @@ export default function TrainingPhotosTab() {
                         setPreviewUrl("");
                         setImageUrl("");
                       }}
-                      className="text-xs text-red-600 hover:underline"
+                      className="text-xs text-red-600 hover:underline cursor-pointer"
                     >
                       Скасувати
                     </button>
@@ -302,11 +396,13 @@ export default function TrainingPhotosTab() {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl border border-nude-300 text-xs focus:border-gold-500 focus:outline-none bg-white font-medium"
+                  className="w-full px-3 py-2.5 rounded-xl border border-nude-300 text-xs focus:border-gold-500 focus:outline-none bg-white font-medium cursor-pointer"
                 >
-                  <option value="process">Процес навчання (Proces szkoleń)</option>
-                  <option value="certificates">Випускниці та дипломи (Kursantki i certyfikaty)</option>
-                  <option value="practice">Практика на моделях (Praktyka na modelkach)</option>
+                  {TRAINING_CATEGORIES.map((cat) => (
+                    <option key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -343,7 +439,10 @@ export default function TrainingPhotosTab() {
                   className="w-full py-3.5 px-6 rounded-xl bg-charcoal-900 hover:bg-gold-600 text-white text-xs font-semibold uppercase tracking-wider transition-colors inline-flex items-center justify-center gap-2 shadow-soft hover:shadow-glow disabled:opacity-50 cursor-pointer"
                 >
                   {uploading ? (
-                    <span>Завантаження фото...</span>
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Завантаження фото...</span>
+                    </>
                   ) : (
                     <>
                       <Plus className="w-4 h-4" />
@@ -357,12 +456,24 @@ export default function TrainingPhotosTab() {
         </form>
       </div>
 
-      {/* Existing Training Photos Grid */}
+      {/* Existing Training Photos Grid with Reordering & Full Editing */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-serif text-lg font-semibold text-charcoal-900">
-            Опубліковані фотографії з курсів ({items.length})
-          </h3>
+          <div className="flex items-center gap-3">
+            <h3 className="font-serif text-lg font-semibold text-charcoal-900">
+              Опубліковані фотографії з курсів ({items.length})
+            </h3>
+            {reorderSuccess && (
+              <span className="text-xs text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 animate-fadeIn flex items-center gap-1 font-medium">
+                <Check className="w-3.5 h-3.5" /> Порядок збережено
+              </span>
+            )}
+            {reordering && (
+              <span className="text-xs text-gold-700 bg-gold-50 px-2.5 py-1 rounded-full border border-gold-200 flex items-center gap-1">
+                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Оновлення черги...
+              </span>
+            )}
+          </div>
           <button
             onClick={fetchItems}
             className="p-2 rounded-lg text-charcoal-600 hover:bg-nude-100 transition-colors cursor-pointer"
@@ -372,14 +483,18 @@ export default function TrainingPhotosTab() {
           </button>
         </div>
 
+        <p className="text-xs text-charcoal-500 mb-4">
+          💡 Використовуйте стрілки <strong>◀ / ▶</strong> на фотографіях для швидкої зміни порядку відображення на сайті. Натисніть <strong>«Редагувати»</strong> для зміни опису, категорії чи кадрування.
+        </p>
+
         {loading ? (
           <p className="text-sm text-charcoal-500">Завантаження галереї...</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {items.map((item) => (
+            {items.map((item, index) => (
               <div
                 key={item.id}
-                className="relative group rounded-2xl overflow-hidden aspect-[4/3] bg-nude-200 border border-nude-200 shadow-xs"
+                className="relative group rounded-2xl overflow-hidden aspect-[4/3] bg-nude-200 border border-nude-200 shadow-xs flex flex-col justify-between"
               >
                 <Image
                   src={item.imageUrl}
@@ -388,36 +503,65 @@ export default function TrainingPhotosTab() {
                   style={{ objectPosition: item.objectPosition || "center" }}
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-charcoal-900/60 opacity-0 group-hover:opacity-100 transition-opacity p-3 flex flex-col justify-between text-white">
-                  <div className="text-[10px] font-bold bg-charcoal-800/90 px-2 py-0.5 rounded w-fit uppercase">
-                    {getCategoryLabel(item.category)}
+
+                {/* Permanent subtle top bar with Order Badge & Reorder Controls */}
+                <div className="relative z-10 p-2 flex items-center justify-between pointer-events-auto bg-gradient-to-b from-charcoal-900/60 to-transparent">
+                  <span className="px-2 py-0.5 rounded-md bg-charcoal-950/80 text-gold-300 font-mono text-[11px] font-bold shadow-xs">
+                    #{index + 1}
+                  </span>
+
+                  <div className="flex items-center gap-1 bg-charcoal-950/80 rounded-lg p-0.5 shadow-xs">
+                    <button
+                      type="button"
+                      disabled={index === 0 || reordering}
+                      onClick={() => handleMove(index, "prev")}
+                      className="p-1 rounded-md text-white hover:bg-gold-600 disabled:opacity-25 transition-colors cursor-pointer"
+                      title="Перемістити ліворуч (вище)"
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={index === items.length - 1 || reordering}
+                      onClick={() => handleMove(index, "next")}
+                      className="p-1 rounded-md text-white hover:bg-gold-600 disabled:opacity-25 transition-colors cursor-pointer"
+                      title="Перемістити праворуч (нижче)"
+                    >
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-xs line-clamp-1">
-                      {item.titleUa || item.titlePl || "Без підпису"}
-                    </p>
-                    <div className="flex items-center justify-end gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingItem(item);
-                          setEditingPosition(item.objectPosition || "50% 50%");
-                        }}
-                        className="p-1.5 px-2.5 rounded-lg bg-white/20 hover:bg-gold-600 text-white text-[11px] font-semibold transition-colors flex items-center gap-1 cursor-pointer"
-                        title="Змінити кадрування"
-                      >
-                        <Crosshair className="w-3.5 h-3.5" />
-                        <span>Фокус</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(item.id)}
-                        className="p-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors shrink-0 cursor-pointer"
-                        title="Видалити"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                </div>
+
+                {/* Category Badge & Titles & Action Buttons */}
+                <div className="relative z-10 p-2.5 flex flex-col justify-end bg-gradient-to-t from-charcoal-950/90 via-charcoal-900/50 to-transparent text-white space-y-1.5">
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[10px] font-bold bg-gold-600/90 text-white px-2 py-0.5 rounded-full w-fit uppercase tracking-wider shadow-xs line-clamp-1">
+                      {getCategoryLabel(item.category)}
+                    </span>
+                  </div>
+
+                  <p className="text-xs line-clamp-1 font-medium text-white/95" title={item.titleUa || item.titlePl || ""}>
+                    {item.titleUa || item.titlePl || "Без підпису"}
+                  </p>
+
+                  <div className="flex items-center justify-end gap-1.5 pt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => openEditModal(item)}
+                      className="px-2.5 py-1 rounded-lg bg-white/25 hover:bg-gold-600 text-white text-[11px] font-semibold transition-colors flex items-center gap-1 cursor-pointer shadow-xs"
+                      title="Редагувати опис, категорію та кадрування"
+                    >
+                      <Pencil className="w-3 h-3" />
+                      <span>Редагувати</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(item.id)}
+                      className="p-1.5 rounded-lg bg-red-600/90 hover:bg-red-700 text-white transition-colors shrink-0 cursor-pointer shadow-xs"
+                      title="Видалити"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -426,7 +570,7 @@ export default function TrainingPhotosTab() {
         )}
       </div>
 
-      {/* Edit Framing Modal for Published Photos */}
+      {/* Full Edit Modal for Published Training Photos */}
       {editingItem && (
         <div
           role="dialog"
@@ -434,34 +578,83 @@ export default function TrainingPhotosTab() {
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal-900/80 backdrop-blur-sm animate-fadeIn"
         >
           <div
-            className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-6 border border-nude-200"
+            className="bg-white rounded-3xl p-6 sm:p-8 max-w-xl w-full shadow-2xl space-y-6 border border-nude-200 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-nude-200 pb-3">
               <div className="flex items-center gap-2">
-                <Crosshair className="w-5 h-5 text-gold-700" />
+                <Pencil className="w-5 h-5 text-gold-700" />
                 <h3 className="font-serif text-lg font-bold text-charcoal-900">
-                  Змінити кадрування передпоказу
+                  Редагувати фото з навчання
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setEditingItem(null)}
-                className="p-1.5 rounded-full text-charcoal-500 hover:bg-nude-100 transition-colors"
+                className="p-1.5 rounded-full text-charcoal-500 hover:bg-nude-100 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <CropPositionPicker
-              imageUrl={editingItem.imageUrl}
-              value={editingPosition}
-              onChange={setEditingPosition}
-              aspectRatio="4/3"
-              label="Позиціонування кадру (4:3)"
-            />
+            {/* Form Fields: Category, Title UA, Title PL */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-charcoal-700 mb-1">
+                  Категорія фотографії
+                </label>
+                <select
+                  value={editCategory}
+                  onChange={(e) => setEditCategory(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl border border-nude-300 text-xs focus:border-gold-500 focus:outline-none bg-white font-medium cursor-pointer"
+                >
+                  {TRAINING_CATEGORIES.map((cat) => (
+                    <option key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2">
+              <div>
+                <label className="block text-xs font-semibold text-charcoal-700 mb-1">
+                  Підпис / опис (Українська)
+                </label>
+                <input
+                  type="text"
+                  value={editTitleUa}
+                  onChange={(e) => setEditTitleUa(e.target.value)}
+                  placeholder="Індивідуальна постановка руки та робота з фрезером"
+                  className="w-full px-3 py-2.5 rounded-xl border border-nude-300 text-xs focus:border-gold-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-charcoal-700 mb-1">
+                  Podpis / opis (Polski)
+                </label>
+                <input
+                  type="text"
+                  value={editTitlePl}
+                  onChange={(e) => setEditTitlePl(e.target.value)}
+                  placeholder="Indywidualne ułożenie ręki i praca z frezarką"
+                  className="w-full px-3 py-2.5 rounded-xl border border-nude-300 text-xs focus:border-gold-500 focus:outline-none"
+                />
+              </div>
+
+              {/* Interactive Crop Position Picker */}
+              <div className="pt-2 border-t border-nude-100">
+                <CropPositionPicker
+                  imageUrl={editingItem.imageUrl}
+                  value={editingPosition}
+                  onChange={setEditingPosition}
+                  aspectRatio="4/3"
+                  label="Кадрування передпоказу (4:3)"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-nude-200">
               <button
                 type="button"
                 onClick={() => setEditingItem(null)}
@@ -472,15 +665,18 @@ export default function TrainingPhotosTab() {
               <button
                 type="button"
                 disabled={savingEdit}
-                onClick={handleSavePosition}
+                onClick={handleSaveEdit}
                 className="px-6 py-2.5 rounded-xl bg-charcoal-900 hover:bg-gold-600 text-white text-xs font-semibold uppercase tracking-wider transition-colors inline-flex items-center gap-2 shadow-soft disabled:opacity-50 cursor-pointer"
               >
                 {savingEdit ? (
-                  <span>Збереження...</span>
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Збереження...</span>
+                  </>
                 ) : (
                   <>
                     <Check className="w-4 h-4 text-gold-300" />
-                    <span>Зберегти новий фокус</span>
+                    <span>Зберегти зміни</span>
                   </>
                 )}
               </button>

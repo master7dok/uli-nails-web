@@ -105,6 +105,7 @@ export const translations = {
       tabManicure: "Чистий манікюр",
       tabFrench: "Френч & Нюд",
       tabCorrection: "Складні випадки / Трапеції",
+      tabPedicure: "Педикюр",
     },
     trainingGallery: {
       badge: "Атмосфера навчання",
@@ -271,6 +272,7 @@ export const translations = {
       tabManicure: "Czysty manicure",
       tabFrench: "French & Nude",
       tabCorrection: "Trudne płytki / Trapez",
+      tabPedicure: "Pedicure",
     },
     trainingGallery: {
       badge: "Atmosfera szkoleń",
