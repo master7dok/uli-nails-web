@@ -32,6 +32,7 @@ interface PortfolioItem {
 
 const PORTFOLIO_CATEGORIES = [
   { value: "gel", label: "Гель & Архітектура (Żel)" },
+  { value: "dual_forms", label: "Нарощення на верхні форми (Przedłużanie dual forms)" },
   { value: "manicure", label: "Чистий манікюр (Manicure)" },
   { value: "pedicure", label: "Педикюр (Pedicure)" },
   { value: "french", label: "Френч & Нюд (French)" },
@@ -267,6 +268,8 @@ export default function PortfolioTab() {
     switch (cat) {
       case "gel":
         return "Гель & Архітектура";
+      case "dual_forms":
+        return "Верхні форми";
       case "manicure":
         return "Чистий манікюр";
       case "pedicure":

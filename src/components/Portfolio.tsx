@@ -31,6 +31,7 @@ export default function Portfolio({ items, settings }: PortfolioProps) {
   const filterTabs = [
     { id: "all", label: t.portfolio.tabAll },
     { id: "gel", label: t.portfolio.tabGel },
+    { id: "dual_forms", label: (t.portfolio as any).tabDualForms || (language === "ua" ? "Нарощення на верхні форми" : "Przedłużanie dual forms") },
     { id: "manicure", label: t.portfolio.tabManicure },
     { id: "pedicure", label: (t.portfolio as any).tabPedicure || (language === "ua" ? "Педикюр" : "Pedicure") },
     { id: "french", label: t.portfolio.tabFrench },

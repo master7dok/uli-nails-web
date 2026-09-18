@@ -46,6 +46,10 @@ export default function TrainingGallery({ items, settings }: TrainingGalleryProp
       id: "practice",
       label: (t as any).trainingGallery?.tabPractice || (language === "ua" ? "Практика на моделях" : "Praktyka na modelkach"),
     },
+    {
+      id: "practice_dual_forms",
+      label: (t as any).trainingGallery?.tabPracticeDualForms || (language === "ua" ? "Практика на моделях - Нарощення на верхні форми" : "Praktyka na modelkach - Przedłużanie dual forms"),
+    },
     ...(hasPedicure
       ? [
           {
@@ -69,6 +73,8 @@ export default function TrainingGallery({ items, settings }: TrainingGalleryProp
         return language === "ua" ? "Сертифікати" : "Certyfikaty";
       case "practice":
         return language === "ua" ? "Практика" : "Praktyka";
+      case "practice_dual_forms":
+        return language === "ua" ? "Верхні форми" : "Dual forms";
       case "students":
         return language === "ua" ? "Учениці" : "Kursantki";
       case "pedicure":

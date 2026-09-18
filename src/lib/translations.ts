@@ -105,6 +105,7 @@ export const translations = {
         "Тонкі міцні торці, чистий зріз та бездоганний блік без перевантаження нігтів.",
       tabAll: "Всі роботи",
       tabGel: "Гелева архітектура",
+      tabDualForms: "Нарощення на верхні форми",
       tabManicure: "Чистий манікюр",
       tabFrench: "Френч & Нюд",
       tabCorrection: "Складні випадки / Трапеції",
@@ -119,6 +120,7 @@ export const translations = {
       tabProcess: "Процес навчання",
       tabCertificates: "Випускниці та дипломи",
       tabPractice: "Практика на моделях",
+      tabPracticeDualForms: "Практика на моделях - Нарощення на верхні форми",
     },
     checklist: {
       badge: "🎁 Подарунок від Уляни",
@@ -275,6 +277,7 @@ export const translations = {
         "Cienkie krawędzie, idealna linia światła i elegancka harmonia dłoni.",
       tabAll: "Wszystkie",
       tabGel: "Architektura żelowa",
+      tabDualForms: "Przedłużanie dual forms",
       tabManicure: "Czysty manicure",
       tabFrench: "French & Nude",
       tabCorrection: "Trudne płytki / Trapez",
@@ -289,6 +292,7 @@ export const translations = {
       tabProcess: "Proces szkoleń",
       tabCertificates: "Kursantki i certyfikaty",
       tabPractice: "Praktyka na modelkach",
+      tabPracticeDualForms: "Praktyka na modelkach - Przedłużanie dual forms",
     },
     checklist: {
       badge: "🎁 Prezent od Uliany",

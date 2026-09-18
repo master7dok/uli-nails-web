@@ -35,6 +35,7 @@ const TRAINING_CATEGORIES = [
   { value: "process", label: "Процес навчання (Proces szkoleń)" },
   { value: "certificates", label: "Випускниці та дипломи (Kursantki i certyfikaty)" },
   { value: "practice", label: "Практика на моделях (Praktyka na modelkach)" },
+  { value: "practice_dual_forms", label: "Практика на моделях - Нарощення на верхні форми (Praktyka - Dual forms)" },
   { value: "students", label: "Учениці (Kursantki)" },
   { value: "pedicure", label: "Педикюр (Pedicure)" },
 ];
@@ -273,6 +274,8 @@ export default function TrainingPhotosTab() {
         return "Випускниці / Дипломи";
       case "practice":
         return "Практика на моделях";
+      case "practice_dual_forms":
+        return "Практика (Верхні форми)";
       case "students":
         return "Учениці";
       case "pedicure":
