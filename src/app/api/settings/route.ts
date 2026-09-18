@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma, isDatabaseAvailable } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
@@ -44,6 +45,11 @@ export async function PUT(request: Request) {
         });
       }
     }
+
+    try {
+      revalidatePath("/");
+      revalidatePath("/admin");
+    } catch {}
 
     return NextResponse.json({ success: true });
   } catch (error) {

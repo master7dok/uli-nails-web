@@ -251,11 +251,11 @@ export default function SettingsTab() {
           Керуйте анкетою запису на курси та контактами для запису клієнтів
         </p>
 
-        {/* Google Form Link */}
+        {/* Google Form Link (UA) */}
         <div>
           <label className="block text-xs font-semibold text-charcoal-700 mb-1.5 flex items-center gap-1.5">
             <LinkIcon className="w-3.5 h-3.5 text-gold-700" />
-            <span>Посилання на Google Form (Анкета для курсів)</span>
+            <span>Посилання на Google Form (Анкета для курсів) (UA версія сайту)</span>
           </label>
           <input
             type="text"
@@ -267,7 +267,27 @@ export default function SettingsTab() {
             className="w-full px-4 py-2.5 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none"
           />
           <span className="text-[11px] text-charcoal-400 mt-1 block">
-            Це посилання відкривається в модальному вікні при натисканні кнопки &ldquo;Подати заявку на курс&rdquo;.
+            Використовується для запису на курси, коли відвідувач переглядає сайт українською мовою (UA).
+          </span>
+        </div>
+
+        {/* Google Form Link (PL) */}
+        <div>
+          <label className="block text-xs font-semibold text-charcoal-700 mb-1.5 flex items-center gap-1.5">
+            <LinkIcon className="w-3.5 h-3.5 text-gold-700" />
+            <span>Посилання на Google Form (Анкета для курсів) (PL версія сайту)</span>
+          </label>
+          <input
+            type="text"
+            value={settings.google_form_url_pl || ""}
+            onChange={(e) =>
+              setSettings({ ...settings, google_form_url_pl: e.target.value })
+            }
+            placeholder="https://docs.google.com/forms/..."
+            className="w-full px-4 py-2.5 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none"
+          />
+          <span className="text-[11px] text-charcoal-400 mt-1 block">
+            Використовується для запису на курси, коли відвідувач переглядає сайт польською мовою (PL). Якщо поле порожнє, буде використано основне посилання.
           </span>
         </div>
 

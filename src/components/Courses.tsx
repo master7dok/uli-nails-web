@@ -399,12 +399,26 @@ export default function Courses({ courses, settings }: CoursesProps) {
       </div>
 
       {/* Embedded Google Form Questionnaire Modal */}
-      <CourseModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        courseTitle={selectedCourse ? getLocalized(selectedCourse, "title") : ""}
-        formUrl={selectedCourse?.formUrl || undefined}
-      />
+      {(() => {
+        const plFormUrl =
+          settings?.google_form_url_pl && settings.google_form_url_pl.trim().length > 0
+            ? settings.google_form_url_pl.trim()
+            : selectedCourse?.formUrl || settings?.google_form_url;
+
+        const uaFormUrl =
+          selectedCourse?.formUrl || settings?.google_form_url || settings?.google_form_url_ua;
+
+        const activeFormUrl = (language === "pl" ? plFormUrl : uaFormUrl) || undefined;
+
+        return (
+          <CourseModal
+            isOpen={modalOpen}
+            onClose={() => setModalOpen(false)}
+            courseTitle={selectedCourse ? getLocalized(selectedCourse, "title") : ""}
+            formUrl={activeFormUrl}
+          />
+        );
+      })()}
     </section>
   );
 }

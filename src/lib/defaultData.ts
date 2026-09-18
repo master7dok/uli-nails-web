@@ -807,6 +807,7 @@ export const defaultSettings: Record<string, string> = {
   phone: "+48 730 000 000",
   google_form_url:
     "https://docs.google.com/forms/d/e/1FAIpQLSdk9UJoxIHIZtMvzwyGVjLawvwQ9MqqspUCmedYQyR4xv-h_g/viewform?usp=header",
+  google_form_url_pl: "",
   hero_photo_url: "/uploads/img-2269-------1788893828203.jpg",
   about_main_photo_url: "/uploads/img-2558-------1788893832635.jpg",
   about_secondary_photo_url: "/uploads/img-2550-1788893834425.jpg",
