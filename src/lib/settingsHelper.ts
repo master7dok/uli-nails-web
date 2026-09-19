@@ -37,3 +37,9 @@ export function getInstagramLink(
     url: `https://instagram.com/${cleanHandle}`,
   };
 }
+
+export function getTelegramLink(settings?: Record<string, string>): string {
+  const handle = (settings?.telegram_handle || "uliana_p_u").replace(/^@/, "").trim();
+  return `https://t.me/${handle || "uliana_p_u"}`;
+}
+

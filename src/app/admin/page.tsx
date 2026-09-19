@@ -11,6 +11,7 @@ import TrainingPhotosTab from "@/components/admin/TrainingPhotosTab";
 import SettingsTab from "@/components/admin/SettingsTab";
 import TestimonialsTab from "@/components/admin/TestimonialsTab";
 import SiteTextsTab from "@/components/admin/SiteTextsTab";
+import OnlineCoursesTab from "@/components/admin/OnlineCoursesTab";
 import {
   Image as ImageIcon,
   DollarSign,
@@ -22,9 +23,10 @@ import {
   MessageSquareQuote,
   Type,
   FileDown,
+  Video,
 } from "lucide-react";
 
-type ActiveTab = "portfolio" | "training" | "prices" | "courses" | "checklists" | "testimonials" | "texts" | "settings";
+type ActiveTab = "portfolio" | "training" | "prices" | "courses" | "online_courses" | "checklists" | "testimonials" | "texts" | "settings";
 
 function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -140,6 +142,7 @@ export default function AdminPage() {
   const navItems = [
     { id: "prices" as ActiveTab, label: "Прайс-лист", icon: DollarSign },
     { id: "courses" as ActiveTab, label: "Курси & Менторинг", icon: GraduationCap },
+    { id: "online_courses" as ActiveTab, label: "Онлайн-курси & Доступи", icon: Video },
     { id: "checklists" as ActiveTab, label: "Корисне (PDF & Відео)", icon: FileDown },
     { id: "training" as ActiveTab, label: "Фото з навчань", icon: Award },
     { id: "portfolio" as ActiveTab, label: "Портфоліо / Фото", icon: ImageIcon },
@@ -214,6 +217,7 @@ export default function AdminPage() {
         <div className="animate-fadeIn">
           {activeTab === "prices" && <PricesTab />}
           {activeTab === "courses" && <CoursesTab />}
+          {activeTab === "online_courses" && <OnlineCoursesTab />}
           {activeTab === "checklists" && <ChecklistsTab />}
           {activeTab === "training" && <TrainingPhotosTab />}
           {activeTab === "portfolio" && <PortfolioTab />}

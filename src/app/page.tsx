@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Courses from "@/components/Courses";
+import OnlineCoursesSection from "@/components/OnlineCoursesSection";
 import LeadMagnetSection from "@/components/LeadMagnetSection";
 import TrainingGallery from "@/components/TrainingGallery";
 import PriceList from "@/components/PriceList";
@@ -24,6 +25,7 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   let courses: any[] = [];
+  let onlineCourses: any[] = [];
   let services: any[] = [];
   let portfolio: any[] = [];
   let trainingPhotos: any[] = [];
@@ -35,7 +37,7 @@ export default async function HomePage() {
   try {
     const dbOnline = await isDatabaseAvailable();
     if (dbOnline) {
-      [courses, services, portfolio, trainingPhotos, leadMagnets, bonusVideos, testimonials, settingsList] = await Promise.all([
+      [courses, services, portfolio, trainingPhotos, leadMagnets, bonusVideos, testimonials, settingsList, onlineCourses] = await Promise.all([
         prisma.course.findMany({
           where: { isActive: true },
           orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
@@ -61,6 +63,11 @@ export default async function HomePage() {
           orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
         }),
         prisma.setting.findMany(),
+        prisma.onlineCourse.findMany({
+          where: { isActive: true },
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+          include: { materials: true },
+        }),
       ]);
     }
   } catch (error) {
@@ -103,6 +110,11 @@ export default async function HomePage() {
       <Hero settings={settings} />
       <About settings={settings} />
       <Courses courses={courses} settings={settings} />
+      <OnlineCoursesSection
+        courses={onlineCourses}
+        settings={settings}
+        visible={settings?.show_online_courses === "true"}
+      />
       <LeadMagnetSection items={leadMagnets} videos={bonusVideos} settings={settings} />
       <TrainingGallery items={trainingPhotos} settings={settings} />
       <PriceList services={services} settings={settings} />

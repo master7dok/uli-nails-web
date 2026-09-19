@@ -160,4 +160,70 @@ model BonusVideo {
   updatedAt     DateTime  @updatedAt
 }
 
+model OnlineCourse {
+  id            String                 @id @default(cuid())
+  slug          String                 @unique
+  titleUa       String
+  titlePl       String
+  subtitleUa    String?
+  subtitlePl    String?
+  descriptionUa String
+  descriptionPl String
+  pricePln      Float
+  priceMaxPln   Float?
+  coverUrl      String?
+  badgeUa       String?
+  badgePl       String?
+  durationUa    String?
+  durationPl    String?
+  sortOrder     Int                    @default(0)
+  isActive      Boolean                @default(true)
+  materials     OnlineCourseMaterial[]
+  students      StudentCourseAccess[]
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+}
+
+model OnlineCourseMaterial {
+  id             String       @id @default(cuid())
+  courseId       String
+  course         OnlineCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  titleUa        String
+  titlePl        String
+  descriptionUa  String?
+  descriptionPl  String?
+  type           String       @default("video") // "video" | "pdf" | "presentation"
+  fileUrl        String?
+  videoEmbedUrl  String?
+  sortOrder      Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Student {
+  id           String                @id @default(cuid())
+  username     String                @unique
+  passwordHash String
+  name         String?
+  email        String?
+  notes        String?
+  isActive     Boolean               @default(true)
+  lastLoginAt  DateTime?
+  courses      StudentCourseAccess[]
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+}
+
+model StudentCourseAccess {
+  id        String       @id @default(cuid())
+  studentId String
+  student   Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    OnlineCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  grantedAt DateTime     @default(now())
+
+  @@unique([studentId, courseId])
+}
+
+
 

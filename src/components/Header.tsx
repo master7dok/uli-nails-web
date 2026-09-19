@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
-import { Send, Menu, X, Sparkles, Globe } from "lucide-react";
+import { Send, Menu, X, Sparkles, Globe, Lock, User } from "lucide-react";
 import InstagramIcon from "@/components/icons/InstagramIcon";
 import { getInstagramLink } from "@/lib/settingsHelper";
+import StudentLoginModal from "./StudentLoginModal";
 
 interface HeaderProps {
   settings?: Record<string, string>;
@@ -16,12 +17,39 @@ export default function Header({ settings }: HeaderProps = {}) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [isStudentLoggedIn, setIsStudentLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check if student is logged in
+    fetch("/api/student/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated) {
+          setIsStudentLoggedIn(true);
+        }
+      })
+      .catch(() => {});
+
+    const handleLoginEvent = () => setIsStudentLoggedIn(true);
+    window.addEventListener("student:logged-in", handleLoginEvent);
+    return () => window.removeEventListener("student:logged-in", handleLoginEvent);
+  }, []);
 
   const instagram = getInstagramLink(language, settings);
+  const showOnlineCourses = settings?.show_online_courses === "true";
 
   const navLinks = [
     { href: "#about", label: t.nav.about },
     { href: "#courses", label: t.nav.courses },
+    ...(showOnlineCourses
+      ? [
+          {
+            href: "#online-courses",
+            label: (t.nav as any).onlineCourses || (language === "ua" ? "Онлайн-курси" : "Kursy online"),
+          },
+        ]
+      : []),
     { href: "#checklist", label: t.nav.checklist || (language === "ua" ? "Корисне" : "Przydatne") },
     { href: "#training", label: (t.nav as any).training || (language === "ua" ? "Фото з курсів" : "Zdjęcia ze szkoleń") },
     { href: "#prices", label: t.nav.prices },
@@ -33,6 +61,7 @@ export default function Header({ settings }: HeaderProps = {}) {
   const sectionIds = [
     "about",
     "courses",
+    ...(showOnlineCourses ? ["online-courses"] : []),
     "checklist",
     "training",
     "prices",
@@ -199,6 +228,27 @@ export default function Header({ settings }: HeaderProps = {}) {
             <Send className="w-4 h-4" />
           </a>
 
+          {/* Student Area Button */}
+          {isStudentLoggedIn ? (
+            <Link
+              href="/student"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border border-gold-400 bg-gold-50/90 text-gold-900 hover:bg-gold-100 transition-colors shadow-xs"
+              title={language === "ua" ? "Кабінет учня" : "Strefa studenta"}
+            >
+              <User className="w-3.5 h-3.5 text-gold-600" />
+              <span>{language === "ua" ? "Кабінет" : "Konto"}</span>
+            </Link>
+          ) : (
+            <button
+              onClick={() => setLoginModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border border-[#E4D9CA] bg-white/90 hover:bg-[#EFE9DF]/80 text-charcoal-700 hover:text-charcoal-900 transition-colors shadow-xs"
+              title={language === "ua" ? "Вхід для учнів курсів" : "Logowanie dla studentów"}
+            >
+              <Lock className="w-3.5 h-3.5 text-gold-600" />
+              <span>{language === "ua" ? "Вхід" : "Zaloguj"}</span>
+            </button>
+          )}
+
           {/* Fast Course CTA */}
           <a
             href="#courses"
@@ -268,6 +318,30 @@ export default function Header({ settings }: HeaderProps = {}) {
                 <span>Telegram</span>
               </a>
             </div>
+
+            {/* Student Login / Cabinet in Mobile Drawer */}
+            {isStudentLoggedIn ? (
+              <Link
+                href="/student"
+                onClick={() => setMobileMenuOpen(false)}
+                className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-semibold uppercase tracking-wider text-gold-900 bg-gold-100/90 hover:bg-gold-200 border border-gold-300 transition-colors"
+              >
+                <User className="w-4 h-4 text-gold-700" />
+                <span>{language === "ua" ? "Кабінет учня" : "Strefa studenta"}</span>
+              </Link>
+            ) : (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setLoginModalOpen(true);
+                }}
+                className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-semibold uppercase tracking-wider text-charcoal-800 bg-white border border-[#E4D9CA] hover:bg-[#EFE9DF] transition-colors"
+              >
+                <Lock className="w-4 h-4 text-gold-600" />
+                <span>{language === "ua" ? "Вхід для учнів" : "Zaloguj się (Kursy)"}</span>
+              </button>
+            )}
+
             <a
               href="#courses"
               onClick={() => {
@@ -281,6 +355,12 @@ export default function Header({ settings }: HeaderProps = {}) {
           </nav>
         </div>
       )}
+
+      {/* Student Login Modal */}
+      <StudentLoginModal
+        isOpen={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+      />
     </header>
   );
 }
