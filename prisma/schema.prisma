@@ -39,6 +39,7 @@ model Course {
   levelPl       String   @default("Dla każdego")
   levelUa       String   @default("Для всіх")
   pricePln      Float
+  priceMaxPln   Float?
   badgePl       String?
   badgeUa       String?
   bonusPl       String?

@@ -35,6 +35,7 @@ export async function PUT(
         levelPl: data.levelPl,
         levelUa: data.levelUa,
         pricePln: Number(data.pricePln),
+        priceMaxPln: data.priceMaxPln !== undefined && data.priceMaxPln !== null && data.priceMaxPln !== "" ? Number(data.priceMaxPln) : null,
         badgePl: data.badgePl || null,
         badgeUa: data.badgeUa || null,
         bonusPl: data.bonusPl || null,

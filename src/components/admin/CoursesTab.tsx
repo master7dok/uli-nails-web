@@ -44,6 +44,7 @@ interface CourseItem {
   levelPl: string;
   levelUa: string;
   pricePln: number;
+  priceMaxPln?: number | null;
   badgePl?: string | null;
   badgeUa?: string | null;
   bonusPl?: string | null;
@@ -63,6 +64,7 @@ const defaultNewCourse = {
   subtitleUa: "",
   subtitlePl: "",
   pricePln: 1500,
+  priceMaxPln: null as number | null,
   durationUa: "2 дні (16 год)",
   durationPl: "2 dni (16h)",
   levelUa: "Для всіх рівнів",
@@ -136,6 +138,7 @@ function serializeCourseForm(form: any): string {
     subtitleUa: (form.subtitleUa || "").trim(),
     subtitlePl: (form.subtitlePl || "").trim(),
     pricePln: Number(form.pricePln) || 0,
+    priceMaxPln: form.priceMaxPln !== undefined && form.priceMaxPln !== null && form.priceMaxPln !== "" ? Number(form.priceMaxPln) : null,
     durationUa: (form.durationUa || "").trim(),
     durationPl: (form.durationPl || "").trim(),
     levelUa: (form.levelUa || "").trim(),
@@ -179,7 +182,8 @@ function isNewCourseFormDirty(form: typeof defaultNewCourse): boolean {
     (form.syllabusUaList && form.syllabusUaList.length > 0) ||
     (form.syllabusPlList && form.syllabusPlList.length > 0) ||
     (form.formUrl || "").trim() !== "" ||
-    Number(form.pricePln) !== 1500
+    Number(form.pricePln) !== 1500 ||
+    Boolean(form.priceMaxPln && Number(form.priceMaxPln) > 0)
   );
 }
 
@@ -626,6 +630,7 @@ export default function CoursesTab() {
         subtitleUa: newForm.subtitleUa || null,
         subtitlePl: newForm.subtitlePl || null,
         pricePln: Number(newForm.pricePln) || 0,
+        priceMaxPln: newForm.priceMaxPln ? Number(newForm.priceMaxPln) : null,
         durationUa: newForm.durationUa,
         durationPl: newForm.durationPl,
         levelUa: newForm.levelUa,
@@ -683,6 +688,7 @@ export default function CoursesTab() {
 
     const editState = {
       ...course,
+      priceMaxPln: course.priceMaxPln ?? null,
       featuresUaText: stringToLines(course.featuresUa),
       featuresPlText: stringToLines(course.featuresPl),
       syllabusUaList: parseSyllabus(course.syllabusUa),
@@ -741,6 +747,7 @@ export default function CoursesTab() {
       const payload = {
         ...editForm,
         pricePln: Number(editForm.pricePln) || 0,
+        priceMaxPln: editForm.priceMaxPln !== undefined && editForm.priceMaxPln !== null && editForm.priceMaxPln !== "" ? Number(editForm.priceMaxPln) : null,
         sortOrder: Number(editForm.sortOrder) || 0,
         featuresUa: linesToJson(editForm.featuresUaText),
         featuresPl: linesToJson(editForm.featuresPlText),
@@ -921,10 +928,10 @@ export default function CoursesTab() {
           </div>
 
           {/* Row 1: Key Metadata */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
               <label className="block text-xs font-semibold text-charcoal-700 mb-1">
-                Ціна курсу (PLN) *
+                Ціна від (PLN) *
               </label>
               <input
                 type="number"
@@ -932,6 +939,27 @@ export default function CoursesTab() {
                 onChange={(e) => setNewForm({ ...newForm, pricePln: Number(e.target.value) })}
                 required
                 min={0}
+                placeholder="1500"
+                className="w-full px-3 py-2 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-charcoal-700 mb-1 flex items-center justify-between">
+                <span>Ціна до (PLN)</span>
+                <span className="text-[10px] text-charcoal-400 font-normal">(діапазон)</span>
+              </label>
+              <input
+                type="number"
+                value={newForm.priceMaxPln ?? ""}
+                onChange={(e) =>
+                  setNewForm({
+                    ...newForm,
+                    priceMaxPln: e.target.value === "" ? null : Number(e.target.value),
+                  })
+                }
+                min={0}
+                placeholder="Напр. 2500"
                 className="w-full px-3 py-2 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none"
               />
             </div>
@@ -975,6 +1003,18 @@ export default function CoursesTab() {
                 className="w-full px-3 py-2 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none"
               />
             </div>
+
+            {newForm.priceMaxPln && Number(newForm.priceMaxPln) > 0 && Number(newForm.priceMaxPln) !== Number(newForm.pricePln) ? (
+              <div className="col-span-full bg-gold-50/70 border border-gold-200/80 rounded-xl px-3.5 py-2 text-xs text-charcoal-700 flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-gold-600 shrink-0" />
+                <span>
+                  Діапазон вартості курсу:{" "}
+                  <strong className="font-semibold text-charcoal-900">
+                    {Math.min(Number(newForm.pricePln), Number(newForm.priceMaxPln))} – {Math.max(Number(newForm.pricePln), Number(newForm.priceMaxPln))} zł
+                  </strong>
+                </span>
+              </div>
+            ) : null}
           </div>
 
           {/* Row 2: Levels & Badges */}
@@ -1285,17 +1325,37 @@ export default function CoursesTab() {
                     </div>
 
                     {/* Row 1 */}
-                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                       <div>
                         <label className="block text-xs font-semibold text-charcoal-700 mb-1">
-                          Ціна курсу (PLN) *
+                          Ціна від (PLN) *
                         </label>
                         <input
                           type="number"
-                          value={editForm.pricePln || 0}
+                          value={editForm.pricePln ?? 0}
                           onChange={(e) =>
                             setEditForm({ ...editForm, pricePln: Number(e.target.value) })
                           }
+                          className="w-full px-3 py-2 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-charcoal-700 mb-1 flex items-center justify-between">
+                          <span>Ціна до (PLN)</span>
+                          <span className="text-[10px] text-charcoal-400 font-normal">(діапазон)</span>
+                        </label>
+                        <input
+                          type="number"
+                          value={editForm.priceMaxPln ?? ""}
+                          onChange={(e) =>
+                            setEditForm({
+                              ...editForm,
+                              priceMaxPln: e.target.value === "" ? null : Number(e.target.value),
+                            })
+                          }
+                          min={0}
+                          placeholder="Напр. 2500"
                           className="w-full px-3 py-2 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none"
                         />
                       </div>
@@ -1341,6 +1401,18 @@ export default function CoursesTab() {
                           className="w-full px-3 py-2 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none"
                         />
                       </div>
+
+                      {editForm.priceMaxPln && Number(editForm.priceMaxPln) > 0 && Number(editForm.priceMaxPln) !== Number(editForm.pricePln) ? (
+                        <div className="col-span-full bg-gold-50/70 border border-gold-200/80 rounded-xl px-3.5 py-2 text-xs text-charcoal-700 flex items-center gap-2">
+                          <Sparkles className="w-3.5 h-3.5 text-gold-600 shrink-0" />
+                          <span>
+                            Діапазон вартості курсу:{" "}
+                            <strong className="font-semibold text-charcoal-900">
+                              {Math.min(Number(editForm.pricePln || 0), Number(editForm.priceMaxPln))} – {Math.max(Number(editForm.pricePln || 0), Number(editForm.priceMaxPln))} zł
+                            </strong>
+                          </span>
+                        </div>
+                      ) : null}
                     </div>
 
                     {/* Row 2: Levels & Badges */}
@@ -1637,7 +1709,9 @@ export default function CoursesTab() {
                             Вартість
                           </span>
                           <span className="font-serif text-2xl font-bold text-charcoal-900">
-                            {course.pricePln} zł
+                            {course.priceMaxPln && course.priceMaxPln > 0 && course.priceMaxPln !== course.pricePln
+                              ? `${Math.min(course.pricePln, course.priceMaxPln)} – ${Math.max(course.pricePln, course.priceMaxPln)} zł`
+                              : `${course.pricePln} zł`}
                           </span>
                         </div>
 

@@ -28,6 +28,7 @@ export interface DefaultCourse {
   levelPl: string;
   levelUa: string;
   pricePln: number;
+  priceMaxPln?: number | null;
   badgePl?: string | null;
   badgeUa?: string | null;
   bonusPl?: string | null;

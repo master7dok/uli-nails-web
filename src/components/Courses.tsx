@@ -44,6 +44,7 @@ interface CourseItem {
   levelPl: string;
   levelUa: string;
   pricePln: number;
+  priceMaxPln?: number | null;
   badgePl?: string | null;
   badgeUa?: string | null;
   bonusPl?: string | null;
@@ -366,8 +367,10 @@ export default function Courses({ courses, settings }: CoursesProps) {
                       {language === "pl" ? "Inwestycja w kurs" : "Вартість курсу"}
                     </span>
                     <div className="flex items-baseline gap-1">
-                      <span className="font-serif text-3xl font-bold text-charcoal-900">
-                        {course.pricePln}
+                      <span className="font-serif text-2xl sm:text-3xl font-bold text-charcoal-900">
+                        {course.priceMaxPln && course.priceMaxPln > 0 && course.priceMaxPln !== course.pricePln
+                          ? `${Math.min(course.pricePln, course.priceMaxPln)} – ${Math.max(course.pricePln, course.priceMaxPln)}`
+                          : course.pricePln}
                       </span>
                       <span className="text-sm font-semibold text-charcoal-600">zł</span>
                     </div>

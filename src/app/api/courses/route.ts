@@ -56,6 +56,7 @@ export async function POST(request: Request) {
         levelPl: data.levelPl || "Dla każdego",
         levelUa: data.levelUa || "Для всіх",
         pricePln: Number(data.pricePln) || 0,
+        priceMaxPln: data.priceMaxPln !== undefined && data.priceMaxPln !== null && data.priceMaxPln !== "" ? Number(data.priceMaxPln) : null,
         badgePl: data.badgePl || null,
         badgeUa: data.badgeUa || null,
         bonusPl: data.bonusPl || null,
