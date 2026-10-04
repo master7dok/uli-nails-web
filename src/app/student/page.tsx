@@ -123,14 +123,18 @@ export default function StudentPortalPage() {
           data.error ||
             (language === "ua"
               ? "Невірний логін або пароль."
-              : "Nieprawidłowy login lub hasło.")
+              : language === "pl"
+              ? "Nieprawidłowy login lub hasło."
+              : "Invalid username or password.")
         );
       }
     } catch {
       setLoginError(
         language === "ua"
           ? "Помилка сервера. Спробуйте пізніше."
-          : "Błąd serwera. Spróbuj później."
+          : language === "pl"
+          ? "Błąd serwera. Spróbuj później."
+          : "Server error. Please try again later."
       );
     } finally {
       setLoginLoading(false);
@@ -174,7 +178,7 @@ export default function StudentPortalPage() {
         <div className="text-center space-y-3">
           <Loader2 className="w-8 h-8 animate-spin text-gold-600 mx-auto" />
           <p className="font-serif text-sm text-charcoal-600">
-            {language === "ua" ? "Завантаження кабінету..." : "Ładowanie strefy kursantki..."}
+            {language === "ua" ? "Завантаження кабінету..." : language === "pl" ? "Ładowanie strefy kursantki..." : "Loading student portal..."}
           </p>
         </div>
       </div>
@@ -190,12 +194,32 @@ export default function StudentPortalPage() {
             Uliana Nails
           </Link>
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setLanguage(language === "ua" ? "pl" : "ua")}
-              className="text-xs font-semibold px-3 py-1 rounded-full bg-nude-100 text-charcoal-700 hover:bg-nude-200 transition-colors"
-            >
-              {language.toUpperCase()}
-            </button>
+            <div className="flex items-center bg-[#EFE9DF]/70 p-0.5 rounded-full border border-[#E4D9CA]">
+              <button
+                onClick={() => setLanguage("ua")}
+                className={`px-2 py-0.5 text-xs font-semibold rounded-full transition-all ${
+                  language === "ua" ? "bg-white text-charcoal-900 shadow-xs" : "text-charcoal-500"
+                }`}
+              >
+                UA
+              </button>
+              <button
+                onClick={() => setLanguage("pl")}
+                className={`px-2 py-0.5 text-xs font-semibold rounded-full transition-all ${
+                  language === "pl" ? "bg-white text-charcoal-900 shadow-xs" : "text-charcoal-500"
+                }`}
+              >
+                PL
+              </button>
+              <button
+                onClick={() => setLanguage("en")}
+                className={`px-2 py-0.5 text-xs font-semibold rounded-full transition-all ${
+                  language === "en" ? "bg-white text-charcoal-900 shadow-xs" : "text-charcoal-500"
+                }`}
+              >
+                EN
+              </button>
+            </div>
             <Link
               href="/"
               className="inline-flex items-center gap-1 text-xs font-semibold text-charcoal-600 hover:text-gold-700 transition-colors"
@@ -213,12 +237,14 @@ export default function StudentPortalPage() {
                 <Lock className="w-5 h-5" />
               </div>
               <h1 className="font-serif text-2xl font-bold text-charcoal-900 mb-1">
-                {language === "ua" ? "Вхід для учениць" : "Logowanie dla kursantek"}
+                {language === "ua" ? "Вхід для учениць" : language === "pl" ? "Logowanie dla kursantek" : "Student Login"}
               </h1>
               <p className="text-xs text-charcoal-500">
                 {language === "ua"
                   ? "Введіть логін та пароль, отримані від Уляни"
-                  : "Wprowadź login i hasło przekazane przez Ulianę"}
+                  : language === "pl"
+                  ? "Wprowadź login i hasło przekazane przez Ulianę"
+                  : "Enter your username and password provided by Uliana"}
               </p>
             </div>
 
@@ -232,7 +258,7 @@ export default function StudentPortalPage() {
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-charcoal-700 mb-1">
-                  {language === "ua" ? "Логін" : "Login"}
+                  {language === "ua" ? "Логін" : language === "pl" ? "Login" : "Username"}
                 </label>
                 <div className="relative">
                   <input
@@ -241,7 +267,7 @@ export default function StudentPortalPage() {
                     autoComplete="username"
                     value={loginUsername}
                     onChange={(e) => setLoginUsername(e.target.value)}
-                    placeholder={language === "ua" ? "Ваш логін" : "Twój login"}
+                    placeholder={language === "ua" ? "Ваш логін" : language === "pl" ? "Twój login" : "Your username"}
                     className="w-full pl-10 pr-3.5 py-3 rounded-2xl border border-nude-300 text-sm font-mono focus:border-gold-600 focus:outline-none"
                   />
                   <User className="w-4 h-4 text-charcoal-400 absolute left-3.5 top-3.5 pointer-events-none" />
@@ -250,7 +276,7 @@ export default function StudentPortalPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-charcoal-700 mb-1">
-                  {language === "ua" ? "Пароль" : "Hasło"}
+                  {language === "ua" ? "Пароль" : language === "pl" ? "Hasło" : "Password"}
                 </label>
                 <div className="relative">
                   <input
@@ -259,7 +285,7 @@ export default function StudentPortalPage() {
                     autoComplete="current-password"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
-                    placeholder={language === "ua" ? "Введіть пароль" : "Wprowadź hasło"}
+                    placeholder={language === "ua" ? "Введіть пароль" : language === "pl" ? "Wprowadź hasło" : "Enter password"}
                     className="w-full pl-10 pr-3.5 py-3 rounded-2xl border border-nude-300 text-sm font-mono focus:border-gold-600 focus:outline-none"
                   />
                   <Lock className="w-4 h-4 text-charcoal-400 absolute left-3.5 top-3.5 pointer-events-none" />
@@ -274,10 +300,10 @@ export default function StudentPortalPage() {
                 {loginLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>{language === "ua" ? "Перевірка..." : "Weryfikacja..."}</span>
+                    <span>{language === "ua" ? "Перевірка..." : language === "pl" ? "Weryfikacja..." : "Verifying..."}</span>
                   </>
                 ) : (
-                  <span>{language === "ua" ? "Увійти в кабінет" : "Zaloguj się"}</span>
+                  <span>{language === "ua" ? "Увійти в кабінет" : language === "pl" ? "Zaloguj się" : "Log In"}</span>
                 )}
               </button>
             </form>
@@ -339,6 +365,14 @@ export default function StudentPortalPage() {
                 }`}
               >
                 PL
+              </button>
+              <button
+                onClick={() => setLanguage("en")}
+                className={`px-2 py-0.5 text-xs font-semibold rounded-full transition-all ${
+                  language === "en" ? "bg-white text-charcoal-900 shadow-xs" : "text-charcoal-500"
+                }`}
+              >
+                EN
               </button>
             </div>
 

@@ -48,7 +48,7 @@ export default function TrainingGallery({ items, settings }: TrainingGalleryProp
     },
     {
       id: "practice_dual_forms",
-      label: (t as any).trainingGallery?.tabPracticeDualForms || (language === "ua" ? "Практика на моделях - Нарощення на верхні форми" : "Praktyka na modelkach - Przedłużanie dual forms"),
+      label: (t as any).trainingGallery?.tabPracticeDualForms || (language === "ua" ? "Практика на моделях - Нарощення на верхні форми" : language === "pl" ? "Praktyka na modelkach - Przedłużanie dual forms" : "Model Practice - Dual Forms"),
     },
     ...(hasPedicure
       ? [
@@ -68,19 +68,19 @@ export default function TrainingGallery({ items, settings }: TrainingGalleryProp
   const getCategoryBadgeLabel = (cat: string) => {
     switch (cat) {
       case "process":
-        return language === "ua" ? "Процес" : "Proces";
+        return language === "ua" ? "Процес" : language === "pl" ? "Proces" : "Process";
       case "certificates":
-        return language === "ua" ? "Сертифікати" : "Certyfikaty";
+        return language === "ua" ? "Сертифікати" : language === "pl" ? "Certyfikaty" : "Certificates";
       case "practice":
-        return language === "ua" ? "Практика" : "Praktyka";
+        return language === "ua" ? "Практика" : language === "pl" ? "Praktyka" : "Practice";
       case "practice_dual_forms":
-        return language === "ua" ? "Верхні форми" : "Dual forms";
+        return language === "ua" ? "Верхні форми" : language === "pl" ? "Dual forms" : "Dual Forms";
       case "students":
-        return language === "ua" ? "Учениці" : "Kursantki";
+        return language === "ua" ? "Учениці" : language === "pl" ? "Kursantki" : "Students";
       case "pedicure":
         return language === "ua" ? "Педикюр" : "Pedicure";
       default:
-        return language === "ua" ? "Курси" : "Szkolenie";
+        return language === "ua" ? "Курси" : language === "pl" ? "Szkolenie" : "Courses";
     }
   };
 
@@ -122,7 +122,9 @@ export default function TrainingGallery({ items, settings }: TrainingGalleryProp
               (t as any).trainingGallery?.subtitle ||
                 (language === "ua"
                   ? "Живі моменти з авторських курсів: практика на моделях, постановка руки, вручення дипломів та перші впевнені кроки в професії."
-                  : "Żywe chwile z kursów autorskich: praktyka na modelkach, ułożenie ręki, wręczenie certyfikatów i pierwsze pewne kroki w zawodzie.")
+                  : language === "pl"
+                  ? "Żywe chwile z kursów autorskich: praktyka na modelkach, ułożenie ręki, wręczenie certyfikatów i pierwsze pewne kroki w zawodzie."
+                  : "Live moments from masterclasses: live model practice, precision hand positioning, certification, and first confident steps into the profession.")
             )}
           </p>
         </motion.div>
@@ -217,7 +219,7 @@ export default function TrainingGallery({ items, settings }: TrainingGalleryProp
         {filteredItems.length === 0 && (
           <div className="text-center py-16">
             <p className="text-charcoal-500 font-serif">
-              {language === "ua" ? "У цій категорії поки що немає фотографій." : "Brak zdjęć w tej kategorii."}
+              {language === "ua" ? "У цій категорії поки що немає фотографій." : language === "pl" ? "Brak zdjęć w tej kategorii." : "No photos in this category yet."}
             </p>
           </div>
         )}

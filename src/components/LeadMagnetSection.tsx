@@ -116,11 +116,16 @@ export default function LeadMagnetSection({
     (t as any).checklist?.instantNote ||
       (language === "ua"
         ? "⚡ Миттєве завантаження в 1 клік • Безкоштовно для майстрів"
-        : "⚡ Błyskawiczne pobieranie w 1 kliknięcie • Za darmo dla stylistek")
+        : language === "pl"
+        ? "⚡ Błyskawiczne pobieranie w 1 kliknięcie • Za darmo dla stylistek"
+        : "⚡ Instant 1-click download • Free for nail stylists")
   );
 
   const handleWatchVideo = (video: DefaultBonusVideo) => {
-    const videoUrl = language === "pl" ? video.videoUrlPl : video.videoUrlUa;
+    const videoUrl =
+      language === "pl" || language === "en"
+        ? video.videoUrlPl || video.videoUrlUa
+        : video.videoUrlUa || video.videoUrlPl;
     if (!videoUrl) return;
 
     if (video.id && unlockedVideoIds[video.id]) {
@@ -175,11 +180,13 @@ export default function LeadMagnetSection({
             {activeItems.map((item, idx) => {
               const title = getLocalized(item, "title");
               const description = getLocalized(item, "description");
-              const badge = getLocalized(item, "badge") || (language === "ua" ? "Безкоштовний PDF" : "Darmowy PDF");
-              const buttonText = getLocalized(item, "buttonText") || (language === "ua" ? "Завантажити чек-лист" : "Pobierz checklist");
+              const badge = getLocalized(item, "badge") || (language === "ua" ? "Безкоштовний PDF" : language === "pl" ? "Darmowy PDF" : "Free PDF");
+              const buttonText = getLocalized(item, "buttonText") || (language === "ua" ? "Завантажити чек-лист" : language === "pl" ? "Pobierz checklist" : "Download Checklist");
               const isDownloaded = Boolean(item.id && downloadedIds[item.id]);
               const displaySize =
                 language === "pl"
+                  ? item.fileSizePl || item.fileSize || item.fileSizeUa
+                  : language === "en"
                   ? item.fileSizePl || item.fileSize || item.fileSizeUa
                   : item.fileSizeUa || item.fileSize || item.fileSizePl;
 
@@ -227,7 +234,9 @@ export default function LeadMagnetSection({
                               <span>
                                 {language === "ua"
                                   ? `Завантажили ${item.downloadCount}+ майстрів`
-                                  : `Pobrano przez ${item.downloadCount}+ stylistek`}
+                                  : language === "pl"
+                                  ? `Pobrano przez ${item.downloadCount}+ stylistek`
+                                  : `Downloaded by ${item.downloadCount}+ stylists`}
                               </span>
                             </span>
                           ) : null}
@@ -260,7 +269,7 @@ export default function LeadMagnetSection({
                           <>
                             <CheckCircle2 className="w-4 h-4 text-white" />
                             <span>
-                              {language === "ua" ? "Завантажити ще раз" : "Pobierz ponownie"}
+                              {language === "ua" ? "Завантажити ще раз" : language === "pl" ? "Pobierz ponownie" : "Download Again"}
                             </span>
                           </>
                         ) : (
@@ -297,17 +306,25 @@ export default function LeadMagnetSection({
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gold-100/80 border border-gold-300 text-gold-900 text-xs font-semibold tracking-wider uppercase mb-3 shadow-xs">
                 <Play className="w-3 h-3 fill-current text-gold-700" />
                 <span>
-                  {language === "pl" ? "🎬 Bonusowe wideo-lekcje" : "🎬 Безкоштовні відеоуроки"}
+                  {language === "pl"
+                    ? "🎬 Bonusowe wideo-lekcje"
+                    : language === "en"
+                    ? "🎬 Free Video Masterclasses"
+                    : "🎬 Безкоштовні відеоуроки"}
                 </span>
               </div>
               <h3 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-normal text-charcoal-900 tracking-tight mb-3">
                 {language === "pl"
                   ? "Oglądaj praktyczne techniki i sekrety pracy"
+                  : language === "en"
+                  ? "Watch practical techniques and salon secrets"
                   : "Дивіться практичні авторські відеоуроки"}
               </h3>
               <p className="text-sm sm:text-base text-charcoal-600 leading-relaxed max-w-2xl mx-auto">
                 {language === "pl"
                   ? "Ekskluzywne materiały wideo z demonstracją technik, rozbiorem błędów i wskazówkami krok po kroku od Uliany."
+                  : language === "en"
+                  ? "Exclusive video tutorials with live technique demonstrations, speed secrets, and step-by-step guidance from Uliana."
                   : "Ексклюзивні відеоматеріали з живою демонстрацією, секретами швидкості та покроковим розбором помилок від Уляни."}
               </p>
             </motion.div>
@@ -325,10 +342,10 @@ export default function LeadMagnetSection({
                 const description = getLocalized(video, "description");
                 const badge =
                   getLocalized(video, "badge") ||
-                  (language === "ua" ? "Безкоштовний відеоурок" : "Darmowa lekcja wideo");
+                  (language === "ua" ? "Безкоштовний відеоурок" : language === "pl" ? "Darmowa lekcja wideo" : "Free Video Lesson");
                 const buttonText =
                   getLocalized(video, "buttonText") ||
-                  (language === "ua" ? "Дивитися відео" : "Oglądaj wideo");
+                  (language === "ua" ? "Дивитися відео" : language === "pl" ? "Oglądaj wideo" : "Watch Video");
                 const isUnlocked = Boolean(video.id && unlockedVideoIds[video.id]);
 
                 return (
@@ -392,14 +409,16 @@ export default function LeadMagnetSection({
                               <span>
                                 {language === "ua"
                                   ? `${video.viewsCount}+ переглядів`
-                                  : `${video.viewsCount}+ wyświetleń`}
+                                  : language === "pl"
+                                  ? `${video.viewsCount}+ wyświetleń`
+                                  : `${video.viewsCount}+ views`}
                               </span>
                             </span>
                           ) : null}
                           {isUnlocked && (
                             <span className="text-[11px] font-semibold text-emerald-700 flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                               <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                              <span>{language === "ua" ? "Доступ відкрито" : "Odblokowano"}</span>
+                              <span>{language === "ua" ? "Доступ відкрито" : language === "pl" ? "Odblokowano" : "Unlocked"}</span>
                             </span>
                           )}
                         </div>
@@ -430,7 +449,9 @@ export default function LeadMagnetSection({
                             {isUnlocked
                               ? language === "ua"
                                 ? "Дивитися ще раз"
-                                : "Oglądaj ponownie"
+                                : language === "pl"
+                                ? "Oglądaj ponownie"
+                                : "Watch Again"
                               : buttonText}
                           </span>
                         </button>
@@ -479,7 +500,9 @@ export default function LeadMagnetSection({
             setActivePlayingVideo({
               url:
                 resolvedUrl ||
-                (language === "pl" ? selectedVideoForLead.videoUrlPl! : selectedVideoForLead.videoUrlUa!),
+                (language === "pl" || language === "en"
+                  ? selectedVideoForLead.videoUrlPl || selectedVideoForLead.videoUrlUa!
+                  : selectedVideoForLead.videoUrlUa || selectedVideoForLead.videoUrlPl!),
               title: getLocalized(selectedVideoForLead, "title"),
               description: getLocalized(selectedVideoForLead, "description"),
               coverUrl: selectedVideoForLead.coverUrl || null,

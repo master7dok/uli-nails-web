@@ -12,6 +12,7 @@ export const metadata: Metadata = {
     languages: {
       "uk-UA": "https://ulinails.pl/ua",
       "pl-PL": "https://ulinails.pl/pl",
+      "en-US": "https://ulinails.pl/en",
       "x-default": "https://ulinails.pl/",
     },
   },

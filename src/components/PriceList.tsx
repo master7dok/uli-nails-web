@@ -215,12 +215,16 @@ export default function PriceList({ services, settings }: PriceListProps) {
                 <span>
                   {language === "pl"
                     ? "Chcesz zarezerwować termin na stylizację?"
+                    : language === "en"
+                    ? "Looking to book an appointment?"
                     : "Бажаєте записатися на послугу?"}
                 </span>
               </p>
               <p className="text-xs text-charcoal-500 mt-0.5">
                 {language === "pl"
                   ? "Napisz bezpośrednio na Telegram lub Instagram"
+                  : language === "en"
+                  ? "Message directly via Telegram or Instagram Direct"
                   : "Напишіть напряму в Telegram або Instagram Direct"}
               </p>
             </div>

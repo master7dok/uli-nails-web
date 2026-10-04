@@ -10,7 +10,7 @@ interface LeadCaptureModalProps {
   onClose: () => void;
   leadMagnetId?: string;
   checklistTitle: string;
-  language: "ua" | "pl";
+  language: "ua" | "pl" | "en";
   t: any;
   mode?: "checklist" | "video";
   videoId?: string;
@@ -38,64 +38,180 @@ export default function LeadCaptureModal({
 
   const modalTexts = isVideoMode
     ? {
-        badge: language === "pl" ? "Darmowa lekcja wideo" : "Безкоштовний відеоурок",
-        title: language === "pl" ? "Oglądaj lekcję wideo" : "Отримати доступ до відео",
+        badge:
+          language === "pl"
+            ? "Darmowa lekcja wideo"
+            : language === "en"
+            ? "Free Video Lesson"
+            : "Безкоштовний відеоурок",
+        title:
+          language === "pl"
+            ? "Oglądaj lekcję wideo"
+            : language === "en"
+            ? "Watch Video Lesson"
+            : "Отримати доступ до відео",
         subtitle:
           language === "pl"
             ? "Wypełnij formularz, aby natychmiast odtworzyć wideo na stronie:"
+            : language === "en"
+            ? "Fill in your details to immediately watch the video on the site:"
             : "Заповніть контакти, щоб миттєво відкрити відеоурок прямо на сайті:",
-        instagramLabel: language === "pl" ? "Twój Instagram" : "Ваш Instagram",
+        instagramLabel:
+          language === "pl"
+            ? "Twój Instagram"
+            : language === "en"
+            ? "Your Instagram"
+            : "Ваш Instagram",
         instagramPlaceholder: "@nik_instagram",
-        emailLabel: language === "pl" ? "Email do kontaktu" : "Email для зворотного зв'язку",
+        emailLabel:
+          language === "pl"
+            ? "Email do kontaktu"
+            : language === "en"
+            ? "Email address"
+            : "Email для зворотного зв'язку",
         emailPlaceholder: "example@gmail.com",
-        experienceLabel: language === "pl" ? "Ile lat w zawodzie?" : "Скільки років у професії?",
+        experienceLabel:
+          language === "pl"
+            ? "Ile lat w zawodzie?"
+            : language === "en"
+            ? "Years in profession?"
+            : "Скільки років у професії?",
         expOptions:
           language === "pl"
             ? ["Początkująca / planuję zacząć", "Do 1 roku", "1–3 lata", "Powyżej 3 lat"]
+            : language === "en"
+            ? ["Beginner / planning to start", "Up to 1 year", "1–3 years", "Over 3 years"]
             : ["Початківець / планую почати", "До 1 року", "1–3 роки", "Понад 3 роки"],
-        submitBtn: language === "pl" ? "Oglądaj wideo teraz" : "Дивитися відео зараз",
-        downloading: language === "pl" ? "Otwieramy wideo..." : "Відкриваємо відео...",
-        successTitle: language === "pl" ? "Dostęp odblokowany! 🎉" : "Доступ відкрито! 🎉",
+        submitBtn:
+          language === "pl"
+            ? "Oglądaj wideo teraz"
+            : language === "en"
+            ? "Watch video now"
+            : "Дивитися відео зараз",
+        downloading:
+          language === "pl"
+            ? "Otwieramy wideo..."
+            : language === "en"
+            ? "Opening video..."
+            : "Відкриваємо відео...",
+        successTitle:
+          language === "pl"
+            ? "Dostęp odblokowany! 🎉"
+            : language === "en"
+            ? "Access unlocked! 🎉"
+            : "Доступ відкрито! 🎉",
         successText:
           language === "pl"
             ? "Uruchamianie odtwarzacza wideo..."
+            : language === "en"
+            ? "Launching video player..."
             : "Запускаємо відеоплеєр...",
         privacyNote:
           language === "pl"
             ? "🔒 Zero spamu. Tylko przydatne materiały i autorskie wskazówki od Uliany."
+            : language === "en"
+            ? "🔒 No spam. Only useful materials and author tips from Uliana."
             : "🔒 Без спаму. Тільки корисні матеріали та авторські фішки від Уляни.",
-        fieldRequired: language === "pl" ? "Proszę wypełnić to pole" : "Будь ласка, заповніть це поле",
-        invalidEmail: language === "pl" ? "Wpisz poprawny adres e-mail" : "Введіть коректну електронну пошту",
+        fieldRequired:
+          language === "pl"
+            ? "Proszę wypełnić to pole"
+            : language === "en"
+            ? "Please fill in this field"
+            : "Будь ласка, заповніть це поле",
+        invalidEmail:
+          language === "pl"
+            ? "Wpisz poprawny adres e-mail"
+            : language === "en"
+            ? "Enter a valid email address"
+            : "Введіть коректну електронну пошту",
       }
     : (t?.leadModal || {
-        badge: language === "pl" ? "Darmowy materiał" : "Безкоштовний матеріал",
-        title: language === "pl" ? "Pobierz checklist" : "Отримати чек-лист",
+        badge:
+          language === "pl"
+            ? "Darmowy materiał"
+            : language === "en"
+            ? "Free Material"
+            : "Безкоштовний матеріал",
+        title:
+          language === "pl"
+            ? "Pobierz checklist"
+            : language === "en"
+            ? "Download Checklist"
+            : "Отримати чек-лист",
         subtitle:
           language === "pl"
             ? "Wypełnij krótki formularz, aby natychmiast pobrać PDF na swoje urządzenie:"
+            : language === "en"
+            ? "Fill in your details to instantly download the PDF to your device:"
             : "Заповніть контакти, щоб миттєво завантажити PDF-посібник:",
-        instagramLabel: language === "pl" ? "Twój Instagram" : "Ваш Instagram",
+        instagramLabel:
+          language === "pl"
+            ? "Twój Instagram"
+            : language === "en"
+            ? "Your Instagram"
+            : "Ваш Instagram",
         instagramPlaceholder: "@nik_instagram",
-        emailLabel: language === "pl" ? "Email do kontaktu" : "Email для зворотного зв'язку",
+        emailLabel:
+          language === "pl"
+            ? "Email do kontaktu"
+            : language === "en"
+            ? "Email address"
+            : "Email для зворотного зв'язку",
         emailPlaceholder: "example@gmail.com",
-        experienceLabel: language === "pl" ? "Ile lat w zawodzie?" : "Скільки років у професії?",
+        experienceLabel:
+          language === "pl"
+            ? "Ile lat w zawodzie?"
+            : language === "en"
+            ? "Years in profession?"
+            : "Скільки років у професії?",
         expOptions:
           language === "pl"
             ? ["Początkująca / planuję zacząć", "Do 1 roku", "1–3 lata", "Powyżej 3 lat"]
+            : language === "en"
+            ? ["Beginner / planning to start", "Up to 1 year", "1–3 years", "Over 3 years"]
             : ["Початківець / планую почати", "До 1 року", "1–3 роки", "Понад 3 роки"],
-        submitBtn: language === "pl" ? "Pobierz darmowy PDF" : "Завантажити чек-лист PDF",
-        downloading: language === "pl" ? "Przygotowujemy plik..." : "Готуємо ваш файл...",
-        successTitle: language === "pl" ? "Dziękujemy! Plik gotowy 🎉" : "Дякуємо! Файл готовий 🎉",
+        submitBtn:
+          language === "pl"
+            ? "Pobierz darmowy PDF"
+            : language === "en"
+            ? "Download free PDF"
+            : "Завантажити чек-лист PDF",
+        downloading:
+          language === "pl"
+            ? "Przygotowujemy plik..."
+            : language === "en"
+            ? "Preparing file..."
+            : "Готуємо ваш файл...",
+        successTitle:
+          language === "pl"
+            ? "Dziękujemy! Plik gotowy 🎉"
+            : language === "en"
+            ? "Thank you! File ready 🎉"
+            : "Дякуємо! Файл готовий 🎉",
         successText:
           language === "pl"
-            ? "Pobieranie pliku PDF розпочалося автоматично."
+            ? "Pobieranie pliku PDF rozpoczęło się automatycznie."
+            : language === "en"
+            ? "PDF download started automatically."
             : "Завантаження PDF розпочалося автоматично.",
         privacyNote:
           language === "pl"
             ? "🔒 Zero spamu. Tylko przydatne materiały i autorskie wskazówki od Uliany."
+            : language === "en"
+            ? "🔒 No spam. Only useful materials and author tips from Uliana."
             : "🔒 Без спаму. Тільки корисні матеріали та авторські фішки від Уляни.",
-        fieldRequired: language === "pl" ? "Proszę wypełnić to pole" : "Будь ласка, заповніть це поле",
-        invalidEmail: language === "pl" ? "Wpisz poprawny adres e-mail" : "Введіть коректну електронну пошту",
+        fieldRequired:
+          language === "pl"
+            ? "Proszę wypełnić to pole"
+            : language === "en"
+            ? "Please fill in this field"
+            : "Будь ласка, заповніть це поле",
+        invalidEmail:
+          language === "pl"
+            ? "Wpisz poprawny adres e-mail"
+            : language === "en"
+            ? "Enter a valid email address"
+            : "Введіть коректну електронну пошту",
       });
 
   const [instagram, setInstagram] = useState("");
@@ -184,7 +300,13 @@ export default function LeadCaptureModal({
       } else {
         // Trigger actual download of the language-specific PDF
         const downloadUrl = data.downloadUrl || "/uploads/checklist-nail-expert.pdf";
-        const fileName = data.fileName || (language === "pl" ? "Checklist_Nail_Expert_PL.pdf" : "Checklist_Nail_Expert_UA.pdf");
+        const fileName =
+          data.fileName ||
+          (language === "pl"
+            ? "Checklist_Nail_Expert_PL.pdf"
+            : language === "en"
+            ? "Checklist_Nail_Expert_EN.pdf"
+            : "Checklist_Nail_Expert_UA.pdf");
 
         const link = document.createElement("a");
         link.href = downloadUrl;
@@ -201,7 +323,14 @@ export default function LeadCaptureModal({
         }, 2400);
       }
     } catch (err: any) {
-      setError(err?.message || "Помилка при збереженні. Спробуйте ще раз.");
+      setError(
+        err?.message ||
+          (language === "ua"
+            ? "Помилка при збереженні. Спробуйте ще раз."
+            : language === "pl"
+            ? "Błąd podczas zapisywania. Spróbuj ponownie."
+            : "Error saving details. Please try again.")
+      );
     } finally {
       setLoading(false);
     }

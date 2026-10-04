@@ -126,7 +126,7 @@ export default function OnlineCoursesSection({
             const title = getLocalized(course, "title");
             const subtitle = getLocalized(course, "subtitle");
             const description = getLocalized(course, "description");
-            const duration = getLocalized(course, "duration") || (language === "ua" ? "30 днів доступу" : "30 dni dostępu");
+            const duration = getLocalized(course, "duration") || (language === "ua" ? "30 днів доступу" : language === "pl" ? "30 dni dostępu" : "30 days access");
             const badge = getLocalized(course, "badge") || loc.badgeOnline;
             const materialsCount = course.materials?.length ?? course._count?.materials ?? 0;
 

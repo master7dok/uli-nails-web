@@ -39,6 +39,24 @@ export default function Header({ settings }: HeaderProps = {}) {
   const instagram = getInstagramLink(language, settings);
   const showOnlineCourses = settings?.show_online_courses === "true";
 
+  const isUaEnabled = settings?.lang_enabled_ua !== "false";
+  const isPlEnabled = settings?.lang_enabled_pl !== "false";
+  const isEnEnabled = settings?.lang_enabled_en !== "false";
+
+  // Auto-switch away from disabled language if current language is turned off
+  useEffect(() => {
+    if (language === "ua" && !isUaEnabled) {
+      if (isPlEnabled) setLanguage("pl");
+      else if (isEnEnabled) setLanguage("en");
+    } else if (language === "pl" && !isPlEnabled) {
+      if (isUaEnabled) setLanguage("ua");
+      else if (isEnEnabled) setLanguage("en");
+    } else if (language === "en" && !isEnEnabled) {
+      if (isPlEnabled) setLanguage("pl");
+      else if (isUaEnabled) setLanguage("ua");
+    }
+  }, [language, isUaEnabled, isPlEnabled, isEnEnabled, setLanguage]);
+
   const navLinks = [
     { href: "#about", label: t.nav.about },
     { href: "#courses", label: t.nav.courses },
@@ -46,12 +64,12 @@ export default function Header({ settings }: HeaderProps = {}) {
       ? [
           {
             href: "#online-courses",
-            label: (t.nav as any).onlineCourses || (language === "ua" ? "Онлайн-курси" : "Kursy online"),
+            label: (t.nav as any).onlineCourses || (language === "ua" ? "Онлайн-курси" : language === "pl" ? "Kursy online" : "Online Courses"),
           },
         ]
       : []),
-    { href: "#checklist", label: t.nav.checklist || (language === "ua" ? "Корисне" : "Przydatne") },
-    { href: "#training", label: (t.nav as any).training || (language === "ua" ? "Фото з курсів" : "Zdjęcia ze szkoleń") },
+    { href: "#checklist", label: t.nav.checklist || (language === "ua" ? "Корисне" : language === "pl" ? "Przydatne" : "Free Guides") },
+    { href: "#training", label: (t.nav as any).training || (language === "ua" ? "Фото з курсів" : language === "pl" ? "Zdjęcia ze szkoleń" : "Training Photos") },
     { href: "#prices", label: t.nav.prices },
     { href: "#portfolio", label: t.nav.portfolio },
     { href: "#reviews", label: t.nav.reviews },
@@ -184,28 +202,46 @@ export default function Header({ settings }: HeaderProps = {}) {
         {/* Actions (Language Switcher + Socials + CTA) */}
         <div className="flex items-center space-x-3 sm:space-x-4">
           {/* Language Switcher */}
-          <div className="flex items-center bg-[#EFE9DF]/70 p-1 rounded-full border border-[#E4D9CA]">
-            <button
-              onClick={() => setLanguage("ua")}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-full transition-all duration-200 ${
-                language === "ua"
-                  ? "bg-white text-charcoal-900 shadow-sm"
-                  : "text-charcoal-500 hover:text-charcoal-800"
-              }`}
-            >
-              UA
-            </button>
-            <button
-              onClick={() => setLanguage("pl")}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-full transition-all duration-200 ${
-                language === "pl"
-                  ? "bg-white text-charcoal-900 shadow-sm"
-                  : "text-charcoal-500 hover:text-charcoal-800"
-              }`}
-            >
-              PL
-            </button>
-          </div>
+          {(isUaEnabled || isPlEnabled || isEnEnabled) && (
+            <div className="flex items-center bg-[#EFE9DF]/70 p-1 rounded-full border border-[#E4D9CA]">
+              {isUaEnabled && (
+                <button
+                  onClick={() => setLanguage("ua")}
+                  className={`px-2.5 py-1 text-xs font-semibold rounded-full transition-all duration-200 ${
+                    language === "ua"
+                      ? "bg-white text-charcoal-900 shadow-sm"
+                      : "text-charcoal-500 hover:text-charcoal-800"
+                  }`}
+                >
+                  UA
+                </button>
+              )}
+              {isPlEnabled && (
+                <button
+                  onClick={() => setLanguage("pl")}
+                  className={`px-2.5 py-1 text-xs font-semibold rounded-full transition-all duration-200 ${
+                    language === "pl"
+                      ? "bg-white text-charcoal-900 shadow-sm"
+                      : "text-charcoal-500 hover:text-charcoal-800"
+                  }`}
+                >
+                  PL
+                </button>
+              )}
+              {isEnEnabled && (
+                <button
+                  onClick={() => setLanguage("en")}
+                  className={`px-2.5 py-1 text-xs font-semibold rounded-full transition-all duration-200 ${
+                    language === "en"
+                      ? "bg-white text-charcoal-900 shadow-sm"
+                      : "text-charcoal-500 hover:text-charcoal-800"
+                  }`}
+                >
+                  EN
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Social Icons */}
           <a
@@ -233,19 +269,19 @@ export default function Header({ settings }: HeaderProps = {}) {
             <Link
               href="/student"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border border-gold-400 bg-gold-50/90 text-gold-900 hover:bg-gold-100 transition-colors shadow-xs"
-              title={language === "ua" ? "Кабінет учня" : "Strefa studenta"}
+              title={language === "ua" ? "Кабінет учня" : language === "pl" ? "Strefa studenta" : "Student Portal"}
             >
               <User className="w-3.5 h-3.5 text-gold-600" />
-              <span>{language === "ua" ? "Кабінет" : "Konto"}</span>
+              <span>{language === "ua" ? "Кабінет" : language === "pl" ? "Konto" : "Portal"}</span>
             </Link>
           ) : (
             <button
               onClick={() => setLoginModalOpen(true)}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border border-[#E4D9CA] bg-white/90 hover:bg-[#EFE9DF]/80 text-charcoal-700 hover:text-charcoal-900 transition-colors shadow-xs"
-              title={language === "ua" ? "Вхід для учнів курсів" : "Logowanie dla studentów"}
+              title={language === "ua" ? "Вхід для учнів курсів" : language === "pl" ? "Logowanie dla studentów" : "Student Login"}
             >
               <Lock className="w-3.5 h-3.5 text-gold-600" />
-              <span>{language === "ua" ? "Вхід" : "Zaloguj"}</span>
+              <span>{language === "ua" ? "Вхід" : language === "pl" ? "Zaloguj" : "Login"}</span>
             </button>
           )}
 
@@ -327,7 +363,7 @@ export default function Header({ settings }: HeaderProps = {}) {
                 className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-semibold uppercase tracking-wider text-gold-900 bg-gold-100/90 hover:bg-gold-200 border border-gold-300 transition-colors"
               >
                 <User className="w-4 h-4 text-gold-700" />
-                <span>{language === "ua" ? "Кабінет учня" : "Strefa studenta"}</span>
+                <span>{language === "ua" ? "Кабінет учня" : language === "pl" ? "Strefa studenta" : "Student Portal"}</span>
               </Link>
             ) : (
               <button
@@ -338,7 +374,7 @@ export default function Header({ settings }: HeaderProps = {}) {
                 className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-semibold uppercase tracking-wider text-charcoal-800 bg-white border border-[#E4D9CA] hover:bg-[#EFE9DF] transition-colors"
               >
                 <Lock className="w-4 h-4 text-gold-600" />
-                <span>{language === "ua" ? "Вхід для учнів" : "Zaloguj się (Kursy)"}</span>
+                <span>{language === "ua" ? "Вхід для учнів" : language === "pl" ? "Zaloguj się (Kursy)" : "Student Login"}</span>
               </button>
             )}
 

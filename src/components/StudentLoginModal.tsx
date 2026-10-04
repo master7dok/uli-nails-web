@@ -54,14 +54,18 @@ export default function StudentLoginModal({
           data.error ||
             (language === "ua"
               ? "Невірний логін або пароль. Спробуйте ще раз."
-              : "Nieprawidłowy login lub hasło. Spróbuj ponownie.")
+              : language === "pl"
+              ? "Nieprawidłowy login lub hasło. Spróbuj ponownie."
+              : "Invalid username or password. Please try again.")
         );
       }
     } catch {
       setError(
         language === "ua"
           ? "Помилка зв'язку з сервером. Спробуйте пізніше."
-          : "Błąd połączenia z serwerem. Spróbuj później."
+          : language === "pl"
+          ? "Błąd połączenia z serwerem. Spróbuj później."
+          : "Server connection error. Please try again later."
       );
     } finally {
       setLoading(false);

@@ -14,6 +14,9 @@ import {
   Info,
   RefreshCw,
   CheckCircle2,
+  Globe,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import InstagramIcon from "@/components/icons/InstagramIcon";
 import { getAdminHeaders } from "@/lib/adminClient";
@@ -102,6 +105,42 @@ export default function SettingsTab() {
       }
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const isUaEnabled = settings.lang_enabled_ua !== "false";
+  const isPlEnabled = settings.lang_enabled_pl !== "false";
+  const isEnEnabled = settings.lang_enabled_en !== "false";
+
+  const toggleLanguage = async (lang: "ua" | "pl" | "en") => {
+    const key = `lang_enabled_${lang}`;
+    const currentVal = settings[key] !== "false";
+    const nextVal = !currentVal;
+
+    // Prevent disabling all languages simultaneously
+    const activeCount = [
+      lang === "ua" ? nextVal : isUaEnabled,
+      lang === "pl" ? nextVal : isPlEnabled,
+      lang === "en" ? nextVal : isEnEnabled,
+    ].filter(Boolean).length;
+
+    if (activeCount === 0) {
+      alert("Принаймні одна мовна версія сайту повинна залишатися увімкненою.");
+      return;
+    }
+
+    const updatedSettings = { ...settings, [key]: nextVal ? "true" : "false" };
+    setSettings(updatedSettings);
+
+    try {
+      await fetch("/api/settings", {
+        method: "PUT",
+        headers: getAdminHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify(updatedSettings),
+      });
+    } catch (e) {
+      console.error(e);
+      alert("Помилка при збереженні налаштування");
     }
   };
 
@@ -242,7 +281,145 @@ export default function SettingsTab() {
         </div>
       </div>
 
-      {/* 2. GENERAL SETTINGS & CONTACTS CARD */}
+      {/* 2. LANGUAGE MANAGEMENT CARD */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-nude-200 space-y-5">
+        <div>
+          <h3 className="font-serif text-xl font-semibold text-charcoal-900 flex items-center gap-2">
+            <Globe className="w-5 h-5 text-gold-600" />
+            <span>Мовні версії сайту</span>
+          </h3>
+          <p className="text-xs text-charcoal-500 mt-1">
+            Керуйте доступними мовами на сайті. Вимкнені мови автоматично приховуються з перемикача мов у шапці (хедері) сайту.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+          {/* UA */}
+          <div className={`p-4 rounded-2xl border transition-all ${
+            isUaEnabled ? "border-gold-300 bg-gold-50/40" : "border-nude-200 bg-gray-50/60 opacity-75"
+          }`}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl">🇺🇦</span>
+                <div>
+                  <h4 className="text-sm font-semibold text-charcoal-900">Українська (UA)</h4>
+                  <p className="text-[11px] text-charcoal-500">Адреса /ua</p>
+                </div>
+              </div>
+              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                isUaEnabled ? "bg-emerald-100 text-emerald-800" : "bg-gray-200 text-gray-700"
+              }`}>
+                {isUaEnabled ? "Активна" : "Прихована"}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => toggleLanguage("ua")}
+              className={`w-full py-2 px-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
+                isUaEnabled
+                  ? "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200"
+                  : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
+              }`}
+            >
+              {isUaEnabled ? (
+                <>
+                  <EyeOff className="w-3.5 h-3.5" />
+                  <span>Вимкнути (Приховати)</span>
+                </>
+              ) : (
+                <>
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Увімкнути (Показати)</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* PL */}
+          <div className={`p-4 rounded-2xl border transition-all ${
+            isPlEnabled ? "border-gold-300 bg-gold-50/40" : "border-nude-200 bg-gray-50/60 opacity-75"
+          }`}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl">🇵🇱</span>
+                <div>
+                  <h4 className="text-sm font-semibold text-charcoal-900">Польська (PL)</h4>
+                  <p className="text-[11px] text-charcoal-500">Адреса /pl</p>
+                </div>
+              </div>
+              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                isPlEnabled ? "bg-emerald-100 text-emerald-800" : "bg-gray-200 text-gray-700"
+              }`}>
+                {isPlEnabled ? "Активна" : "Прихована"}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => toggleLanguage("pl")}
+              className={`w-full py-2 px-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
+                isPlEnabled
+                  ? "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200"
+                  : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
+              }`}
+            >
+              {isPlEnabled ? (
+                <>
+                  <EyeOff className="w-3.5 h-3.5" />
+                  <span>Вимкнути (Приховати)</span>
+                </>
+              ) : (
+                <>
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Увімкнути (Показати)</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* EN */}
+          <div className={`p-4 rounded-2xl border transition-all ${
+            isEnEnabled ? "border-gold-300 bg-gold-50/40" : "border-nude-200 bg-gray-50/60 opacity-75"
+          }`}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl">🇬🇧</span>
+                <div>
+                  <h4 className="text-sm font-semibold text-charcoal-900">Англійська (EN)</h4>
+                  <p className="text-[11px] text-charcoal-500">Адреса /en</p>
+                </div>
+              </div>
+              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                isEnEnabled ? "bg-emerald-100 text-emerald-800" : "bg-gray-200 text-gray-700"
+              }`}>
+                {isEnEnabled ? "Активна" : "Прихована"}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => toggleLanguage("en")}
+              className={`w-full py-2 px-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
+                isEnEnabled
+                  ? "bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200"
+                  : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
+              }`}
+            >
+              {isEnEnabled ? (
+                <>
+                  <EyeOff className="w-3.5 h-3.5" />
+                  <span>Вимкнути (Приховати)</span>
+                </>
+              ) : (
+                <>
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Увімкнути (Показати)</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. GENERAL SETTINGS & CONTACTS CARD */}
       <form onSubmit={handleSave} className="bg-white rounded-3xl p-6 sm:p-8 shadow-soft border border-nude-200 space-y-5">
         <h3 className="font-serif text-xl font-semibold text-charcoal-900">
           Загальні налаштування та контакти
@@ -288,6 +465,26 @@ export default function SettingsTab() {
           />
           <span className="text-[11px] text-charcoal-400 mt-1 block">
             Використовується для запису на курси, коли відвідувач переглядає сайт польською мовою (PL). Якщо поле порожнє, буде використано основне посилання.
+          </span>
+        </div>
+
+        {/* Google Form Link (EN) */}
+        <div>
+          <label className="block text-xs font-semibold text-charcoal-700 mb-1.5 flex items-center gap-1.5">
+            <LinkIcon className="w-3.5 h-3.5 text-gold-700" />
+            <span>Посилання на Google Form (Анкета для курсів) (EN версія сайту)</span>
+          </label>
+          <input
+            type="text"
+            value={settings.google_form_url_en || ""}
+            onChange={(e) =>
+              setSettings({ ...settings, google_form_url_en: e.target.value })
+            }
+            placeholder="https://docs.google.com/forms/..."
+            className="w-full px-4 py-2.5 rounded-xl border border-nude-300 text-sm focus:border-gold-500 focus:outline-none"
+          />
+          <span className="text-[11px] text-charcoal-400 mt-1 block">
+            Використовується для запису на курси, коли відвідувач переглядає сайт англійською мовою (EN). Якщо поле порожнє, буде використано польське або основне посилання.
           </span>
         </div>
 

@@ -15,7 +15,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 function detectLanguageFromLocation(): Language | null {
   if (typeof window === "undefined") return null;
 
-  // 1. Pathname check: /ua, /pl, /ua/..., /pl/...
+  // 1. Pathname check: /ua, /pl, /en, /ua/..., /pl/..., /en/...
   const pathname = window.location.pathname.toLowerCase();
   if (pathname === "/ua" || pathname.startsWith("/ua/")) {
     return "ua";
@@ -23,12 +23,15 @@ function detectLanguageFromLocation(): Language | null {
   if (pathname === "/pl" || pathname.startsWith("/pl/")) {
     return "pl";
   }
+  if (pathname === "/en" || pathname.startsWith("/en/")) {
+    return "en";
+  }
 
-  // 2. Query param check: ?lang=ua, ?lang=pl
+  // 2. Query param check: ?lang=ua, ?lang=pl, ?lang=en
   try {
     const searchParams = new URLSearchParams(window.location.search);
     const langParam = searchParams.get("lang")?.toLowerCase();
-    if (langParam === "ua" || langParam === "pl") {
+    if (langParam === "ua" || langParam === "pl" || langParam === "en") {
       return langParam as Language;
     }
   } catch {}
@@ -37,7 +40,7 @@ function detectLanguageFromLocation(): Language | null {
 }
 
 function getInitialLanguage(defaultFallback: Language = "ua"): Language {
-  // 1. Direct URL check (/ua, /pl, ?lang=ua, ?lang=pl)
+  // 1. Direct URL check (/ua, /pl, /en, ?lang=ua, ?lang=pl, ?lang=en)
   const fromUrl = detectLanguageFromLocation();
   if (fromUrl) {
     try {
@@ -51,15 +54,19 @@ function getInitialLanguage(defaultFallback: Language = "ua"): Language {
   // 2. Check saved user preference
   try {
     const saved = localStorage.getItem("uli_preferred_lang") as Language;
-    if (saved === "ua" || saved === "pl") {
+    if (saved === "ua" || saved === "pl" || saved === "en") {
       return saved;
     }
   } catch {}
 
   // 3. Check browser navigator language
   if (typeof navigator !== "undefined" && navigator.language) {
-    if (navigator.language.toLowerCase().startsWith("pl")) {
+    const navLang = navigator.language.toLowerCase();
+    if (navLang.startsWith("pl")) {
       return "pl";
+    }
+    if (navLang.startsWith("en")) {
+      return "en";
     }
   }
 
@@ -83,7 +90,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         document.documentElement.lang = detected;
       } else {
         const saved = localStorage.getItem("uli_preferred_lang") as Language;
-        if (saved === "ua" || saved === "pl") {
+        if (saved === "ua" || saved === "pl" || saved === "en") {
           setLanguageState(saved);
           document.documentElement.lang = saved;
         }
@@ -103,10 +110,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       } catch {}
       document.documentElement.lang = lang;
 
-      // Seamlessly update browser URL if currently on /, /ua, or /pl
+      // Seamlessly update browser URL if currently on /, /ua, /pl, or /en
       const pathname = window.location.pathname;
-      if (pathname === "/" || pathname === "/ua" || pathname === "/pl") {
-        const targetPath = lang === "pl" ? "/pl" : "/ua";
+      if (pathname === "/" || pathname === "/ua" || pathname === "/pl" || pathname === "/en") {
+        const targetPath = lang === "pl" ? "/pl" : lang === "en" ? "/en" : "/ua";
         if (pathname !== targetPath) {
           const newUrl = targetPath + window.location.search + window.location.hash;
           window.history.pushState(null, "", newUrl);
@@ -117,12 +124,16 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const getLocalized = (item: any, field: string): string => {
     if (!item) return "";
-    const suffix = language === "pl" ? "Pl" : "Ua";
+    const suffix = language === "en" ? "En" : language === "pl" ? "Pl" : "Ua";
     const localizedKey = `${field}${suffix}`;
-    if (item[localizedKey] !== undefined && item[localizedKey] !== null) {
+    if (item[localizedKey] !== undefined && item[localizedKey] !== null && String(item[localizedKey]).trim() !== "") {
       return item[localizedKey];
     }
-    // Fallback to alternative
+    // Fallback:
+    if (language === "en") {
+      if (item[`${field}Pl`] && String(item[`${field}Pl`]).trim() !== "") return item[`${field}Pl`];
+      return item[`${field}Ua`] || "";
+    }
     const fallbackSuffix = language === "pl" ? "Ua" : "Pl";
     return item[`${field}${fallbackSuffix}`] || "";
   };

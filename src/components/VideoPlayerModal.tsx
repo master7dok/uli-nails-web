@@ -11,7 +11,7 @@ interface VideoPlayerModalProps {
   title: string;
   description?: string | null;
   coverUrl?: string | null;
-  language: "ua" | "pl";
+  language: "ua" | "pl" | "en";
 }
 
 function getEmbedInfo(url: string): { type: "youtube" | "vimeo" | "native"; src: string } {
@@ -105,7 +105,7 @@ export default function VideoPlayerModal({
                   {title}
                 </h3>
                 <span className="text-[11px] text-gold-300 uppercase tracking-widest font-mono">
-                  {language === "pl" ? "Ekskluzywne wideo" : "Ексклюзивний відеоурок"}
+                  {language === "pl" ? "Ekskluzywne wideo" : language === "en" ? "Exclusive Video Lesson" : "Ексклюзивний відеоурок"}
                 </span>
               </div>
             </div>
@@ -142,7 +142,7 @@ export default function VideoPlayerModal({
               </video>
             ) : (
               <div className="p-8 text-center text-charcoal-400">
-                <p>{language === "pl" ? "Wideo niedostępne" : "Відео тимчасово недоступне"}</p>
+                <p>{language === "pl" ? "Wideo niedostępne" : language === "en" ? "Video temporarily unavailable" : "Відео тимчасово недоступне"}</p>
               </div>
             )}
           </div>
@@ -157,6 +157,8 @@ export default function VideoPlayerModal({
                 <span>
                   {language === "pl"
                     ? "Wskazówka: Zastosuj te techniki podczas kolejnej stylizacji salonowej!"
+                    : language === "en"
+                    ? "Tip: Try applying these techniques during your next salon client appointment!"
                     : "Порада: Спробуйте повторити цю техніку вже на наступній клієнтці!"}
                 </span>
               </div>

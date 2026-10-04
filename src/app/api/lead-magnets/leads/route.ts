@@ -53,14 +53,29 @@ export async function POST(request: Request) {
       : `@${instagram.trim()}`;
 
     const cleanEmail = email.trim().toLowerCase();
-    const cleanLang = language === "pl" ? "pl" : "ua";
+    const cleanLang = language === "pl" ? "pl" : language === "en" ? "en" : "ua";
     const title =
       videoTitle ||
       checklistTitle ||
-      (isVideo ? (cleanLang === "pl" ? "Lekcja wideo" : "Відеоурок") : "Чек-лист для nail-майстрів");
+      (isVideo
+        ? cleanLang === "pl"
+          ? "Lekcja wideo"
+          : cleanLang === "en"
+          ? "Video Lesson"
+          : "Відеоурок"
+        : cleanLang === "pl"
+        ? "Checklist dla stylistek"
+        : cleanLang === "en"
+        ? "Checklist for Nail Artists"
+        : "Чек-лист для nail-майстрів");
 
     let downloadUrl = "/uploads/checklist-nail-expert.pdf";
-    let fileName = cleanLang === "pl" ? "Checklist_Nail_Expert_PL.pdf" : "Checklist_Nail_Expert_UA.pdf";
+    let fileName =
+      cleanLang === "pl"
+        ? "Checklist_Nail_Expert_PL.pdf"
+        : cleanLang === "en"
+        ? "Checklist_Nail_Expert_EN.pdf"
+        : "Checklist_Nail_Expert_UA.pdf";
     let videoUrl = "";
 
     if (await isDatabaseAvailable()) {
@@ -75,7 +90,7 @@ export async function POST(request: Request) {
 
           if (video) {
             videoUrl =
-              cleanLang === "pl"
+              cleanLang === "pl" || cleanLang === "en"
                 ? video.videoUrlPl || video.videoUrlUa || ""
                 : video.videoUrlUa || video.videoUrlPl || "";
 
@@ -88,7 +103,7 @@ export async function POST(request: Request) {
           const newLead = await prisma.checklistLead.create({
             data: {
               leadMagnetId: null,
-              checklistTitle: video ? (cleanLang === "pl" ? video.titlePl : video.titleUa) : title,
+              checklistTitle: video ? (cleanLang === "pl" ? video.titlePl : cleanLang === "en" ? (video.titlePl || video.titleUa) : video.titleUa) : title,
               instagram: cleanInstagram,
               email: cleanEmail,
               experience: experience.trim(),
@@ -114,7 +129,7 @@ export async function POST(request: Request) {
         }
 
         if (magnet) {
-          if (cleanLang === "pl") {
+          if (cleanLang === "pl" || cleanLang === "en") {
             downloadUrl = magnet.fileUrlPl || magnet.fileUrl || magnet.fileUrlUa || downloadUrl;
             fileName = magnet.fileNamePl || magnet.fileName || fileName;
           } else {
@@ -178,7 +193,7 @@ export async function POST(request: Request) {
 
     const fallbackItem = defaultLeadMagnets.find((m) => m.id === leadMagnetId) || defaultLeadMagnets[0];
     if (fallbackItem) {
-      if (cleanLang === "pl") {
+      if (cleanLang === "pl" || cleanLang === "en") {
         downloadUrl = fallbackItem.fileUrlPl || fallbackItem.fileUrl || fallbackItem.fileUrlUa || downloadUrl;
         fileName = fallbackItem.fileNamePl || fallbackItem.fileName || fileName;
       } else {

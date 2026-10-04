@@ -408,10 +408,15 @@ export default function Courses({ courses, settings }: CoursesProps) {
             ? settings.google_form_url_pl.trim()
             : selectedCourse?.formUrl || settings?.google_form_url;
 
+        const enFormUrl =
+          settings?.google_form_url_en && settings.google_form_url_en.trim().length > 0
+            ? settings.google_form_url_en.trim()
+            : plFormUrl;
+
         const uaFormUrl =
           selectedCourse?.formUrl || settings?.google_form_url || settings?.google_form_url_ua;
 
-        const activeFormUrl = (language === "pl" ? plFormUrl : uaFormUrl) || undefined;
+        const activeFormUrl = (language === "pl" ? plFormUrl : language === "en" ? enFormUrl : uaFormUrl) || undefined;
 
         return (
           <CourseModal
